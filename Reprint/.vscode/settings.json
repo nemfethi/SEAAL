@@ -1,0 +1,15 @@
+{
+    "plsql-language.connections": [
+        {
+            "ID": 2,
+            "active": true,
+            "database": "X7ALGTST",
+            "password": "X7",
+            "schema": "X7",
+            "tag": "Test",
+            "username": "X7",
+            "name": "X7@X7ALGTST"
+        }
+    ],
+    "plsql-language.connection.activeInfos": "X7/X7@X7ALGTST"
+}
