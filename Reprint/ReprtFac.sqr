@@ -1,35 +1,10 @@
-!--------------------------------------------------------------------------------
-!-- Filename: GenFac_F3.sqr
-!-- Crée le 01/02/2008
-!-- Par Abderahim ABBAS
-!-- Cas : SEAAL ALGER
-!-- Fichier de génération de fichiers textes de factures
-!-- EAU_LOT_IdtLotFac_Date_F1 ou F2_Séquence.txt (paramètre : IdtLotFac) pour les factures 
-!-- périodiques EAU_HLT_Date_F1 ou F2_Séquence.txt (paramètre : IdtFac) pour une facture non 
-!-- périodique FctMntUtl = 0
-!-- Facture manuelle (paramètre : IdtFac) où FctMnlUtl = 1
-!--------------------------------------------------------------------------------
-!-- Modications :
-!--------------------------------------------------------------------------------
-!-- Maj     : 02/06/2010
-!-- Par     : FBE
-!-- Contenu : Prise en compte du routage des documents
-!--------------------------------------------------------------------------------
-!-- Maj     : 05/09/2010
-!-- Par     : LLA
-!-- Contenu : Ajout d'un logo et des informations légales pour la facture manuelle
-!-- ==========================================================================
-!--------------------------------------------------------------------------------
-!-- Maj     : 01/08/2012
-!-- Par     : R.TIHAL & B.CHAREF
-!-- Contenu : Génération des factures F3
-!-- ==========================================================================
 #include 'msg.inc'
 #include 'sql.inc'
 #include 'dft_cste.h'
 
 #define EDTEPR01
 #DEFINE IDTTYPTCHE_RTG_FAC 'TRT5016'
+#DEFINE IDTTYPTCHE_RPRFAC 'TRT8005'
 #DEFINE IDTTYPTCHE_LSTRTG_FAC 'TRT2045'
 
 #INCLUDE 'o_cstglb.h'
@@ -454,7 +429,6 @@ END-SELECT
 
 !Let $CmdOpen = $ReportName1
 
-!call system using $CmdOpen  #status
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 END-PROCEDURE
 
