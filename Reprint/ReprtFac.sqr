@@ -2170,8 +2170,8 @@ HSTTax.Tau &TVA
 from lgnfac, rbq, HSTTax
 where lgnfac.idtfac = #IdtFac
   and lgnfac.Idtrbq = rbq.Idtrbq
-  and lgnfac.IdtTax = HSTTax.IDTTax
-  and lgnfac.DatDbtVld = HSTTax.DatDbtVld
+  and lgnfac.IdtTax = HSTTax.IDTTax (+)
+  and lgnfac.DatDbtVld = HSTTax.DatDbtVld (+)
 end-select
 	
     graphic (,1,70) horz-line 5

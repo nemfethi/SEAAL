@@ -1,0 +1,440 @@
+!--------------------------------------------------------------------------------
+!-- Filename: ALGEAP01.sqr
+!-- Crée le 16/12/2008
+!-- Par Abderahim ABBAS
+!-- Encaissements d'Algérie Poste
+!-- Cas : SEAAL Alger
+!-- Génération des fichiers txt des encaissements d'Algerie Poste
+!-- Modifié FNE 13/01/2011 : Le fichier est cree dans un repertoire temporaire
+!--                          et deplace apres
+!-- Modification FBE 17/01/2011: On utilise un traitement asynchrone pour effacer
+!--                              l'historique.
+!--------------------------------------------------------------------------------
+#include 'msg.inc'
+#include 'sql.inc'
+#include 'dft_cste.h'
+
+#define ALGEAP01
+
+#INCLUDE 'O_CSTGLB.H'
+
+#DEFINE TRT TRT5001
+
+#define exc_CO
+!#DEFINE IS_TEST
+
+BEGIN-SETUP
+		DECLARE-LAYOUT defaut
+				paper-size=(A4)
+				orientation= portrait
+				left-margin=0.19
+				right-margin=0.5
+				top-margin = 1
+				bottom-margin = 1
+				line-height = 1
+				char-width = 0.19
+		END-DECLARE
+END-SETUP
+
+Begin-Program
+ 
+! Récupération des paramètres
+#IFDEF IS_TEST
+ Let $user = 'G'
+ Let $mode = 'R'
+ Let $IMP = 'HP'
+ Let $RepGeneration = '.'
+ Let $LogFile = '.\toto.log'
+ Let $ExportDir = '.'
+#else
+ INPUT $user maxlen={MAX_USER_LEN} type=char noprompt
+ INPUT $mode max_len=1 type=char noprompt 
+ INPUT $IMP noprompt
+ INPUT $RepGeneration noprompt
+ INPUT $LogFile noprompt
+ INPUT $ExportDir noprompt
+#endif
+  LET #_NbrCtr = 0
+  do MSG_Init
+  
+
+  do MSG_DefinirUtilisateur ($user)
+  !do MSG_DefinirTraitement ('{TRT}')
+  Do Main
+  do MSG_Ecrire ('MSG_FIN', #Rst)
+end-program
+
+!--------------------------------------------------------------------------------
+! Procedure : Main
+! Objetivo  : Choisir les données de la facture en la tabla Tche
+!--------------------------------------------------------------------------------
+begin-procedure Main
+ do MSG_DefinirLocalisation ('{TRT}_MAIN')
+! do MSG_DefinirRequeteCourante ('SELECT FROM TCHE')
+
+ 
+!FBE BEGIN-SELECT on-error=SQL_Erreur
+!FBE TCHE.ROWID &ROWID
+!FBE   do Maj_Tche(&ROWID, {STTTCH_ENCOURS}, #NbrCtr)
+!FBE   COMMIT
+!FBE ADRIMP
+!FBE PRM1
+!FBE PRM2
+!FBE PRM3
+!FBE PRM4
+!FBE PRM5
+!FBE MODDCL &_Moddcl
+       
+!-------------------------------------------------------------------------------------------------------
+! Procédure Balayage de la table des Taches
+!	le prm4 est utilisé afin d''obkiger l'utilisateur à vérifier que la génération n'est pas encore faite
+!   s'il s'agit d'une tache de génération batch
+!         appel de la procédure Main ()
+!-------------------------------------------------------------------------------------------------------
+
+              ! On prepare l'ecriture du fichier log
+              LET $vFileLog1 = $LogFile
+              OPEN $vFileLog1 as 3  For-Append record=1024:VARY
+						!-- insertion et ecriture dans le fichier
+						  LET $var1 ='AP_OUT_'
+              LET $var2 = edit($current-date,'YYYYMMDD')
+              LET $file_name = $var1||$var2 || '.txt'
+              LET $file_TxtPath = $ExportDir||'\'||$var1||$var2 ||'.txt'
+              Do Rech_Num_Report(#Num)
+    				  LET $fileTMP = $ExportDir||'\TMP\'||to_char(#Num) ||'.txt'
+
+              open $fileTMP as 1 for-writing record=76:fixed status=#filestat
+               !gestion des erreurs d'ouverture de fichiers
+               if #filestat <> 0
+                   Let $Msg = 'ERREUR : Impossible d''ouvrir en ecriture le fichier: ' || $fileTMP
+                   do TrtError($Msg)
+                   !stop quiet
+                   stop
+               end-if
+              
+
+              let #nbropr = 0
+              let #mntexp = 0
+              let #nbrclt = 0
+              DO InsEap
+
+              DO TrtEap 
+
+              DO InsEapHst
+
+              close 1
+							Do MoveTMPFile
+							COMMIT
+              DO TrtEapHst	
+					 
+						!-- mettre en oeuvre le rapport de génération
+    				  Do Rech_Num_Report(#Num)
+    				  let $fileNam = 'Rapport de génération_EncAlgPst_'||to_char(#Num) || '.pdf'
+        		  let $ReportName = $RepGeneration ||'\'||$fileNam
+        		  NEW-REPORT $ReportName
+    				  Do TrtEapHst
+
+              BEGIN-SQL on-error=TrtError('ERROR_SQL')
+              ! Appel au traitement d'effacement des donnees historiques
+              ! en asynchrone. On fait le traitement que si tout se bien passe
+                BEGIN
+                  ALG_OUTIL.ExeAsynTrt('ALG_TRTEAP.DelHstAP;');;
+                END;;
+              END-SQL
+              ! Ce commit permet de lancer le traitement de suppresion de l'historique
+              COMMIT
+              close 3
+
+	Let #NbrCtr = 0
+ 
+end-procedure
+
+!------------------------------------------------------------------------------------------------------------------------
+!-- Procedure : InsEap
+!-- Objectif :  Selection des données à inserer dans la table ALG_EAP des clients contenus dans le fichier de génération
+!------------------------------------------------------------------------------------------------------------------------
+
+begin-procedure InsEap
+ do MSG_DefinirLocalisation ('{TRT}_InsEap')
+
+LET $datfic = edit($current-date,'YYYYMMDD')
+#ifdef exc_CO
+Let $exclude_CO42=' AND c.idtCntOpr not in (''20'',''21'',''22'',''29'')'|| chr(13)
+#else
+let $exclude_CO42=''
+#endif
+
+let $whr = 'o.Sld > 0' || chr(13)
+            || ' AND o.IdtClt = c.IdtClt' || chr(13)
+            || $exclude_CO42
+            || ' AND ( (o.IdtTypOpr = 1)' || chr(13)
+            || '       OR' || chr(13)
+            || '       (o.IdtTypOpr = 7 and o.DatExg <= (SELECT Min(DatExg)' || chr(13)
+            || '                                         FROM   OPR ' || chr(13)
+            || '                                         WHERE  OPR.IdtClt = o.IdtClt' || chr(13)
+            || '                                           AND  OPR.EchPmt = o.EchPmt' || chr(13)
+            || '                                           AND  trunc(OPR.DatExg) >= trunc(sysdate) )))'  || chr(13)
+            || ' AND o.idtsit = sit.idtsit and sit.lttaut=1' || chr(13)
+
+Begin-select 
+expcltap   &expcltap
+from X7.ALG_PRMGNR
+End-Select
+
+  if &expcltap = 0
+    let $whr = $whr || ' and c.ancrfr is not null'
+  end-if
+
+
+BEGIN-SQL on-error=TrtError('ERROR_SQL')
+! FBE: On efface les donnees generes du jour meme
+delete ALG_EAP where trunc(DatTrt) = trunc(sysdate);
+insert into X7.ALG_EAP (IdtFic,DatFic, IdtClt, IdtOpr, DatCrt, DatExg, Mnt, AncRfr, DatTrt) 
+     select $file_name,
+            $datfic,
+            o.idtclt,
+            o.idtopr,
+            o.datcrt,
+            o.datexg,
+            o.sld,
+            c.ancrfr,
+            to_date($datfic,'yyyymmdd')
+     from opr o, clt c, sit
+     where [$whr];
+end-sql
+
+end-procedure
+
+!----------------------------------------------------------------------------
+!-- Procedure : TrtEap
+!-- Objectif : selection des données à inserer dans la table ALG_EAPHST
+!----------------------------------------------------------------------------
+
+begin-procedure TrtEap
+ do MSG_DefinirLocalisation ('{TRT}_TrtEap')
+begin-select on-error=TrtError('ERROR_SQL')
+LPAD(c.IdtClt,8,'0') &IdtClt
+c.idtcntopr &idtcntopr
+RPAD(c.Nom ||''|| c.Prn,30,' ') &raisonsociale
+c.IdtCntopr||nvl(SUBSTR(C.AncRfr,-6),'000000') &ancrfr
+ap.mnt &sldclt
+ap.nbopr &nbopr
+  let #nbropr =  #nbropr +&nbopr
+	let #mntexp = #mntexp + &sldclt
+	let #sldclt = &sldclt
+	let #nbrclt = #nbrclt + 1
+	Do ins_file
+from CLT c, 
+     ( select idtclt, sum(mnt) mnt, count(idtopr) nbopr
+       from X7.ALG_EAP
+       where idtfic = $file_name
+       group by idtclt) ap
+where ap.IdtClt = c.IdtClt
+order by c.IdtCntOpr, c.AncRfr, c.IdtClt
+end-select
+end-procedure
+
+
+!-------------------------------------------------
+!-- Procedure : InsEapHst
+!-- Objectif : insertion dans la table ALG_EAPHST
+!-------------------------------------------------
+
+BEGIN-PROCEDURE InsEapHst
+ do MSG_DefinirLocalisation ('{TRT}_InsEapHst')
+
+BEGIN-SQL on-error=TrtError('ERROR_SQL')
+delete X7.ALG_EAPHST
+  where Nom_Fichier = $File_Name;
+  
+INSERT INTO X7.ALG_EAPHST (nom_fichier, datfic, nbrcltexp, nbroprexp, mntexp) 
+  VALUES ($file_name, $current-date, #nbrclt, #nbropr, #mntexp);
+!COMMIT;
+END-SQL
+END-PROCEDURE
+
+!--------------------------------------------
+!-- Procedure : ins_file
+!-- Objectif : ecriture dans le fichier texte
+!--------------------------------------------
+
+BEGIN-PROCEDURE ins_file
+ do MSG_DefinirLocalisation ('{TRT}_ins_file')
+
+let $sldclt = edit(#sldclt,'99999999.99')
+let $cst1 = '                   '
+
+if &ExpCltAP = 1
+  write 1 from 
+  						 !&IdtCntOpr:02
+  						 &ancrfr:08
+  						 &idtclt:08
+  						 &raisonsociale:30
+               $sldclt:11
+               $cst1:19
+else
+  write 1 from 
+  						 !&IdtCntOpr:02
+  						 &ancrfr:08  
+  						 &idtclt:08
+  						 &raisonsociale:30
+               $sldclt:11
+               $cst1:19
+end-if
+
+let #sldclt=0
+END-procedure
+
+!---------------------------------------------------------------------
+!-- Procedure : TrtEapHst
+!-- Objectif : Rapport de génération des encaissement d'Algérie Poste
+!---------------------------------------------------------------------
+
+BEGIN-PROCEDURE TrtEapHst
+ do MSG_DefinirLocalisation ('{TRT}_TrtEapHst')
+
+alter-printer font=4 point-size=14
+
+Print 'SOCIETE DES EAUX ET DE L''ASSAINISSEMENT D''ALGER' (5,7) bold
+PRINT 'FICHIER ALGERIE POSTE' (10,22) bold underline
+
+LET $txt = 'Nom du fichier exporté : ' || $file_name
+
+PRINT  $txt (+5,10)
+
+LET $var2 = edit($current-date,'DD/MM/YYYY')
+
+let $txt = 'Exporté le : ' || $var2
+
+PRINT $txt (+2,10) bold
+
+PRINT 'Nombre de clients exportés: '  (+3,10)
+
+print #nbrclt (,38) bold edit B999,999,999,999nu
+
+PRINT 'Nombre d''opérations ' (+2,10) ! nombre d'opérations générées
+
+Print #nbropr (,38) bold edit B999,999,999,999nu
+
+Print 'Montant exporté ' (+2,10)
+
+Print #mntexp (,35) bold edit B999,999,999,999.99nu
+
+END-PROCEDURE
+
+!------------------------------------------------------------------
+!-- Procedure : entete de page
+!------------------------------------------------------------------
+
+Begin-Heading 5 
+
+ Alter-Printer Font=4 Point-Size=10
+Print 'Date :  ' (4,1,7)
+Print $current-date (4,5) edit 'DD/MM/YYYY'
+Print $fileNam (4,24)
+Page-Number (4,67)
+ Graphic (4,1,68) Horz-Line 10
+
+End-Heading
+
+!------------------------------------------------------------------
+!-- Procedure : pied de page
+!------------------------------------------------------------------
+
+Begin-Footing 3
+
+ Graphic (1,1,68)   Horz-Line 10
+ Alter-Printer Font=4 Point-Size=8
+ print 'Printed by X7 Software' (2,1)
+ Print 'Heure : ' (2,30)
+ Let $DateHour = Edit(Datenow(), 'HH:MI')
+ Print $datehour						  (,35)
+ Page-number                (,66)
+ Print '/'								  (,67)
+ Last-Page								  (,68)
+
+End-Footing
+
+!-------------------------------------------------------------------------------
+!-- Procedure : Maj_Tche
+!-- Objectif : Mise à jour de l'état de la tâche: $stt
+!-------------------------------------------------------------------------------
+
+BEGIN-PROCEDURE Maj_Tche ($rowid, $stt, #NbrEnt)
+   do MSG_DefinirLocalisation ('{TRT}_Maj_Tche')
+   do MSG_DefinirRequeteCourante ('UPDATE TCHE set STT = $stt, DATRLS = SYSDATE WHERE ROWID = &ROWID')
+   BEGIN-SQL  on-error=SQL_Erreur
+    UPDATE TCHE set STT = $stt, DATRLS = SYSDATE, NBRENT = #NbrEnt
+	 WHERE ROWID = $rowid
+  END-SQL
+END-PROCEDURE
+
+!-----------------------------------------------------------------------
+!-- Procedure : Rech_Num_Report 
+!-- Objectif : Recherche du dernier numéro de rapport attribué
+!-----------------------------------------------------------------------
+
+Begin-procedure Rech_Num_Report(:#P1_Num_rpt)
+Begin-Select
+seq_rpt.nextval &num_rpt
+ let #P1_Num_rpt = &num_rpt
+from dual
+End-Select
+End-Procedure
+
+
+!-----------------------------------------------------------------------------------------
+! procedure d'historisation des fichiers
+!-----------------------------------------------------------------------------------------
+BEGIN-PROCEDURE MoveTMPFile
+
+  DO MSG_DefinirLocalisation ('{TRT}_MoveTMPFile')
+
+  Do Rech_Num_Report(#Num_rpt)
+
+  MOVE $_current-date to $vDatHist 'YYYYMMDD'
+  LET $Cmd = getenv('COMSPEC')
+  Let $Cmd = $Cmd || ' /C' || ' move /Y '
+  LET $vOldFile = $FileTMP
+  LET $vNewFile  = $file_TxtPath
+
+  LET $HistFile = $Cmd || $vOldFile || ' ' || $vNewFile
+
+  Let #status = 0
+  call system using $HistFile #status WAIT
+
+  if #status <> 0
+    Let $vMsgErr = 'ERREUR : FIN ANORMAL DU TRAITEMENT: Impossible de creer le fichier "' || $vNewFile || '" . Code erreur OS: ' || to_char(#status)
+    do TrtError($vMsgErr)
+    stop quiet
+  end-if
+
+END-PROCEDURE MoveTMPFile
+
+!-----------------------------------------------------------------------------------------
+! procedure de traitement des erreurs
+!-----------------------------------------------------------------------------------------
+BEGIN-PROCEDURE TrtError($pMsgErr)
+
+!  DO MSG_DefinirLocalisation('{TRT}_TrtError')
+
+  LET $vMsgErr = $pMsgErr
+  if $vMsgErr = 'ERROR_SQL'
+    rollback
+
+    Let $vLine = '  ' || $_MSG_NomLocalisation  || ' : ERREUR: Problème d''execution SQL : ' || $_Sql-error
+    write 3 from $vLine
+    write 3 from '########################## CODE SQL ##########################' 
+    write 3 from $_sql-text
+    write 3 from '########################## CODE SQL ##########################' 
+    Do MSG_EcrireErreurSQL ( $_Sql-Error, #CodeRetour )
+    stop quiet
+  else
+    Let $vLine = '  ' || $_MSG_NomLocalisation || ' : ' || $vMsgErr
+    write 3 from $vLine
+  end-if
+
+  DO MSG_EcrireChaine(' ', $vMsgErr, #Rst)
+!  COMMIT
+
+END-PROCEDURE TrtError
