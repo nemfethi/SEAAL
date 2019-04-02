@@ -1,0 +1,32 @@
+{
+    "plsql-language.connections": [
+        {
+            "ID": 2,
+            "active": false,
+            "database": "BRL_1",
+            "loginScript": "D:\\Work\\GFI\\Utils\\with_debug.sql",
+            "password": "X7",
+            "username": "X7",
+            "name": "X7@BRL_1"
+        },
+        {
+            "ID": 3,
+            "active": false,
+            "database": "BRL_REF",
+            "loginScript": "D:\\Work\\GFI\\Utils\\with_debug.sql",
+            "password": "X7",
+            "username": "X7",
+            "name": "X7@BRL_REF"
+        },
+        {
+            "ID": 4,
+            "active": true,
+            "database": "X7ALGTST",
+            "password": "X7",
+            "schema": "X7",
+            "username": "X7",
+            "name": "X7@X7ALGTST"
+        }
+    ],
+    "plsql-language.connection.activeInfos": "X7/X7@X7ALGTST"
+}

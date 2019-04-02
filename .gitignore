@@ -1,2 +1,5 @@
 Reprint/*.log
 Reprint/*.sqt
+Reprint/pdf/*.PDF
+Reprint/pdf/*.SPF
+Reprint/txt/*.TXT
