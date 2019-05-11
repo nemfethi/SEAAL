@@ -1,3 +1,4 @@
+
 #include 'msg.inc'
 #include 'sql.inc'
 #include 'dft_cste.h'
@@ -8,7 +9,7 @@
 #DEFINE IDTTYPTCHE_LSTRTG_FAC 'TRT2045'
 
 #INCLUDE 'o_cstglb.h'
-! #DEFINE IS_TEST 
+#DEFINE IS_TEST 
 
 Begin-Setup
   DECLARE-LAYOUT defaut
@@ -62,7 +63,7 @@ END-SQL
   !INPUT $IMP noprompt 
   !INPUT $pIdtFac type=char noprompt
   ! INPUT $RepGeneration noprompt
-   INPUT $RepGeneration noprompt
+  INPUT $RepGeneration noprompt
   INPUT $RepGenerationfic noprompt
 
   if ISNULL($RepGenerationfic)
@@ -76,7 +77,7 @@ END-SQL
   IF not ISNULL($vIdtFac)
 BEGIN-SQL
   insert into tche (IDTTYPTCHE, IDTAGT, STT, DATDMD, DATRLS, MODDCL, ADRIMP, PRM1, PRM2) 
-  values ('TRT2005', 'M23361', '', sysdate, to_date(null), 'R', 'LPT1', $vIdtFac , 'D');
+  values ('TRT8005', 'M23361', '', sysdate, to_date(null), 'R', 'LPT1', $vIdtFac , 'D');
 END-SQL
   end-if
 #Endif
@@ -521,7 +522,7 @@ IdtCntOpr &IdtCntOpr
 From FAC
   where IdtFac = #IdtFac 
 End-select 
-show 'cntoprhlt' &IdtCntOpr
+ ! show 'cntoprhlt' &IdtCntOpr
 end-procedure
 
 !---------------------------------------------------------------------------------
@@ -3897,7 +3898,8 @@ FacAlg.Z36 &Z36 !idtclt
 	do Prev_fac(&idtfac, $_idtcltssc) 
 	 show 'Client: '      &Z36
 	 show 'Facture: '     &idtfac
-	 show 'HLT xxx-->'    $datclcprc
+	 show 'HLT xxx-->'    $
+   
 FacAlg.Chp13 &chp13 !0 pour g�n�rer F1 et 1 pour g�n�rer F2
 
 to_char(FacAlg.DatLctPrc,'DD/MM/YYYY') &DatLctPrc    

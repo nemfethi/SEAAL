@@ -1,7 +1,7 @@
 CREATE OR REPLACE PACKAGE BODY X7.TRTRLVPORT01 IS
 /************************************************************************************\
 * RlvPortable                                        *
-* Création     : 22/10/2005 par SJ                                                  *
+* Crï¿½ation     : 22/10/2005 par SJ                                                  *
 *                                                 *
 \************************************************************************************/
 -----------------------------------------------------------------------------
@@ -12,15 +12,15 @@ CREATE OR REPLACE PACKAGE BODY X7.TRTRLVPORT01 IS
 -----------------------------------------------------------------------------
 -- Maj     : 21/03/2006
 -- Par     : SJ
--- Contenu : fiche 4205 - Adaptation des procédures Oracle pour bfex: utilise les champs paramètrables du pntcpg
+-- Contenu : fiche 4205 - Adaptation des procï¿½dures Oracle pour bfex: utilise les champs paramï¿½trables du pntcpg
 --                       Evolutions: renommer la vue rlv_portable_cpr_anb en rlv_portable_cpr,
 --modifier la calcule pour la colonne nbrmois_cf, utiliser rlvbat06 dans la fonction cnshstjouhst,
---mise à jour de la table pntcpg à partir de la relève portable, etc
+--mise ï¿½ jour de la table pntcpg ï¿½ partir de la relï¿½ve portable, etc
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 -- Maj     : 14/06/2006
 -- Par     : SJ
--- Contenu : Regroupement par tournées pour plusieurs lot - pas de fiche tracker  -
+-- Contenu : Regroupement par tournï¿½es pour plusieurs lot - pas de fiche tracker  -
 --fiche mantis 4459
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
@@ -31,27 +31,27 @@ CREATE OR REPLACE PACKAGE BODY X7.TRTRLVPORT01 IS
 -----------------------------------------------------------------------------
 -- Maj     : 30/08/2006
 -- Par     : SJ
--- Contenu : récupere prmgnr.sprcdf à l'import car il n'est pas utilisé dans rlvport.exe (pour ne pas grandir la taille de fichier à l'export)
+-- Contenu : rï¿½cupere prmgnr.sprcdf ï¿½ l'import car il n'est pas utilisï¿½ dans rlvport.exe (pour ne pas grandir la taille de fichier ï¿½ l'export)
 -- dans le cas d'interrruption du batch pendant que la tache est en L - reprendre la tache en L pareil comme les tache en C
 -- fiche 4461
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 -- Maj     : 22/11/2006
 -- Par     : FP
--- Contenu : Modification du package Rlvportable, procédure DCHINDRLVPORT
+-- Contenu : Modification du package Rlvportable, procï¿½dure DCHINDRLVPORT
 -- pour permettre l'utilisation de la colonne BCHINC
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 -- Maj     : 25/10/2006
 -- Par     : SJ
--- rendre la création des tournées de relève possible si le nombre des compteurs dans la tournée dépoasse 353
+-- rendre la crï¿½ation des tournï¿½es de relï¿½ve possible si le nombre des compteurs dans la tournï¿½e dï¿½poasse 353
 -- fiche 4584.
 -- VERSION 10201
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 -- Maj     : 31/10/2006
 -- Par     : SJ
--- utiliser une table temporaire pour créer l'hst des indexes
+-- utiliser une table temporaire pour crï¿½er l'hst des indexes
 -- fiche 4584.
 -- VERSION 10201
 -----------------------------------------------------------------------------
@@ -85,47 +85,47 @@ CREATE OR REPLACE PACKAGE BODY X7.TRTRLVPORT01 IS
 -----------------------------------------------------------------------------
 -- Maj     : 07/04/2009
 -- Par     : SJ
--- Contenu : mettre idtcodorg à 4 si il est null
+-- Contenu : mettre idtcodorg ï¿½ 4 si il est null
 -----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------
 -- Maj     : 18/04/2009
 -- Par     : BPZ
--- Contenu : Dans certain cas les infos complémentaires ne sont pas transférées dans X7
+-- Contenu : Dans certain cas les infos complï¿½mentaires ne sont pas transfï¿½rï¿½es dans X7
 -----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------
 -- Maj     : 28/08/2009
 -- Par     : SJ
--- Contenu : Fiche 7700 - Erreur de mise à jours de taches au cas o?¹ lots non regroupé
+-- Contenu : Fiche 7700 - Erreur de mise ï¿½ jours de taches au cas o?ï¿½ lots non regroupï¿½
 -----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------
 -- Maj     : 30/11/2009
 -- Par     : FP
--- Contenu : utilisation de DBMS_XMLGEN à la place de system.xmlgen
+-- Contenu : utilisation de DBMS_XMLGEN ï¿½ la place de system.xmlgen
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 -- Maj     : 27/01/2010
 -- Par     : SJ
--- Contenu : modifier le nom des fichiers de parametrage et agt = préfix 'typo_' fiche 7867
+-- Contenu : modifier le nom des fichiers de parametrage et agt = prï¿½fix 'typo_' fiche 7867
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 -- Maj     : 27/01/2010
 -- Par     : FP
--- Contenu : - génération de 2 fichiers : résumé de la tournée TRNxxxx et données de la tournée
+-- Contenu : - gï¿½nï¿½ration de 2 fichiers : rï¿½sumï¿½ de la tournï¿½e TRNxxxx et donnï¿½es de la tournï¿½e
 --           - gestion des directories
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 -- Maj     : 26/05/2010
 -- Par     : FP
 -- Contenu : - modification du directory TMP_XML en TMP_XML_RLVPORT
---           - dans la fonction TrnHstIndExport, on enlève le FOR UPDATE (qui fonctionne mal en oracle 10) du cursor c_lot
+--           - dans la fonction TrnHstIndExport, on enlï¿½ve le FOR UPDATE (qui fonctionne mal en oracle 10) du cursor c_lot
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 -- Maj     : 01/06/2010
 -- Par     : SJ
--- Contenu : - traitement de la fiche 8425 - enlever temporairement le controle date et heure de relève (jusqu'au moment quand la syncronisation de la date et
+-- Contenu : - traitement de la fiche 8425 - enlever temporairement le controle date et heure de relï¿½ve (jusqu'au moment quand la syncronisation de la date et
 --         l'heure sera faite lors de modification du module de transfert); laisser que le controle date (trunc(date) ) procedure controler_daterlv
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
@@ -137,29 +137,29 @@ CREATE OR REPLACE PACKAGE BODY X7.TRTRLVPORT01 IS
 -----------------------------------------------------------------------------
 -- Maj     : 11/08/2010
 -- Par     : FP
--- Contenu : - modification de la requête pour la création du fichier de résumé des tournées de manière à supprimer
+-- Contenu : - modification de la requï¿½te pour la crï¿½ation du fichier de rï¿½sumï¿½ des tournï¿½es de maniï¿½re ï¿½ supprimer
 --             les apostrophes des libabr
 -----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------
 -- Maj     : 18/08/2010 - 20101.008
 -- Par     : FP
--- Contenu : - on essaye de réduire les temps de génération des fichiers, pour ce faire :
---                * ajout d'une fonction exp_file récupérée du recensement
---                * utilisation de cette fonction pour créer les fichiers xml
+-- Contenu : - on essaye de rï¿½duire les temps de gï¿½nï¿½ration des fichiers, pour ce faire :
+--                * ajout d'une fonction exp_file rï¿½cupï¿½rï¿½e du recensement
+--                * utilisation de cette fonction pour crï¿½er les fichiers xml
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 -- Maj     : 04/08/2011 - 20204.009
 -- Par     : SJ
--- Contenu : - le nombre total de compteurs de la tournée vNbrCprTrn = TRNTYPRLV.nbrcpr - le nombre des compteurs extraits du lot aux moment de l'export
---       +   exporter tous les données des compteurs qui sont dans RLV même sans ctr car il est possible de vouloir lire les cpr inactif (si prmgrn.pntcpginc=1 alors dans la table rlv on peut avoir cpr inactifs, ça c'est déjà fait dans calslf01 et rlvbat01)
--- Note FP: on corrige dans cette version une erreur apparue le 09/05/2012 car j'ai oublié d'envoyé ce package lors de la livraison de la relève portable
+-- Contenu : - le nombre total de compteurs de la tournï¿½e vNbrCprTrn = TRNTYPRLV.nbrcpr - le nombre des compteurs extraits du lot aux moment de l'export
+--       +   exporter tous les donnï¿½es des compteurs qui sont dans RLV mï¿½me sans ctr car il est possible de vouloir lire les cpr inactif (si prmgrn.pntcpginc=1 alors dans la table rlv on peut avoir cpr inactifs, ï¿½a c'est dï¿½jï¿½ fait dans calslf01 et rlvbat01)
+-- Note FP: on corrige dans cette version une erreur apparue le 09/05/2012 car j'ai oubliï¿½ d'envoyï¿½ ce package lors de la livraison de la relï¿½ve portable
 --          voir fiche 0010111
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 -- Maj     : 03/07/2012 - 20205.010
 -- Par     : FP
--- Contenu : - fiche 10071 : on utilise à présent 2 directories seulement
+-- Contenu : - fiche 10071 : on utilise ï¿½ prï¿½sent 2 directories seulement
 -- NB : on ne peut pas se passer de celui pointant vers un rep local, pb avec bfile
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
@@ -170,7 +170,7 @@ CREATE OR REPLACE PACKAGE BODY X7.TRTRLVPORT01 IS
 -----------------------------------------------------------------------------
 -- Maj     : 12/12/2013 - 20506.015
 -- Par     : FP
--- Contenu : mise à plat de version
+-- Contenu : mise ï¿½ plat de version
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 -- Maj     : 11/04/2014
@@ -185,39 +185,39 @@ CREATE OR REPLACE PACKAGE BODY X7.TRTRLVPORT01 IS
 -- Maj     : 11/06/2014
 -- VERSION : 30102.018
 -- Par     : BPZ
--- Mantis    11735: Division de tournées
+-- Mantis    11735: Division de tournï¿½es
 -----------------------------------------------------------------------------
 -- Maj     : 12/07/2014
 -- VERSION : 30200.026
 -- Par     : FBE
--- Contenu : - 11874: Adresses longues tronquées sur le PDA
---           - 11875: Problèmes de dates lorsque le dépasse minuit
---           - 11877: Gestion de la division de tournées
---           - 11878: Possibilité d'annuler la génération de fichiers relève en état 4
---           - 11879: Modification du système d'historisation des fichiers de la relève portable
+-- Contenu : - 11874: Adresses longues tronquï¿½es sur le PDA
+--           - 11875: Problï¿½mes de dates lorsque le dï¿½passe minuit
+--           - 11877: Gestion de la division de tournï¿½es
+--           - 11878: Possibilitï¿½ d'annuler la gï¿½nï¿½ration de fichiers relï¿½ve en ï¿½tat 4
+--           - 11879: Modification du systï¿½me d'historisation des fichiers de la relï¿½ve portable
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 -- Maj     : 05/03/2015
 -- Par     : SJ
 -- VERSION : 30204.027
 -- Contenu : - traitement de la fiche 12407: FNemir d'Alger signale que :
---  - Le point d’entrée des taches de génération est STT=’L’, àhors que nous sur le carnet de relève nous mettons les STT=’T’ s’il y au moins nue TRN portable sur le lot.
---  - Sur le package TRTRLVPORT01 on met à jour IdtEtTrn à 5 avant de générer le fichier XML (voir lign 441)...
---  --SJ : gestion des taches comme avant et meilleurs gestion des erreurs: si pb à la génération on ne mets pas à jour l'état de la tournée trn
+--  - Le point dï¿½entrï¿½e des taches de gï¿½nï¿½ration est STT=ï¿½Lï¿½, ï¿½hors que nous sur le carnet de relï¿½ve nous mettons les STT=ï¿½Tï¿½ sï¿½il y au moins nue TRN portable sur le lot.
+--  - Sur le package TRTRLVPORT01 on met ï¿½ jour IdtEtTrn ï¿½ 5 avant de gï¿½nï¿½rer le fichier XML (voir lign 441)...
+--  --SJ : gestion des taches comme avant et meilleurs gestion des erreurs: si pb ï¿½ la gï¿½nï¿½ration on ne mets pas ï¿½ jour l'ï¿½tat de la tournï¿½e trn
 
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 -- Maj     : 17/03/2015
 -- Par     : SJ
 -- VERSION : 30204.028
--- Contenu : - traitement de la fiche 12466: reprise des modifications de FNE sauf la maj de la tache à null si la tache est à 'T'
--- Ci-dessous le fonctionnement des changement des état de la tache TRT2003:
---signification des états L, T, C, F pour idttyptche=2003 qui a été connstruit pour la Roumanie et repris en version produit:
+-- Contenu : - traitement de la fiche 12466: reprise des modifications de FNE sauf la maj de la tache ï¿½ null si la tache est ï¿½ 'T'
+-- Ci-dessous le fonctionnement des changement des ï¿½tat de la tache TRT2003:
+--signification des ï¿½tats L, T, C, F pour idttyptche=2003 qui a ï¿½tï¿½ connstruit pour la Roumanie et repris en version produit:
 --
--- 1. le carnet de relève est imprimé par un état brio lancé avant l'appel de la procédure d'exp de la relève portable
+-- 1. le carnet de relï¿½ve est imprimï¿½ par un ï¿½tat brio lancï¿½ avant l'appel de la procï¿½dure d'exp de la relï¿½ve portable
 
---Ce carnet de relève à la fin du traitement de la tournée met la tache en F si toutes les tournées sont en portable ou si on imprime que le carnet de relève même pour les tournées en portable. Le traitement d'export de la relève portable ne doit rien faire dans ce cas. Lorsque le carnet de relève commence le traitement la tache est mise à C (en cours).
---A la fin du traitement le carnet de relève met l'état de la tâche à F ou à T comme suite:
+--Ce carnet de relï¿½ve ï¿½ la fin du traitement de la tournï¿½e met la tache en F si toutes les tournï¿½es sont en portable ou si on imprime que le carnet de relï¿½ve mï¿½me pour les tournï¿½es en portable. Le traitement d'export de la relï¿½ve portable ne doit rien faire dans ce cas. Lorsque le carnet de relï¿½ve commence le traitement la tache est mise ï¿½ C (en cours).
+--A la fin du traitement le carnet de relï¿½ve met l'ï¿½tat de la tï¿½che ï¿½ F ou ï¿½ T comme suite:
 
 --    if #NbrTrnPortab = 0 or $prm3='1'
 --     do Maj_Tche (, 'F', #NbrPntCpgTraites)
@@ -225,8 +225,8 @@ CREATE OR REPLACE PACKAGE BODY X7.TRTRLVPORT01 IS
 --     do Maj_Tche (, 'T', #NbrPntCpgTraites)
 --    end-if
 
---2.le traitement de l'export de la relève portable prend la tache qui a stt=null ou T et la passe en L (lancement de l'exp portable) qui est équivalent de C "en cours" pour le carnet de relève ou autre type de tâche).
---Si le traitement est intrerrompu , le traitement de la relève portable doit reprendre les taches qui sont en état null ou L (commencé mais pas fini par l'exp portable) et en état T ( traité par le carnet de relève des tournées pas en portable et disponible pour l'export des autres tournées)
+--2.le traitement de l'export de la relï¿½ve portable prend la tache qui a stt=null ou T et la passe en L (lancement de l'exp portable) qui est ï¿½quivalent de C "en cours" pour le carnet de relï¿½ve ou autre type de tï¿½che).
+--Si le traitement est intrerrompu , le traitement de la relï¿½ve portable doit reprendre les taches qui sont en ï¿½tat null ou L (commencï¿½ mais pas fini par l'exp portable) et en ï¿½tat T ( traitï¿½ par le carnet de relï¿½ve des tournï¿½es pas en portable et disponible pour l'export des autres tournï¿½es)
 
 
 -----------------------------------------------------------------------------
@@ -239,13 +239,13 @@ CREATE OR REPLACE PACKAGE BODY X7.TRTRLVPORT01 IS
 -- Maj     : 03/03/2019
 -- Par     : FNE
 -- VERSION : 30204.030
--- Contenu : 17760: Gestion des coefficients des Compteurs (TYPCPR.CFF) lors de la décharge
+-- Contenu : 17760: Gestion des coefficients des Compteurs (TYPCPR.CFF) lors de la dï¿½charge
 -----------------------------------------------------------------------------
 
 --FUNCTION VersionPkg RETURN VersionPackage
 ----NUMBER
 --IS
---pour le cas où on veux liverer en double mais je pense que il ne faut pas faire ça car risque d'err et necessaire d'autre modif sur traccage
+--pour le cas oï¿½ on veux liverer en double mais je pense que il ne faut pas faire ï¿½a car risque d'err et necessaire d'autre modif sur traccage
 
 --  VersionNumberP_RP VersionPackage;
 --
@@ -265,9 +265,9 @@ END;
 ---------------------------------------------------------------------------
 ---------------------------------------------------------------------------
 PROCEDURE ExporterParametres IS
---NB : pPath n'est plus utilisé, on utilise les directories
---répertoire de destination sur le serveur de base de données (il faut ULT_FILE_DIR=* ou alors ajouter les droits
---en écriture sur le répertoire)
+--NB : pPath n'est plus utilisï¿½, on utilise les directories
+--rï¿½pertoire de destination sur le serveur de base de donnï¿½es (il faut ULT_FILE_DIR=* ou alors ajouter les droits
+--en ï¿½criture sur le rï¿½pertoire)
 -- Cursor pour recuperer les parametres pour la generation des fichiers
   cursor cMDL is
     select IdtExpMdl,
@@ -348,7 +348,7 @@ procedure Exporter
        where LOTFAC.IdtLotFac = TCHE.Prm2
         and  TCHE.IdtTypTche  = 'TRT2003'
         --and  (TCHE.Stt is null)
-        and (TCHE.Stt is null or TCHE.Stt = 'T' or TCHE.Stt = 'L') -- SJ 05/03/2015 traitement de la fiche 12407 : pour des raison de comptaibilité Alger lance les carnet de relève et à la fin si il reset au moins une tournée en "portable" la tcahe est mise à T
+        and (TCHE.Stt is null or TCHE.Stt = 'T' or TCHE.Stt = 'L') -- SJ 05/03/2015 traitement de la fiche 12407 : pour des raison de comptaibilitï¿½ Alger lance les carnet de relï¿½ve et ï¿½ la fin si il reset au moins une tournï¿½e en "portable" la tcahe est mise ï¿½ T
         and  TCHE.DatPrv <= SysDate
           -- BPZ
           AND RLV.IdtLotFac = LOTFAC.IdtLotFac
@@ -526,11 +526,11 @@ BEGIN
 --          where IdtTrn = tIdtLotFac(i) || '-' || rTRN.IdtTrnTyp
 --           and  Sqc = rTRN.Sqc;
 
-    --SJ 05/03/2015, traitement de la fiche 12407 -éviter la création d'un fichier vide : à bien tester cela car je ne suis pas trop d'acc avec le code ci-dessus
+    --SJ 05/03/2015, traitement de la fiche 12407 -ï¿½viter la crï¿½ation d'un fichier vide : ï¿½ bien tester cela car je ne suis pas trop d'acc avec le code ci-dessus
 
       if vNbr != 0 then
            -- FNE: 12466 gestion de l'export
- -- ça empêche la génération des trn vides
+ -- ï¿½a empï¿½che la gï¿½nï¿½ration des trn vides
             begin
                 erreur:=false;
       -----------------------------------------------------------
@@ -599,13 +599,13 @@ BEGIN
      else
 
       Insert into sys_hst_msg (NOM_UTILISATEUR,NOM_TRAITEMENT,DAT_COURANTE,MSG_CODE,MSG_LIBELLE,NUM_PROGRESSION,NOM_LOCALISATION,CPT,NOM_REQUETE )
-                      values    (user, 'TRTRLVPORT.export',sysdate, 'MSG_INF2002', '', 0,'TRTRLVPORT.export',null, 'pas de données pour la tournnée ' || rTRN.IdtAgt || '-' || vIdtLotFacRgr || '-' || rTRN.IdtTrnTyp || '_' || rTRN.Sqc || '-' || rTRN.DatPrvRlv   );
+                      values    (user, 'TRTRLVPORT.export',sysdate, 'MSG_INF2002', '', 0,'TRTRLVPORT.export',null, 'pas de donnï¿½es pour la tournnï¿½e ' || rTRN.IdtAgt || '-' || vIdtLotFacRgr || '-' || rTRN.IdtTrnTyp || '_' || rTRN.Sqc || '-' || rTRN.DatPrvRlv   );
 
-      DBMS_OUTPUT.PUT_LINE('pas de données pour la tournnée ' || rTRN.IdtAgt || '-' || vIdtLotFacRgr || '-' || rTRN.IdtTrnTyp || '_' || rTRN.Sqc || '-' || rTRN.DatPrvRlv);
+      DBMS_OUTPUT.PUT_LINE('pas de donnï¿½es pour la tournnï¿½e ' || rTRN.IdtAgt || '-' || vIdtLotFacRgr || '-' || rTRN.IdtTrnTyp || '_' || rTRN.Sqc || '-' || rTRN.DatPrvRlv);
 
      end if;
 --'
-  --SJ 05/03/2015 - traitement de la fiche 12407 : vérif que l'export est bien fait avant de maj de l'état de la tournée
+  --SJ 05/03/2015 - traitement de la fiche 12407 : vï¿½rif que l'export est bien fait avant de maj de l'ï¿½tat de la tournï¿½e
       -- Mise a jour de l'etat de la tournee
 if not erreur then
 forall i in 1..tIdtLotFac.Count
@@ -843,7 +843,7 @@ BEGIN
       if tXML(i).IdtCodOrg is null then
         tXML(i).IdtCodOrg := 4;
       end if;
-      -- FNE: 12466 ajouté, gestion des valeurs Varchar2: null
+      -- FNE: 12466 ajoutï¿½, gestion des valeurs Varchar2: null
       ------------------------------------------
       vChamp := 'IdtLotFac';
       tDCH(i).IdtLotFac    := tXML(i).IdtLotFac;
@@ -889,7 +889,7 @@ BEGIN
             -- FNE: 12466 : correction si CNS null
             -- FNE: 17760 : Correction Coefficient
             
-            select Cff into vCff 
+            select nvl(Cff, 1) into vCff 
             from Cpr, TypCpr 
             where Cpr.IdtCpr = tDCH(i).IdtCpr
             and Cpr.IDtTypCpr = TypCpr.IdtTypCpr;
@@ -1027,7 +1027,7 @@ BEGIN
 --    UTL_FILE.fRename('XMLFILES_RLVPORT', 'HST-' || pFile,'XMLFILES_RLVPORT',vNomFicFin,TRUE);
 --  EXCEPTION
 --    when others then
---      null;  --FP 10/07/2012 le fichier historique n'est plus censé exister depuis la version 20500 et donc on ne fait rien si exception
+--      null;  --FP 10/07/2012 le fichier historique n'est plus censï¿½ exister depuis la version 20500 et donc on ne fait rien si exception
 --  END;
 -- Gestion des exceptions globales
 EXCEPTION

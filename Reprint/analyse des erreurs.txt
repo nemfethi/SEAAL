@@ -1,0 +1,12 @@
+analyse des erreurs
+    - erreur: Centre opérationnel affiché est cleui de la facture et non pas celui du client.
+    - erreur : Période du 28/01/2016 au 28/01/2016
+        . pas d'erreur dans le TXT généré le 07/05/2019
+    - erreur : Période du 30/09/2006 au 30/12/1997
+        . pas d'erreur dans le TXT généré le 07/05/2019
+    - erreur : Période du 30/06/1998 au 11/10/1958
+        . Erreur de données (migration)
+    - erreur : affichage créance à date
+        . pas d'erreur logique le programme affiche la créance actuelle. Le programme est fait pour la facture fraiche
+    
+    

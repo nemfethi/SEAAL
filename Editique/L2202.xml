@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema>
+    <column comment="Ancien Index F3" default="" key="false" label="Z21"
+        length="-1" nullable="true" originalDbColumnName="Z21"
+        originalLength="-1" pattern="" precision="-1"
+        talendType="id_String" type=""/>
+    <column comment="date de facturation" default="" key="false"
+        label="Z14" length="-1" nullable="true"
+        originalDbColumnName="Z14" originalLength="-1" pattern=""
+        precision="-1" talendType="id_String" type=""/>
+    <column comment="N° de contrat" default="" key="false"
+        label="idtctr" length="-1" nullable="true"
+        originalDbColumnName="idtctr" originalLength="-1" pattern=""
+        precision="-1" talendType="id_String" type=""/>
+    <column comment="Date exigibilité" default="" key="false"
+        label="Z1435" length="-1" nullable="true"
+        originalDbColumnName="Z1435" originalLength="-1" pattern=""
+        precision="-1" talendType="id_String" type=""/>
+</schema>

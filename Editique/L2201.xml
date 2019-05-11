@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema>
+    <column comment="N° de compteur / Code Observation relève"
+        default="" key="false" label="Z19" length="-1" nullable="true"
+        originalDbColumnName="Z19" originalLength="-1" pattern=""
+        precision="-1" talendType="id_String" type=""/>
+    <column comment="N° de facture" default="" key="false" label="Z12"
+        length="-1" nullable="true" originalDbColumnName="Z12"
+        originalLength="-1" pattern="" precision="-1"
+        talendType="id_String" type=""/>
+    <column comment="Id catégorie client" default="" key="false"
+        label="ZZ10" length="-1" nullable="true"
+        originalDbColumnName="ZZ10" originalLength="-1" pattern=""
+        precision="-1" talendType="id_String" type=""/>
+    <column comment="libellé abrégé de la catégorie du client"
+        default="" key="false" label="ZZ11" length="-1" nullable="true"
+        originalDbColumnName="ZZ11" originalLength="-1" pattern=""
+        precision="-1" talendType="id_String" type=""/>
+    <column comment="Date de la prochaine relève (DD/MM/YYYY)"
+        default="" key="false" label="DATPRCRLV" length="-1"
+        nullable="true" originalDbColumnName="DATPRCRLV"
+        originalLength="-1" pattern="" precision="-1"
+        talendType="id_String" type=""/>
+    <column comment="Date de la prochaine facture" default=""
+        key="false" label="DATPRCFAC" length="-1" nullable="true"
+        originalDbColumnName="DATPRCFAC" originalLength="-1" pattern=""
+        precision="-1" talendType="id_String" type=""/>
+    <column
+        comment="Client souscripteur :  '1' pour ne pas afficher le client souscripteur;  '0' pour afficher le client souscripteur"
+        default="" key="false" label="orgp" length="-1" nullable="true"
+        originalDbColumnName="orgp" originalLength="-1" pattern=""
+        precision="-1" talendType="id_String" type=""/>
+</schema>
