@@ -1,5 +1,6 @@
 
 #include 'msg.inc'
+#include 'REPRTFAC.inc'
 #include 'sql.inc'
 #include 'dft_cste.h'
 
@@ -40,21 +41,13 @@ BEGIN-PROGRAM
   !LET $mode = 'R'
   LET $user = 'M23361'
 	LET $mode = 'R'       
-	LET $pIdtFac = '52889482'       
+	LET $pIdtFac = '16398219'       
+	LET $pIdtFac = '9555168'       
   !LET $IMP  = ''
   ! LET $RepGeneration = 'c:\temp'
   LET $RepGenerationfic = 'c:\temp'
 BEGIN-SQL
-   !Update Tche set STT=null, Datrls=null where Idtagt='BATCH' and  idttyptche='TRT2005' and Prm2 in ('58560')
-   !Update Tche set STT=null, Datrls=null where Idtagt='BATCH' and  idttyptche='TRT2005' and Prm2 in ('57642')
-   !Update Tche set STT=null, Datrls=null where Idtagt='BATCH' and  idttyptche='TRT2005' and Prm2 in ('58583')
-   !Update Tche set STT=null, Datrls=null where Idtagt='M01016'
-!    Update Tche set STT=null, 
-!                 Datrls=null 
-!     where Idtagt='M23361' 
-!     and MODDCL='R' 
-!     and idttyptche='TRT2005' --and PRM1=39188223 
-insert into tche (IDTTYPTCHE, IDTAGT, STT, DATDMD, DATRLS, MODDCL, ADRIMP, PRM1, PRM2) values ('TRT2005', 'M23361', '', to_date('17-01-2019', 'dd-mm-yyyy'), to_date(null), 'R', 'LPT1', $pIdtFac , 'D');
+insert into tche (IDTTYPTCHE, IDTAGT, STT, DATDMD, DATRLS, MODDCL, ADRIMP, PRM1, PRM2) values ('TRT8005', 'M23361', '', to_date('17-01-2019', 'dd-mm-yyyy'), to_date(null), 'R', 'LPT1', $pIdtFac , 'D');
 END-SQL
 #Else
   !Recuperation des param�tres
@@ -190,7 +183,7 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
 		  when = 1   ! Facture manuelle / devis
         Do Rech_Num_Report(#Num)
         let #_facsrv = 0
-        Do cntoprinfoHLT(#idtfac, $IdtCntOprFil)
+        Do cntoprFacFromClt(#idtfac, $IdtCntOprFil)
         let $FileNam = 'Facture_manuelle_'||$IdtCntOprFil||'_'||&CODE_CLIENT||'_'||to_char(#Num) ||'_FAC_' || &numfct2 ||'.PDF'
         let $ReportName1 = $RepGeneration ||'\'||$FileNam
         NEW-REPORT $ReportName1
@@ -217,30 +210,18 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
             Do Rech_Num_Report(#Num)
             !Do cntoprinfo($vIdtLotFac, $IdtCntOprFil) !vu que c'est une facture hors lot, �a ne peut que retourner "null"
             !let #IdtFac = &NUMFCT2
-            Do cntoprinfoHLT(#idtfac, $IdtCntOprFil)
+            Do cntoprFacFromClt(#idtfac, $IdtCntOprFil)
             let $date = edit ($current-date,'YYYYMMDD')
             let $file_name_root = 'REIMPSRV_'||$IdtCntOprFil||'_'||&CODE_CLIENT||'_'||&NUMFCT2||'_'||$date||'_'||to_char(#Num)
             
             ! test sur le centre op�rationel pour la facture F3 
             if $IdtCntOprfil <> '00'
-            !if not ISNULL ($IdtCntOprfil)
-            
-            !if $IdtCntOprfil = '40'
-            !if $IdtCntOprfil = '42' !pour test
-            !if $IdtCntOprfil = '43' or $IdtCntOprfil = '32' !pour la production
             if $valChp13='F1'
             let $file_name= $file_name_root ||'_F3.txt'
             else
             let $file_name= $file_name_root ||'_F3_EX_F2.txt'
             end-if
             let $file_TxtPathf = $RepGenerationfic||'\'||$file_name
-
-            !let $file_namef2 = $file_name_root ||'_F2.txt'
-            !let $_filetxtF1 = $file_name_root ||'_F1.txt'
-            !let $_filetxtF2 = $file_name_root ||'_F2.txt'
-            !let $file_TxtPathf1 = $RepGenerationfic||'\'||$file_namef1
-            !let $file_TxtPathf2 = $RepGenerationfic||'\'||$file_namef2    
-            							
 
             ! on g�n�re le fichier F3
             open $file_TxtPathf as 3 for-writing record=32767:vary status=#filestate
@@ -563,6 +544,7 @@ do MSG_DefinirLocalisation ('{TRT}_SELFAC')
 
 begin-select
 FACALG.IdtOpr &IdtOpr
+FACALG.IdtCLt &IdtClt
 FacAlg.Z90 &Z90 			! ancienne r�f�rence du client
 	let $_Z90 = &Z90
 	let $_ZZ32 = &Z90
@@ -678,8 +660,14 @@ nvl(FacAlg.Z86,0) &Z86 ! montant sur valeur ajout�e MntTva de la facture
 nvl(FacAlg.Z97,0) &Z97 					! Montant de la facture
 	let $_Z97 = ltrim(edit(&Z97,'999999999999.99'),' ')
 FacAlg.Z99 &Z99 					! Solde Exigible Ant�rieur de la facture
-	let $_Z99 = ltrim(edit(&Z99,'999999999999.99'),' ')
-	let $_ZZ84 = ltrim(edit(&Z99,'999999999999.99'),' ')
+	! let $_Z99 = ltrim(edit(&Z99,'999999999999.99'),' ')
+	! let $_ZZ84 = ltrim(edit(&Z99,'999999999999.99'),' ')
+	
+  do Solde_Date($_idtcltssc, &Z14) 
+  show 'Solde Date' &_Solde
+  let $_Z99 = ltrim(edit(&_Solde,'999999999999.99'),' ')
+	let $_ZZ84 = ltrim(edit(&_Solde,'999999999999.99'),' ')
+  
 FacAlg.ZZ80 &ZZ80	! montant � payer pour le modele de facture F2 sans timbre fiscal
 	let #_ZZ80 = &ZZ80
 	Do NBRTOSTR(&ZZ80)
@@ -700,10 +688,10 @@ FacAlg.Z105 &Z105 ! montant � payer pour le modele de facture F1
  ! let $_dat = &net
 	!let #_datcal = LTRIM((lpad( (substr($_dat,1,2)||substr($_dat,4,2)||substr($_dat,9,2)),6,'0')),'.0' )
 	if &Z101 > 0
-GEN_CLE_CLT(FacAlg.Z90,FacAlg.Z101,FacAlg.DATVALCLE) &cleclient  !ltrim((&Z101+&Z103)*100) /to_char((FacAlg.datexg),'DD/MM/YYYY')
-!GEN_CLE_CLT(605201, 41531, 090913) &cleclient
+! FNE: GEN_CLE_CLT(FacAlg.Z90,FacAlg.Z101,FacAlg.DATVALCLE) &cleclient  !ltrim((&Z101+&Z103)*100) /to_char((FacAlg.datexg),'DD/MM/YYYY')
+! GEN_CLE_CLT(605201, 41531, 090913) &cleclient
  end-if
-  let $_cleclient  = &cleclient
+  let $_cleclient  = '' !&cleclient
 FacAlg.IdtTrnTyp &IdtTrn ! identifiant de la tourn�e
 	let $_Z121 = &IdtTrn
 FacAlg.Rng1 &rng1 ! identifiant du rang de la tourn�e
@@ -791,6 +779,17 @@ order by IDTTRNTYP, RNG1
 end-select
 
 end-procedure !SelFac
+
+begin-Procedure Solde_Date($pidtclt, $pdate)
+begin-select
+sum(Sld) &_Solde 
+ let $_Solde = &_Solde
+from SLDOPR_VIEW1 
+where IdtClt=$pIdtClt 
+and datdeb<=to_date($pdate, 'DD/MM/YYYY')
+end-select 
+
+End-Procedure
 
 begin-Procedure Prev_fac(#idtfac, $pidtclt)
 
@@ -950,8 +949,14 @@ nvl(FacAlg.Z86,0) &Z86 ! montant sur valeur ajout�e MntTva de la facture
 nvl(FacAlg.Z97,0) &Z97 					! Montant de la facture
 	let $_Z97 = ltrim(edit(&Z97,'999999999999.99'),' ')
 FacAlg.Z99 &Z99 					! Solde Exigible Ant�rieur de la facture
-	let $_Z99 = ltrim(edit(&Z99,'999999999999.99'),' ')
-	let $_ZZ84 = ltrim(edit(&Z99,'999999999999.99'),' ')
+	! let $_Z99 = ltrim(edit(&Z99,'999999999999.99'),' ')
+	! let $_ZZ84 = ltrim(edit(&Z99,'999999999999.99'),' ')
+
+  do Solde_Date($_idtcltssc, &Z14) 
+  show 'Solde Date' &_Solde
+  let $_Z99 = ltrim(edit(&_Solde,'999999999999.99'),' ')
+	let $_ZZ84 = ltrim(edit(&_Solde,'999999999999.99'),' ')
+  
 FacAlg.ZZ80 &ZZ80	! montant � payer pour le modele de facture F2 sans timbre fiscal
 	let #_ZZ80 = &ZZ80
 	Do NBRTOSTR(&ZZ80)
@@ -1209,6 +1214,29 @@ nvl(lgnfac.tau,0) &hsttaxtau
 	  let $_ZZ52 = ltrim(edit(&lgnfacmnthtmnttva,'999999999999.99'),' ')
     break
 	when = 'ASS'
+		let #p41 = &lgnfacmntht
+	  let $_ZZ72 = ltrim(edit(&lgnfacqtefct,'999999999999'),' ')
+	  let $_ZZ70 = ltrim(edit(&lgnfacprxunt,'999999999999.99'),' ')
+	  let $_ZZ67 = ltrim(edit(&lgnfacmntht,'999999999999.99'),' ')
+	  let $_ZZ63 = ltrim(edit(&hsttaxtau,'99999.99'),' ')
+	  let $_ZZ59 = ltrim(edit(&lgnfacmnttva,'999999999999.99'),' ')
+	  let $_ZZ53 = ltrim(edit(&lgnfacmnthtmnttva,'999999999999.99'),' ')
+		Do nbrdetlgn(#IdtFac, &NumLgnFct, #NbrDetLgnFac)
+	  if #NbrDetLgnFac <> 0 and $_Z27 = 'C1'
+  	  Do detlgnass(#idtfac,&NumLgnFct,#NbrDetLgnFac)
+		else
+			if $_Z27 = 'C1'
+				let $_Z55 = ltrim(edit(&lgnfacprxunt,'999999999999.99'),' ')
+				let $_Z59 = ltrim(edit(&lgnfacmntht,'999999999999.99'),' ')
+			else
+  			let #_Z115 = &lgnfacprxunt ! tranche unique
+	  		let $_Z115 = ltrim(edit(&lgnfacprxunt,'999999999999.99'),' ')
+		  	let #_Z114 = &lgnfacmntht ! tranche unique
+		  	let $_Z114 = ltrim(edit(&lgnfacmntht,'999999999999.99'),' ')
+		  end-if
+  	end-if
+	  break
+	when = 'T_ASS'
 		let #p41 = &lgnfacmntht
 	  let $_ZZ72 = ltrim(edit(&lgnfacqtefct,'999999999999'),' ')
 	  let $_ZZ70 = ltrim(edit(&lgnfacprxunt,'999999999999.99'),' ')
@@ -2675,8 +2703,13 @@ nvl(FacAlg.Z86,0) &Z86 ! montant sur valeur ajout�e MntTva de la facture
 nvl(FacAlg.Z97,0) &Z97 					! Montant de la facture                                                         
 	let $_Z97 = ltrim(edit(&Z97,'999999999999.99'),' ')                                                           
 FacAlg.z99 &Z99 					! Solde Exigible Ant�rieur de la facture                                              
-	let $_Z99 = ltrim(edit(&Z99,'999999999999.99'),' ')                                                           
-	let $_ZZ84 = ltrim(edit(&Z99,'999999999999.99'),' ')                                                         
+	! let $_Z99 = ltrim(edit(&Z99,'999999999999.99'),' ')                                                           
+	! let $_ZZ84 = ltrim(edit(&Z99,'999999999999.99'),' ')    
+  
+  do Solde_Date($_idtcltssc, &Z14) 
+  show 'Solde Date' &_Solde
+  let $_Z99 = ltrim(edit(&_Solde,'999999999999.99'),' ')
+	let $_ZZ84 = ltrim(edit(&_Solde,'999999999999.99'),' ')                                                     
 FacAlg.ZZ80 &ZZ80	! montant � payer pour le modele de facture F2 sans timbre fiscal                             
 	let #_ZZ80 = &ZZ80                                                                                            
 	!Do NBRTOSTR(&ZZ80) 
@@ -2698,10 +2731,10 @@ FacAlg.Z105 &Z105 ! montant � payer pour le modele de facture F1
 	!let $_dat = &net 
 	!let #_datcal = LTRIM((lpad( (substr($_dat,1,2)||substr($_dat,4,2)||substr($_dat,9,2)),6,'0')),'.0' )
 	if &Z101 > 0
-GEN_CLE_CLT(FacAlg.Z90,FacAlg.Z101,FacAlg.DATVALCLE) &cleclient  !ltrim((&Z101+&Z103)*100) /to_char((FacAlg.datexg),'DD/MM/YYYY')
+! FNE: GEN_CLE_CLT(FacAlg.Z90,FacAlg.Z101,FacAlg.DATVALCLE) &cleclient  !ltrim((&Z101+&Z103)*100) /to_char((FacAlg.datexg),'DD/MM/YYYY')
 !GEN_CLE_CLT(605201, 41531, 090913) &cleclient
  end-if
-	let $_cleclient  = &cleclient                                                       
+	let $_cleclient  = '' !&cleclient                                                       
 FacAlg.IdtTrnTyp &IdtTrn ! identifiant de la tourn�e                                                            
 	let $_Z121 = &IdtTrn                                                                                          
 FacAlg.Rng1 &rng1 ! identifiant du rang de la tourn�e                                                           
@@ -2774,7 +2807,7 @@ FacAlg.NbrExp &NbrExp
                                                                                                                 
 	! Mise a jour de la date d'impression sur l'operation                                                         
 	do Maj_OPR(&IdtOpr)  
-	do SendSMS(#idtfac)                                                                                         
+	! FNE: do SendSMS(#idtfac)                                                                                         
 	!show &idtfac                                                                                                 
 	!show &Z36                                                                                                    
   !show '$_Whr SELFACF3' $_Whr                                                                                                           
@@ -3362,6 +3395,29 @@ nvl(lgnfac.tau,0) &hsttaxtau
 		  	let $_Z114 = ltrim(edit(&lgnfacmntht,'999999999999.99'),' ')
 		  end-if
   	end-if
+    break
+	when = 'T_ASS'
+		let #p41 = &lgnfacmntht
+	  let $_ZZ72 = ltrim(edit(&lgnfacqtefct,'999999999999'),' ')
+	  let $_ZZ70 = ltrim(edit(&lgnfacprxunt,'999999999999.99'),' ')
+	  let $_ZZ67 = ltrim(edit(&lgnfacmntht,'999999999999.99'),' ')
+	  let $_ZZ63 = ltrim(edit(&hsttaxtau,'99999.99'),' ')
+	  let $_ZZ59 = ltrim(edit(&lgnfacmnttva,'999999999999.99'),' ')
+	  let $_ZZ53 = ltrim(edit(&lgnfacmnthtmnttva,'999999999999.99'),' ')
+		Do nbrdetlgn(#IdtFac, &NumLgnFct, #NbrDetLgnFac)
+	  if #NbrDetLgnFac <> 0 and $_Z27 = 'C1'
+  	  Do detlgnass(#idtfac,&NumLgnFct,#NbrDetLgnFac)
+		else
+			if $_Z27 = 'C1'
+				let $_Z55 = ltrim(edit(&lgnfacprxunt,'999999999999.99'),' ')
+				let $_Z59 = ltrim(edit(&lgnfacmntht,'999999999999.99'),' ')
+			else
+  			let #_Z115 = &lgnfacprxunt ! tranche unique
+	  		let $_Z115 = ltrim(edit(&lgnfacprxunt,'999999999999.99'),' ')
+		  	let #_Z114 = &lgnfacmntht ! tranche unique
+		  	let $_Z114 = ltrim(edit(&lgnfacmntht,'999999999999.99'),' ')
+		  end-if
+  	end-if
 	  break
 	when = 'RFATRM'
 		let #p42 = &lgnfacmntht
@@ -3860,8 +3916,15 @@ nvl(FacAlg.Z86,0) &Z86 ! montant sur valeur ajout�e MntTva de la facture
 nvl(FacAlg.Z97,0) &Z97 					! Montant de la facture
 	let $_Z97 = ltrim(edit(&Z97,'999999999999.99'),' ')
 FacAlg.z99 &Z99 					! Solde Exigible Ant�rieur de la facture
-	let $_Z99 = ltrim(edit(&Z99,'999999999999.99'),' ')
-	let $_ZZ84 = ltrim(edit(&Z99,'999999999999.99'),' ')
+	! let $_Z99 = ltrim(edit(&Z99,'999999999999.99'),' ')
+	! let $_ZZ84 = ltrim(edit(&Z99,'999999999999.99'),' ')
+  
+  do Solde_Date($_idtcltssc, &Z14) 
+  show 'Solde Date: ' &_Solde
+  let $_Z99 = ltrim(edit(&_Solde,'999999999999.99'),' ')
+	let $_ZZ84 = ltrim(edit(&_Solde,'999999999999.99'),' ')                                                     
+
+
 FacAlg.ZZ80 &ZZ80	! montant � payer pour le modele de facture F2 sans timbre fiscal
 	let #_ZZ80 = &ZZ80
 	!Do NBRTOSTR(&ZZ80)
@@ -3955,7 +4018,7 @@ FacAlg.IdtPntCpg &IdtPntCpg
 	  end-evaluate
 	! Mise a jour de la date d'impression sur l'operation
 	do Maj_OPR(&IdtOpr)
-	do SendSMS(#idtfac)
+	! FNE: do SendSMS(#idtfac)
 
 from alg_fac_F3 FacAlg, ALG_CPTBNC, STR
  where FacAlg.IdtFac = #IdtFac

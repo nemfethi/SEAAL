@@ -3,3 +3,8 @@ Reprint/*.sqt
 Reprint/pdf/*.PDF
 Reprint/pdf/*.SPF
 Reprint/txt/*.TXT
+Intégration_Distribution/ALG_DIST_DTL.xml
+Intégration_Distribution/ALG_DIST_ENT.xml
+Reprint/~$Référentiel Détail facture V2.xlsx
+Reprint/Référentiel Détail facture V2.xlsx
+.gitignore

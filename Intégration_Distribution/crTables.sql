@@ -1,0 +1,19 @@
+Create table Alg_Dist_Ent (
+IDTDST number,
+FICDST VARCHAR2(255),
+DATFIC Date,
+STT VARCHAR2(1)
+DATIMP Date
+);
+
+
+Create table Alg_Dist_Dtl (
+IDTDST number,
+CLEDST VARCHAR2(255),
+CLTDST VARCHAR2(6),
+AGTDST VARCHAR2(6),
+STTDST VARCHAR2(1),
+COMDST VARCHAR2(255)
+DATDSTDTL Date,
+LNGDTS number,
+LATDST number);
