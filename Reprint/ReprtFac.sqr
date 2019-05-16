@@ -1,15 +1,9 @@
 
-#include 'msg.inc'
 #include 'REPRTFAC.inc'
-#include 'sql.inc'
-#include 'dft_cste.h'
 
-#define EDTEPR01
-#DEFINE IDTTYPTCHE_RTG_FAC 'TRT5016'
-#DEFINE IDTTYPTCHE_RPRFAC 'TRT8005'
-#DEFINE IDTTYPTCHE_LSTRTG_FAC 'TRT2045'
 
-#INCLUDE 'o_cstglb.h'
+
+
 #DEFINE IS_TEST 
 
 Begin-Setup
@@ -37,7 +31,6 @@ BEGIN-PROGRAM
     
 #IFDEF IS_TEST
 ! Pour Test
-  !LET $user = 'M01016'
   !LET $mode = 'R'
   LET $user = 'M23361'
 	LET $mode = 'R'       
@@ -47,15 +40,13 @@ BEGIN-PROGRAM
   ! LET $RepGeneration = 'c:\temp'
   LET $RepGenerationfic = 'c:\temp'
 BEGIN-SQL
-insert into tche (IDTTYPTCHE, IDTAGT, STT, DATDMD, DATRLS, MODDCL, ADRIMP, PRM1, PRM2) values ('TRT8005', 'M23361', '', to_date('17-01-2019', 'dd-mm-yyyy'), to_date(null), 'R', 'LPT1', $pIdtFac , 'D');
+insert into tche (IDTTYPTCHE, IDTAGT, STT, DATDMD, DATRLS, MODDCL, ADRIMP, PRM1, PRM2) 
+values ('TRT8005', 'M23361', '', to_date('17-01-2019', 'dd-mm-yyyy'), to_date(null), 'R', 'LPT1', $pIdtFac , 'D');
 END-SQL
 #Else
   !Recuperation des param�tres
   INPUT $user maxlen={MAX_USER_LEN} type=char noprompt
   INPUT $mode max_len=1 type=char noprompt
-  !INPUT $IMP noprompt 
-  !INPUT $pIdtFac type=char noprompt
-  ! INPUT $RepGeneration noprompt
   INPUT $RepGeneration noprompt
   INPUT $RepGenerationfic noprompt
 
@@ -85,6 +76,7 @@ END-SQL
   Do Main
   do MSG_Ecrire ('MSG_FIN', #Rst)
 END-PROGRAM
+
 
 !--------------------------------------------------------------------------------
 ! Procedure : Main
@@ -177,13 +169,14 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
 
   IF not ISNULL(&PRM1)  ! facture interm�diaire  ou manuelle
     let #IdtFac = &PRM1  
-    show 'PRM1' &PRM1
+    show 'PRM1: ' &PRM1
     Do FctMnl (#IdtFac,#ValFctMnlUtl,$ValChp13,$IdtLot)
     EVALUATE #ValFctMnlUtl
 		  when = 1   ! Facture manuelle / devis
         Do Rech_Num_Report(#Num)
         let #_facsrv = 0
         Do cntoprFacFromClt(#idtfac, $IdtCntOprFil)
+        ! Do cntoprinfoHLT(#idtfac, $IdtCntOprFil)
         let $FileNam = 'Facture_manuelle_'||$IdtCntOprFil||'_'||&CODE_CLIENT||'_'||to_char(#Num) ||'_FAC_' || &numfct2 ||'.PDF'
         let $ReportName1 = $RepGeneration ||'\'||$FileNam
         NEW-REPORT $ReportName1
@@ -211,6 +204,7 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
             !Do cntoprinfo($vIdtLotFac, $IdtCntOprFil) !vu que c'est une facture hors lot, �a ne peut que retourner "null"
             !let #IdtFac = &NUMFCT2
             Do cntoprFacFromClt(#idtfac, $IdtCntOprFil)
+            ! Do cntoprinfoHLT(#idtfac, $IdtCntOprFil)
             let $date = edit ($current-date,'YYYYMMDD')
             let $file_name_root = 'REIMPSRV_'||$IdtCntOprFil||'_'||&CODE_CLIENT||'_'||&NUMFCT2||'_'||$date||'_'||to_char(#Num)
             
@@ -240,13 +234,6 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
             else
             let $file_name= $file_name_root ||'_'|| $valChp13 || '.txt'
             let $file_TxtPathf = $RepGenerationfic||'\'||$file_name
-
-            !let $file_namef2 = $file_name_root ||'_F2.txt'
-            !let $_filetxtF1 = $file_name_root ||'_F1.txt'
-            !let $_filetxtF2 = $file_name_root ||'_F2.txt'
-            !let $file_TxtPathf1 = $RepGenerationfic||'\'||$file_namef1
-            !let $file_TxtPathf2 = $RepGenerationfic||'\'||$file_namef2    
-            							
 
             ! on g�n�re le fichier F1 ou F2 en fonction de la variable $valchp13
             open $file_TxtPathf as 3 for-writing record=32767:vary status=#filestate
@@ -283,11 +270,6 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
       
       ! test sur le centre op�rationel pour la facture F3 
       if $IdtCntOprfil <> '00'
-      !if not ISNULL ($IdtCntOprfil)
-      !if $IdtCntOprfil in ('42')
-      !if $IdtCntOprfil = '40'
-      !if $IdtCntOprfil = '42' !pour test
-      !if $IdtCntOprfil = '43' or $IdtCntOprfil = '32' !pour la production
       
             let $file_namef3 = $file_name_root ||'_F3.txt'
             let $file_namef2 = $file_name_root ||'_F3_EX_F2.txt'
@@ -425,109 +407,6 @@ END-SELECT
 END-PROCEDURE
 
 
-BEGIN-PROCEDURE InsTche
-  do MSG_DefinirLocalisation ('{TRT}_INSTCHE')
-  do MSG_DefinirRequeteCourante ('DELETE TCHE')
-  BEGIN-SQL on-error=SQL_Erreur
-    delete TCHE where IdtTypTche = {IDTTYPTCHE_LSTRTG_FAC} and IdtAgt = $user and ModDcl = $Mode and (Stt is null or Stt = 'C')
-  END-SQL
-  do MSG_DefinirRequeteCourante ('INSERT INTO TCHE')
-  BEGIN-SQL on-error=SQL_Erreur
-    insert into TCHE (IdtTypTche,
-                      IdtAgt,
-                      ModDcl,
-                      DatDmd,
-                      DatPrv,
-                      Prm1,
-                      Prm2,
-                      AdrImp,
-                      NbrEnt)
-              values ({IDTTYPTCHE_LSTRTG_FAC},
-                      $user,
-                      $Mode,
-                      &DatDmdDat,
-                      &DatPrv,
-                      &IdtLotRtg,
-                      &IdtSousLotRtg,
-                      &AdrImp,
-                      #NbrFac)
-  END-SQL
-END-PROCEDURE
-
-!---------------------------------------------------------------------------------
-!-- Procedure : FctMnt
-!-- Objectif : la facture est-elle imprimable en manuel ou pas !
-!---------------------------------------------------------------------------------
-
-begin-procedure FctMnl(#IdtFac,:#ValFctMnlUtl, :$ValChp13, :$IdtLot)
-  do MSG_DefinirLocalisation ('{TRT}_FCTMNL')
-BEGIN-SELECT  
-TYPFCT.FctMnlUtl &FctMnlUtl
-	let #ValFctMnlUtl = &FctMnlUtl
-decode(nvl(AVTCTR.Chp13,0),0,'F1','F2') &chp13
-	let $ValChp13 = &chp13
-FAC.IdtLotFac &IdtLot
-		let $IdtLot = &IdtLot
-FROM FAC, TYPFCT, CTRFAC, AVTCTR
-WHERE FAC.IdtFac = #IdtFac
-  AND FAC.IdtTypFct = TYPFCT.IdtTypFct
-  AND Fac.IdtFac = CtrFac.IdtFac(+)
-  AND CtrFac.IdtCtr = AvtCtr.IdtCtr(+)
-  AND CtrFac.NumAvn = AvtCtr.NumAvn(+)
-END-SELECT
-END-PROCEDURE  ! Fctmnl
-
-!---------------------------------------------------------------------------------
-!-- Procedure : cntoprinfo
-!-- Objectif : idtcntopr pour l'appellation du fichier
-!---------------------------------------------------------------------------------
-
-begin-procedure cntoprinfo($vIdtLotFac, :$P5_IdtCntOpr)
-begin-select
-LOTFAC.IdtCntOpr &IdtCntOpr
-	let $P5_IdtCntOpr = &IdtCntOpr
-From LOTFAC
-  where LOTFAC.IdtLotFac = $vIdtLotFac
-end-select
-end-procedure
-
-!---------------------------------------------------------------------------------
-!-- Procedure : cntoprinfoHLT
-!-- Objectif : idtcntopr pour l'appellation du fichier
-!---------------------------------------------------------------------------------
-
-begin-procedure cntoprinfoHLT(#IdtFac, :$P5_IdtCntOpr)
-Begin-select 
-IdtCntOpr &IdtCntOpr
-  let $P5_IdtCntOpr = &IdtCntOpr
-From FAC
-  where IdtFac = #IdtFac 
-End-select 
- ! show 'cntoprhlt' &IdtCntOpr
-end-procedure
-
-!---------------------------------------------------------------------------------
-!-- Procedure : infcntopr
-!-- Objectif : inions necessaires pour le rapport de g�n�ration
-!---------------------------------------------------------------------------------
-
-begin-procedure infcntopr($vIdtLotFac, :$P1_IdtCntOpr, :$P2_lib, :$P3_datdbtprd, :$P4_datfinprd)
-
-begin-select 
-lotfac.idtcntopr &IdtCntOpr
-	let $P1_IdtCntOpr = &IdtCntOpr
-cntopr.lib &lib
-	let $P2_lib = &lib
-lotfac.datdbtprd &datdbtprd
-	let $P3_datdbtprd = &datdbtprd
-lotfac.datfinprd &datfinprd
-	let $P4_datfinprd = &datfinprd
-from lotfac, cntopr
-where lotfac.idtcntopr = cntopr.idtcntopr
-  and lotfac.idtlotfac = $vIdtLotFac
-end-select
-  
-end-procedure
 
 !---------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------
@@ -571,62 +450,11 @@ ALG_ARTFSC(FacAlg.AdrStr10, FacAlg.IdtCntOpr) &artfscrglfct
 STR.telrns &telrns !numero de telephone de l'agence
 	let $_ZZ28 = &telrns
 FacAlg.AdrStr10 &commune 
-!test tipaza alger
-!Ltrim(rtrim(substr(FacAlg.AdrLbr,
-!                         1,
-!                         case
-!                           when substr(FacAlg.adrstr10, 1, 2) = '16' then
-!                            instr(upper(FacAlg.AdrLbr), 'ALGER', -1)
-!                           when substr(FacAlg.adrstr10, 1, 2) = '42' then
-!                            instr(upper(FacAlg.AdrLbr), 'TIPAZA', -1)
-!                         end - 2))) || case
-!        when substr(FacAlg.adrstr10, 1, 2) = '16' then
-!         ' - ALGER'
-!        when substr(FacAlg.adrstr10, 1, 2) = '42' then
-!         ' - TIPAZA'
-!      end &ZZ34
 substr(FacAlg.adrlbr, 1, instr(FacAlg.adrlbr, Chr(13) || chr(10), -1) - 1) ||  ' - ' || replace(substr(FacAlg.adrlbr, instr(FacAlg.adrlbr, Chr(13) || chr(10), -1)), Chr(13) || chr(10),'')  &ZZ34  	                                                                                         
- !Ltrim(rtrim(substr(FacAlg.AdrLbr,1,instr(upper(FacAlg.AdrLbr), 'ALGER', -1) - 3))) &ZZ34		! pntcpg.adrlbr     
-	!let #pos = instr(&ZZ34,'ALGER',1)-3                                                                          
-	!let $adr = substr(&ZZ34,1,#pos)||' - ALGER'  
-	!if substr(&commune, 1, 2) = '16'                                                                 
-  !let $adr = &ZZ34||' - ALGER' 
-  !else 
-  !let $adr = &ZZ34||' - TIPAZA' 
-  !end-if                                                                                 
-	let $_ZZ34 = &ZZ34	 
+ 	let $_ZZ34 = &ZZ34	 
 	                                                                                          
- !FacAlg.AdrLbrClt &Z92 		                                                                                    
- !Ltrim(rtrim(substr(FacAlg.AdrLbrClt,1,instr(upper(FacAlg.AdrLbrClt), 'ALGER', -1) - 3))) &Z92		! pntcpg.adrlbr 
-!Ltrim(rtrim(substr(FacAlg.AdrLbr,
-!                         1,
-!                         case
-!                           when substr(FacAlg.adrstr10, 1, 2) = '16' then
-!                            instr(upper(FacAlg.AdrLbr), 'ALGER', -1)
-!                           when substr(FacAlg.adrstr10, 1, 2) = '42' then
-!                            instr(upper(FacAlg.AdrLbr), 'TIPAZA', -1)
-!                         end - 2))) || case
-!        when substr(FacAlg.adrstr10, 1, 2) = '16' then
-!         ' - ALGER'
-!        when substr(FacAlg.adrstr10, 1, 2) = '42' then
-!         ' - TIPAZA'
-!      end &Z92     
 substr(FacAlg.AdrLbrClt, 1, instr(FacAlg.AdrLbrClt, Chr(13) || chr(10), -1) - 1) ||  ' - ' || replace(substr(FacAlg.AdrLbrClt, instr(FacAlg.AdrLbrClt, Chr(13) || chr(10), -1)), Chr(13) || chr(10),'')  &Z92   
-	!let #pos = instr(&Z92,'ALGER',1)-3                                                                           
-	!let $adr = substr(&Z92,1,#pos)||' - ALGER'  
-	!if substr(&commune, 1, 2) = '16'                                                                        
-	!let $adr = &Z92||' - ALGER'  
-	!else
-	!let $adr = &Z92||' - TIPAZA' 
-	!end-if                                                                                   
 	let $_Z92 = &Z92                                                                                              
- !FacAlg.Z14 &Z14 ! date de facturation  
-  
- 
- 
- 
- 
- 
 to_char(FacAlg.Z14,'DD/MM/YYYY') &Z14
 	let $_Z14 = &Z14
 FacAlg.Z16 &Z16 !cycle de facturation
@@ -634,19 +462,8 @@ FacAlg.Z16 &Z16 !cycle de facturation
   let $_ZZ20 = &Z16
 FacAlg.ZZ36 &ZZ36 !idtcltdst
 	let $_ZZ36 = &ZZ36
-!FacCnsAlg.Z19 &Z19 ! num�ro de compteur
-!	let $_Z19 = &Z19
-!	let $_ZZ37 = 'Compteur N�:'||&Z19
-!FacCnsAlg.Z21 &Z21			! ancien index relev�
-!	let $_Z21 = ltrim(edit(&Z21,'999999999999'),' ')
-!	let $_ZZ39 = ltrim(edit(&Z21,'999999999999'),' ')
 FacAlg.lib &ZZ22 !cntopr.lib
 	let $_ZZ22 = &ZZ22
-!FacCnsAlg.Z23 &Z23 		! nouveau index relev�
-!	let $_Z23 = ltrim(edit(&Z23,'999999999999'),' ')
-!	let $_ZZ41 = ltrim(edit(&Z23,'999999999999'),' ')
-!FacCnsAlg.Z25 &Z25 					! consommation en metre cube
-!	let $_Z25 = ltrim(edit(&Z25,'999999999999'),' ')
 FacAlg.Z27 &Z27 		! type d''abonnement
 	let $_Z27 = &Z27
 FacAlg.Z29 &Z29 ! nombre de m�nages par rapport au code type de contrat
@@ -660,8 +477,6 @@ nvl(FacAlg.Z86,0) &Z86 ! montant sur valeur ajout�e MntTva de la facture
 nvl(FacAlg.Z97,0) &Z97 					! Montant de la facture
 	let $_Z97 = ltrim(edit(&Z97,'999999999999.99'),' ')
 FacAlg.Z99 &Z99 					! Solde Exigible Ant�rieur de la facture
-	! let $_Z99 = ltrim(edit(&Z99,'999999999999.99'),' ')
-	! let $_ZZ84 = ltrim(edit(&Z99,'999999999999.99'),' ')
 	
   do Solde_Date($_idtcltssc, &Z14) 
   show 'Solde Date' &_Solde
@@ -680,13 +495,6 @@ FacAlg.Z103 &Z103 ! calcul du timbre fiscal(payement en esp�ce)
 	let #_netplustimbre1 = $_netplustimbre!ltrim(edit(&Z101+&Z103,'999999999999.99'),' ')
 FacAlg.Z105 &Z105 ! montant � payer pour le modele de facture F1                  
 	let $_Z105 = ltrim(edit(&Z105,'999999999999.99'),' ')
-	!modification e-paiment
-	!FacAlg.datexg &datcal
-	!let #_datcal = to_char((&datcal),'DDMMYY')
-	!let $_datcal = (substr(to_char(FacAlg.datexg,'DD/MM/YYYY'), 1, 2))||(Substr(to_char(FacAlg.datexg,'DD/MM/YYYY'), 4, 2))||(substr(to_char(FacAlg.datexg,'DD/MM/YYYY'), 9, 2))
-!to_char(FacAlg.datexg,'DDMMYY') &net 
- ! let $_dat = &net
-	!let #_datcal = LTRIM((lpad( (substr($_dat,1,2)||substr($_dat,4,2)||substr($_dat,9,2)),6,'0')),'.0' )
 	if &Z101 > 0
 ! FNE: GEN_CLE_CLT(FacAlg.Z90,FacAlg.Z101,FacAlg.DATVALCLE) &cleclient  !ltrim((&Z101+&Z103)*100) /to_char((FacAlg.datexg),'DD/MM/YYYY')
 ! GEN_CLE_CLT(605201, 41531, 090913) &cleclient
@@ -722,8 +530,6 @@ FacAlg.Z36 &Z36 !idtclt
 	DO DETCNS (&idtfac, &idtpntlvr, &idtpntcpg)	
 	do Prev_fac(&idtfac, $_idtcltssc) 
 	
-	 !show  &idtfac ';' &Z36  ' -->'   &_datclcprc
-	 
 	!Insertion dans le fichier texte des zones retir�es de la BdD
 FacAlg.Chp13 &chp13 !0 pour g�n�rer F1 et 1 pour g�n�rer F2
 to_char(FacAlg.DatLctPrc,'DD/MM/YYYY') &DatLctPrc    
@@ -780,26 +586,14 @@ end-select
 
 end-procedure !SelFac
 
-begin-Procedure Solde_Date($pidtclt, $pdate)
-begin-select
-sum(Sld) &_Solde 
- let $_Solde = &_Solde
-from SLDOPR_VIEW1 
-where IdtClt=$pIdtClt 
-and datdeb<=to_date($pdate, 'DD/MM/YYYY')
-end-select 
 
-End-Procedure
 
 begin-Procedure Prev_fac(#idtfac, $pidtclt)
 
  !on recherche la date de la derni�re facture
- !alg_fac_F3.numfct
- !alg_fac_F3.Z14
 begin-select
 to_char(prev_fac.datclcprc,'DD/MM/YYYY') &_datclcprc
   let $_datclcprc = &_datclcprc
- !show '_datclcprc'   &_datclcprc
 from 
 (select idtfac,lag(datclc, 1) over(order by idtfac) datclcprc 
 from X7.fac where idtclt = $pidtclt and idttypfct = '1' and numfct <> '1') prev_fac
@@ -861,61 +655,11 @@ ALG_ARTFSC(FacAlg.AdrStr10, FacAlg.IdtCntOpr) &artfscrglfct
 STR.telrns &telrns !numero de telephone de l'agence
 	let $_ZZ28 = &telrns
 FacAlg.AdrStr10 &commune 	
-	
-	
-	
-!test tipaza alger
-!Ltrim(rtrim(substr(FacAlg.AdrLbr,
-!                         1,
-!                         case
-!                           when substr(FacAlg.adrstr10, 1, 2) = '16' then
-!                            instr(upper(FacAlg.AdrLbr), 'ALGER', -1)
-!                           when substr(FacAlg.adrstr10, 1, 2) = '42' then
-!                            instr(upper(FacAlg.AdrLbr), 'TIPAZA', -1)
-!                         end - 2))) || case
-!        when substr(FacAlg.adrstr10, 1, 2) = '16' then
-!         ' - ALGER'
-!        when substr(FacAlg.adrstr10, 1, 2) = '42' then
-!         ' - TIPAZA'
-!      end &ZZ34	
 substr(FacAlg.adrlbr, 1, instr(FacAlg.adrlbr, Chr(13) || chr(10), -1) - 1) ||  ' - ' || replace(substr(FacAlg.adrlbr, instr(FacAlg.adrlbr, Chr(13) || chr(10), -1)), Chr(13) || chr(10),'')  &ZZ34                                                                                           
- !Ltrim(rtrim(substr(FacAlg.AdrLbr,1,instr(upper(FacAlg.AdrLbr), 'ALGER', -1) - 3))) &ZZ34		! pntcpg.adrlbr     
-	!let #pos = instr(&ZZ34,'ALGER',1)-3                                                                          
-	!let $adr = substr(&ZZ34,1,#pos)||' - ALGER'  
-	!if substr(&commune, 1, 2) = '16'                                                                 
-  !let $adr = &ZZ34||' - ALGER' 
-  !else 
-  !let $adr = &ZZ34||' - TIPAZA' 
-  !end-if                                                                                 
 	let $_ZZ34 = &ZZ34	 
 	                                                                                          
- !FacAlg.AdrLbrClt &Z92 		                                                                                    
- !Ltrim(rtrim(substr(FacAlg.AdrLbrClt,1,instr(upper(FacAlg.AdrLbrClt), 'ALGER', -1) - 3))) &Z92		! pntcpg.adrlbr 
-!Ltrim(rtrim(substr(FacAlg.AdrLbr,
-!                         1,
-!                         case
-!                           when substr(FacAlg.adrstr10, 1, 2) = '16' then
-!                            instr(upper(FacAlg.AdrLbr), 'ALGER', -1)
-!                           when substr(FacAlg.adrstr10, 1, 2) = '42' then
-!                            instr(upper(FacAlg.AdrLbr), 'TIPAZA', -1)
-!                         end - 2))) || case
-!        when substr(FacAlg.adrstr10, 1, 2) = '16' then
-!         ' - ALGER'
-!        when substr(FacAlg.adrstr10, 1, 2) = '42' then
-!         ' - TIPAZA'
-!      end &Z92     
 substr(FacAlg.AdrLbrClt, 1, instr(FacAlg.AdrLbrClt, Chr(13) || chr(10), -1) - 1) ||  ' - ' || replace(substr(FacAlg.AdrLbrClt, instr(FacAlg.AdrLbrClt, Chr(13) || chr(10), -1)), Chr(13) || chr(10),'')  &Z92   
-	!let #pos = instr(&Z92,'ALGER',1)-3                                                                           
-	!let $adr = substr(&Z92,1,#pos)||' - ALGER'  
-	!if substr(&commune, 1, 2) = '16'                                                                        
-	!let $adr = &Z92||' - ALGER'  
-	!else
-	!let $adr = &Z92||' - TIPAZA' 
-	!end-if                                                                                   
 	let $_Z92 = &Z92                                                                                              
- !FacAlg.Z14 &Z14 ! date de facturation  
- 
- 
 to_char(FacAlg.Z14,'DD/MM/YYYY') &Z14
 	let $_Z14 = &Z14
 FacAlg.Z16 &Z16 !cycle de facturation
@@ -923,19 +667,8 @@ FacAlg.Z16 &Z16 !cycle de facturation
   let $_ZZ20 = &Z16
 FacAlg.ZZ36 &ZZ36 !idtcltdst
 	let $_ZZ36 = &ZZ36
-!FacCnsAlg.Z19 &Z19 ! num�ro de compteur
-!	let $_Z19 = &Z19
-!	let $_ZZ37 = 'Compteur N�:'||&Z19
-!FacCnsAlg.Z21 &Z21			! ancien index relev�
-!	let $_Z21 = ltrim(edit(&Z21,'999999999999'),' ')
-!	let $_ZZ39 = ltrim(edit(&Z21,'999999999999'),' ')
 FacAlg.lib &ZZ22 !cntopr.lib
 	let $_ZZ22 = &ZZ22
-!FacCnsAlg.Z23 &Z23 		! nouveau index relev�
-!	let $_Z23 = ltrim(edit(&Z23,'999999999999'),' ')
-!	let $_ZZ41 = ltrim(edit(&Z23,'999999999999'),' ')
-!FacCnsAlg.Z25 &Z25 					! consommation en metre cube
-!	let $_Z25 = ltrim(edit(&Z25,'999999999999'),' ')
 FacAlg.Z27 &Z27 		! type d''abonnement
 	let $_Z27 = &Z27
 FacAlg.Z29 &Z29 ! nombre de m�nages par rapport au code type de contrat
@@ -2330,49 +2063,6 @@ BEGIN-PROCEDURE Maj_SousLotRtg ($IdtLotRtg, $IdtSousLotRtg)
   END-SQL
 END-PROCEDURE
 
-!-------------------------------------------------------------------------------
-!-- Procedure : Maj_SousLotRtg
-!-- Objectif : Mise � jour de la date d'impression du sous lot de routage
-!-------------------------------------------------------------------------------
-
-BEGIN-PROCEDURE Maj_OPR (#IdtOpr)
-	 do MSG_DefinirLocalisation ('{TRT}_Maj_OPR')
-   do MSG_DefinirRequeteCourante ('UPDATE OPR')
-   BEGIN-SQL  on-error=SQL_Erreur
-    UPDATE OPR
-      set DatImp = sysdate
-	 WHERE IdtOpr = #IdtOpr
-  END-SQL
-END-PROCEDURE
-
-!-------------------------------------------------------------------------------
-!-- Procedure : Maj_Tche
-!-- Objectif : Mise � jour de l'�tat de la t�che: $stt
-!-------------------------------------------------------------------------------
-
-BEGIN-PROCEDURE Maj_Tche ($rowid, $stt, #NbrEnt)
-	 do MSG_DefinirLocalisation ('{TRT}_MAJTCHE')
-   do MSG_DefinirRequeteCourante ('UPDATE TCHE set STT = $stt, DATRLS = SYSDATE WHERE ROWID = &ROWID')
-   BEGIN-SQL  on-error=SQL_Erreur
-    UPDATE TCHE set STT = $stt, DATRLS = SYSDATE, NBRENT = #_NbrFac
-	 WHERE ROWID = $rowid
-  END-SQL
-END-PROCEDURE
-
-!-----------------------------------------------------------------------
-!-- Procedure : Rech_Num_Report 
-!-- Objectif : Recherche du dernier num�ro de rapport attribu�
-!-----------------------------------------------------------------------
-
-Begin-procedure Rech_Num_Report(:#P1_Num_rpt)
-	do MSG_DefinirLocalisation ('{TRT}_RECHNUMREPORT')
-Begin-Select
-seq_rpt.nextval &num_rpt
- let #P1_Num_rpt = &num_rpt
-from dual
-End-Select
-End-Procedure
-
 
 BEGIN-PROCEDURE DETCNS (#idtfac, #idtpntlvr, #idtpntcpg)
 ! on r�cup�re d'abord la somme des consommations au cas o�
@@ -2603,60 +2293,12 @@ ALG_ARTFSC(FacAlg.AdrStr10, FacAlg.IdtCntOpr) &artfscrglfct
 STR.telrns &telrns !numero de telephone de l'agence                                                             
 	let $_ZZ28 = &telrns 
 FacAlg.AdrStr10 &commune
-	 !test tipaza alger
-!Ltrim(rtrim(substr(FacAlg.AdrLbr,
-!                         1,
-!                         case
-!                           when substr(FacAlg.adrstr10, 1, 2) = '16' then
-!                            instr(upper(FacAlg.AdrLbr), 'ALGER', -1)
-!                           when substr(FacAlg.adrstr10, 1, 2) = '42' then
-!                            instr(upper(FacAlg.AdrLbr), 'TIPAZA', -1)
-!                         end - 2))) || case
-!        when substr(FacAlg.adrstr10, 1, 2) = '16' then
-!         ' - ALGER'
-!        when substr(FacAlg.adrstr10, 1, 2) = '42' then
-!         ' - TIPAZA'
-!      end &ZZ34	 
 substr(FacAlg.adrlbr, 1, instr(FacAlg.adrlbr, Chr(13) || chr(10), -1) - 1) ||  ' - ' || replace(substr(FacAlg.adrlbr, instr(FacAlg.adrlbr, Chr(13) || chr(10), -1)), Chr(13) || chr(10),'')  &ZZ34                                                                                        
- !Ltrim(rtrim(substr(FacAlg.AdrLbr,1,instr(upper(FacAlg.AdrLbr), 'ALGER', -1) - 3))) &ZZ34		! pntcpg.adrlbr     
-	!let #pos = instr(&ZZ34,'ALGER',1)-3                                                                          
-	!let $adr = substr(&ZZ34,1,#pos)||' - ALGER'  
-	!if substr(&commune, 1, 2) = '16'                                                                 
-  !let $adr = &ZZ34||' - ALGER' 
-  !else 
-  !let $adr = &ZZ34||' - TIPAZA' 
-  !end-if                                                                                 
 	let $_ZZ34 = &ZZ34	 
-	                                                                                          
- !FacAlg.AdrLbrClt &Z92 		                                                                                    
- !Ltrim(rtrim(substr(FacAlg.AdrLbrClt,1,instr(upper(FacAlg.AdrLbrClt), 'ALGER', -1) - 3))) &Z92		! pntcpg.adrlbr 
- !Ltrim(rtrim(substr(FacAlg.AdrLbr,
- !                        1,
- !                        case
- !                          when substr(FacAlg.adrstr10, 1, 2) = '16' then
- !                           instr(upper(FacAlg.AdrLbr), 'ALGER', -1)
- !                          when substr(FacAlg.adrstr10, 1, 2) = '42' then
- !                           instr(upper(FacAlg.AdrLbr), 'TIPAZA', -1)
- !                        end - 2))) || case
- !       when substr(FacAlg.adrstr10, 1, 2) = '16' then
- !        ' - ALGER'
- !       when substr(FacAlg.adrstr10, 1, 2) = '42' then
- !        ' - TIPAZA'
- !     end &Z92     
 substr(FacAlg.AdrLbrClt, 1, instr(FacAlg.AdrLbrClt, Chr(13) || chr(10), -1) - 1) ||  ' - ' || replace(substr(FacAlg.AdrLbrClt, instr(FacAlg.AdrLbrClt, Chr(13) || chr(10), -1)), Chr(13) || chr(10),'')  &Z92
-	!let #pos = instr(&Z92,'ALGER',1)-3                                                                           
-	!let $adr = substr(&Z92,1,#pos)||' - ALGER'  
-	!if substr(&commune, 1, 2) = '16'                                                                        
-	!let $adr = &Z92||' - ALGER'  
-	!else
-	!let $adr = &Z92||' - TIPAZA' 
-	!end-if                                                                                   
 	let $_Z92 = &Z92                                                                                              
- !FacAlg.Z14 &Z14 ! date de facturation  
-                                                                  
 to_char(FacAlg.Z14,'DD/MM/YYYY') &Z14                                                                           
 	let $_Z14 = &Z14  
-!FacAlg.Z14 + 28 &Z1435 !bily                                                                           
 to_char((FacAlg.datexg),'DD/MM/YYYY') &Z14351                                                                         
   let $_Z1435 = &Z14351                                                                
 FacAlg.Z16 &Z16 !cycle de facturation                                                                           
@@ -2677,19 +2319,8 @@ FacAlg.T1 &T1
   else 
     let $_orgp = '0' ! pour afficher le client suscrirteur
   end-if	                                                                                       
-!FacCnsAlg.Z19 &Z19 ! num�ro de compteur                                                                        
-!	let $_Z19 = &Z19                                                                                              
-!	let $_ZZ37 = 'Compteur N�:'||&Z19                                                                             
-!FacCnsAlg.Z21 &Z21			! ancien index relev�                                                                   
-!	let $_Z21 = ltrim(edit(&Z21,'999999999999'),' ')                                                              
-!	let $_ZZ39 = ltrim(edit(&Z21,'999999999999'),' ')                                                             
 FacAlg.lib &ZZ22 !cntopr.lib                                                                                    
 	let $_ZZ22 = &ZZ22                                                                                            
-!FacCnsAlg.Z23 &Z23 		! nouveau index relev�                                                                  
-!	let $_Z23 = ltrim(edit(&Z23,'999999999999'),' ')                                                              
-!	let $_ZZ41 = ltrim(edit(&Z23,'999999999999'),' ')                                                             
-!FacCnsAlg.Z25 &Z25 					! consommation en metre cube                                                      
-!	let $_Z25 = ltrim(edit(&Z25,'999999999999'),' ')                                                              
 FacAlg.Z27 &Z27 		! type d''abonnement                                                                        
 	let $_Z27 = &Z27                                                                                              
 FacAlg.Z29 &Z29 ! nombre de m�nages par rapport au code type de contrat                                         
@@ -2703,9 +2334,6 @@ nvl(FacAlg.Z86,0) &Z86 ! montant sur valeur ajout�e MntTva de la facture
 nvl(FacAlg.Z97,0) &Z97 					! Montant de la facture                                                         
 	let $_Z97 = ltrim(edit(&Z97,'999999999999.99'),' ')                                                           
 FacAlg.z99 &Z99 					! Solde Exigible Ant�rieur de la facture                                              
-	! let $_Z99 = ltrim(edit(&Z99,'999999999999.99'),' ')                                                           
-	! let $_ZZ84 = ltrim(edit(&Z99,'999999999999.99'),' ')    
-  
   do Solde_Date($_idtcltssc, &Z14) 
   show 'Solde Date' &_Solde
   let $_Z99 = ltrim(edit(&_Solde,'999999999999.99'),' ')
@@ -2725,11 +2353,6 @@ FacAlg.Z103 &Z103 ! calcul du timbre fiscal(payement en esp�ce)
 FacAlg.Z105 &Z105 ! montant � payer pour le modele de facture F1                                                  
 	let $_Z105 = ltrim(edit(&Z105,'999999999999.99'),' ')  
 	
-	!modification e-paiment
-!FacAlg.datexg &datcal
-!to_char(FacAlg.datexg,'DD/MM/YYYY') &net 
-	!let $_dat = &net 
-	!let #_datcal = LTRIM((lpad( (substr($_dat,1,2)||substr($_dat,4,2)||substr($_dat,9,2)),6,'0')),'.0' )
 	if &Z101 > 0
 ! FNE: GEN_CLE_CLT(FacAlg.Z90,FacAlg.Z101,FacAlg.DATVALCLE) &cleclient  !ltrim((&Z101+&Z103)*100) /to_char((FacAlg.datexg),'DD/MM/YYYY')
 !GEN_CLE_CLT(605201, 41531, 090913) &cleclient
@@ -2766,9 +2389,7 @@ FacAlg.Z36 &Z36 !idtclt
 	!let $_Z36 = &Z36 	  
 	  DO DETCNSF3 (&idtfac, &idtpntlvr, &idtpntcpg)                                                                
 	  Do Prev_fac(&idtfac, $_idtcltssc)                                                                                    
-	                                                                                                              
-	 !show  &idtfac ';' &Z36  ' -->'   &_datclcprc                                                                
-                                                                                                             
+	                                                                                                           
 	!Insertion dans le fichier texte des zones retir�es de la BdD                                                                                                     
 to_char(FacAlg.DatLctPrc,'DD/MM/YYYY') &DatLctPrc                                                               
                                                                                                                 
@@ -2808,9 +2429,6 @@ FacAlg.NbrExp &NbrExp
 	! Mise a jour de la date d'impression sur l'operation                                                         
 	do Maj_OPR(&IdtOpr)  
 	! FNE: do SendSMS(#idtfac)                                                                                         
-	!show &idtfac                                                                                                 
-	!show &Z36                                                                                                    
-  !show '$_Whr SELFACF3' $_Whr                                                                                                           
 from x7.alg_fac_F3 FacAlg, x7.ALG_CPTBNC, x7.STR, x7.LOTRTG, x7.SOUSLOTRTG, x7.RTG                                                   
  where FacAlg.IdtLotFac = $vIdtLotFac                                                                           
 	and  FacAlg.IdtCntOpr = ALG_CPTBNC.IdtCntOpr                                                                  
@@ -2824,7 +2442,6 @@ from x7.alg_fac_F3 FacAlg, x7.ALG_CPTBNC, x7.STR, x7.LOTRTG, x7.SOUSLOTRTG, x7.R
   [$_Whr]                                                                                                       
 order by IDTTRNTYP, RNG1                                                                                        
 end-select                                                                                                      
-                                                                                                                
 end-procedure !SelFacF3
 
 
@@ -3815,61 +3432,13 @@ ALG_ARTFSC(FacAlg.AdrStr10, FacAlg.IdtCntOpr) &artfscrglfct
 STR.telrns &telrns !numero de telephone de l'agence
 	let $_ZZ28 = &telrns
 FacAlg.AdrStr10 &commune	
-	 !test tipaza alger
-!Ltrim(rtrim(substr(FacAlg.AdrLbr,
-!                         1,
-!                         case
-!                           when substr(FacAlg.adrstr10, 1, 2) = '16' then
-!                            instr(upper(FacAlg.AdrLbr), 'ALGER', -1)
-!                           when substr(FacAlg.adrstr10, 1, 2) = '42' then
-!                            instr(upper(FacAlg.AdrLbr), 'TIPAZA', -1)
-!                         end - 2))) || case
-!        when substr(FacAlg.adrstr10, 1, 2) = '16' then
-!         ' - ALGER'
-!        when substr(FacAlg.adrstr10, 1, 2) = '42' then
-!         ' - TIPAZA'
-!      end &ZZ34	 
 substr(FacAlg.adrlbr, 1, instr(FacAlg.adrlbr, Chr(13) || chr(10), -1) - 1) ||  ' - ' || replace(substr(FacAlg.adrlbr, instr(FacAlg.adrlbr, Chr(13) || chr(10), -1)), Chr(13) || chr(10),'')  &ZZ34                                                                                          
- !Ltrim(rtrim(substr(FacAlg.AdrLbr,1,instr(upper(FacAlg.AdrLbr), 'ALGER', -1) - 3))) &ZZ34		! pntcpg.adrlbr     
-	!let #pos = instr(&ZZ34,'ALGER',1)-3                                                                          
-	!let $adr = substr(&ZZ34,1,#pos)||' - ALGER'  
-	!if substr(&commune, 1, 2) = '16'                                                                 
-  !let $adr = &ZZ34||' - ALGER' 
-  !else 
-  !let $adr = &ZZ34||' - TIPAZA' 
-  !end-if                                                                                 
 	let $_ZZ34 = &ZZ34	 
 	                                                                                          
- !FacAlg.AdrLbrClt &Z92 		                                                                                    
- !Ltrim(rtrim(substr(FacAlg.AdrLbrClt,1,instr(upper(FacAlg.AdrLbrClt), 'ALGER', -1) - 3))) &Z92		! pntcpg.adrlbr 
-!Ltrim(rtrim(substr(FacAlg.AdrLbr,
-!                         1,
-!                         case
-!                           when substr(FacAlg.adrstr10, 1, 2) = '16' then
-!                            instr(upper(FacAlg.AdrLbr), 'ALGER', -1)
-!                           when substr(FacAlg.adrstr10, 1, 2) = '42' then
-!                            instr(upper(FacAlg.AdrLbr), 'TIPAZA', -1)
-!                         end - 2))) || case
-!        when substr(FacAlg.adrstr10, 1, 2) = '16' then
-!         ' - ALGER'
-!        when substr(FacAlg.adrstr10, 1, 2) = '42' then
-!         ' - TIPAZA'
-!      end &Z92     
 substr(FacAlg.AdrLbrClt, 1, instr(FacAlg.AdrLbrClt, Chr(13) || chr(10), -1) - 1) ||  ' - ' || replace(substr(FacAlg.AdrLbrClt, instr(FacAlg.AdrLbrClt, Chr(13) || chr(10), -1)), Chr(13) || chr(10),'')  &Z92   
-	!let #pos = instr(&Z92,'ALGER',1)-3                                                                           
-	!let $adr = substr(&Z92,1,#pos)||' - ALGER'  
-	!if substr(&commune, 1, 2) = '16'                                                                        
-	!let $adr = &Z92||' - ALGER'  
-	!else
-	!let $adr = &Z92||' - TIPAZA' 
-	!end-if                                                                                   
 	let $_Z92 = &Z92                                                                                              
- !FacAlg.Z14 &Z14 ! date de facturation  
- 
- 
 to_char(FacAlg.Z14,'DD/MM/YYYY') &Z14
 	let $_Z14 = &Z14
-!FacAlg.Z14 + 28 &Z1435 !bily  
 to_char((FacAlg.datexg),'DD/MM/YYYY') &Z14351                                                                         
   let $_Z1435 = &Z14351 	
 FacAlg.Z16 &Z16 !cycle de facturation
@@ -3890,19 +3459,8 @@ FacAlg.T1 &T1
   else 
     let $_orgp = '0' ! pour afficher le client suscrirteur
   end-if	
-!FacCnsAlg.Z19 &Z19 ! num�ro de compteur
-!	let $_Z19 = &Z19
-!	let $_ZZ37 = 'Compteur N�:'||&Z19
-!FacCnsAlg.Z21 &Z21			! ancien index relev�
-!	let $_Z21 = ltrim(edit(&Z21,'999999999999'),' ')
-!	let $_ZZ39 = ltrim(edit(&Z21,'999999999999'),' ')
 FacAlg.lib &ZZ22 !cntopr.lib
 	let $_ZZ22 = &ZZ22
-!FacCnsAlg.Z23 &Z23 		! nouveau index relev�
-!	let $_Z23 = ltrim(edit(&Z23,'999999999999'),' ')
-!	let $_ZZ41 = ltrim(edit(&Z23,'999999999999'),' ')
-!FacCnsAlg.Z25 &Z25 					! consommation en metre cube
-!	let $_Z25 = ltrim(edit(&Z25,'999999999999'),' ')
 FacAlg.Z27 &Z27 		! type d''abonnement
 	let $_Z27 = &Z27
 FacAlg.Z29 &Z29 ! nombre de m�nages par rapport au code type de contrat
@@ -3961,7 +3519,6 @@ FacAlg.Z36 &Z36 !idtclt
 	do Prev_fac(&idtfac, $_idtcltssc) 
 	 show 'Client: '      &Z36
 	 show 'Facture: '     &idtfac
-	 show 'HLT xxx-->'    $
    
 FacAlg.Chp13 &chp13 !0 pour g�n�rer F1 et 1 pour g�n�rer F2
 
@@ -3996,10 +3553,6 @@ FacAlg.IdtPntCpg &IdtPntCpg
  !Insertion dans le fichier texte des zones retir�es de la BdD
 	let #nb1 = 1               
 	Let #P5_NbrExpLot = #P5_NbrExpLot + &NbrExp
- !to_char(FacAlg.DatLctPrc,'DD/MM/YYYY') &DatLctPrc   
- !  let $_DatLctPrc = &DatLctPrc 
- !to_char(FacAlg.DatLctDrn,'DD/MM/YYYY') &DatLctDrn   
- !	let $_DatLctDrn = &DatLctDrn 
  evaluate &chp13 ! 0 pour F1 et 1 pour F2
 	    when = 0
 	     Do GrapheF3(&idtfac)
@@ -4029,19 +3582,7 @@ end-select
 
 end-procedure !SelFacHltF3
 !DF
-BEGIN-PROCEDURE SendSms(#idtfac)
-begin-SQL
-declare
-result varchar2 (100);;
-begin
-$v :=ALG_KTSMS.SendSMS_HTTP(#idtfac, 2);;
- exception 
-when others then
-null;;
-end;;
-end-SQL   
-commit 
-End-procedure
+
 
 
 !-------------------------------------------------------------------------------
@@ -4182,12 +3723,6 @@ where a.rn <= 10
 where z.idtfac = cns.idtfac (+)
 group by z.idtfac, z.datclc
 order by z.datclc desc, z.idtfac
-
-
 end-select
 
 end-procedure !GrapheF3
-
-
-
-
