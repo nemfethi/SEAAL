@@ -152,7 +152,7 @@ end-procedure
 
 !---------------------------------------------------------------------------------
 !-- Procedure : infcntopr
-!-- Objectif : inions necessaires pour le rapport de gï¿½nï¿½ration
+!-- Objectif : infos necessaires pour le rapport de génération
 !---------------------------------------------------------------------------------
 
 begin-procedure infcntopr($vIdtLotFac, :$P1_IdtCntOpr, :$P2_lib, :$P3_datdbtprd, :$P4_datfinprd)
@@ -173,10 +173,20 @@ end-select
   
 end-procedure
 
-begin-Procedure Solde_Date($pidtclt, $pdate)
+begin-Procedure Solde_Date($pidtclt, $pdate) !Solde du client avant une certaine date
 begin-select
 sum(Sld) &_Solde 
  let $_Solde = &_Solde
+from SLDOPR_VIEW1 
+where IdtClt=$pIdtClt 
+and datdeb<=to_date($pdate, 'DD/MM/YYYY')
+end-select 
+End-Procedure
+
+begin-Procedure Solde_Date2($pidtclt, $pdate, :#solde_date) !Solde du client avant une certaine date version 2
+begin-select
+sum(Sld) &_Solde2 
+ let #solde_date = &_Solde2
 from SLDOPR_VIEW1 
 where IdtClt=$pIdtClt 
 and datdeb<=to_date($pdate, 'DD/MM/YYYY')

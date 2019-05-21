@@ -1,9 +1,6 @@
 
 #include 'REPRTFAC.inc'
 
-
-
-
 #DEFINE IS_TEST 
 
 Begin-Setup
@@ -34,8 +31,7 @@ BEGIN-PROGRAM
   !LET $mode = 'R'
   LET $user = 'M23361'
 	LET $mode = 'R'       
-	LET $pIdtFac = '16398219'       
-	LET $pIdtFac = '9555168'       
+	! LET $pIdtFac = '27242028'       
   !LET $IMP  = ''
   ! LET $RepGeneration = 'c:\temp'
   LET $RepGenerationfic = 'c:\temp'
@@ -178,7 +174,7 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
         Do cntoprFacFromClt(#idtfac, $IdtCntOprFil)
         ! Do cntoprinfoHLT(#idtfac, $IdtCntOprFil)
         let $FileNam = 'Facture_manuelle_'||$IdtCntOprFil||'_'||&CODE_CLIENT||'_'||to_char(#Num) ||'_FAC_' || &numfct2 ||'.PDF'
-        let $ReportName1 = $RepGeneration ||'\'||$FileNam
+        let $ReportName1 = $RepGenerationFic ||'\'||$FileNam
         NEW-REPORT $ReportName1
         Do mainfacman
       break
@@ -190,7 +186,7 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
               Do Rech_Num_Report(#Num)
               let #_facsrv = 1
               let $FileNam = 'Facture_de_service_'||to_char(#Num) ||'_FAC_' || &numfct2 ||'.PDF'
-              let $ReportName1 = $RepGeneration ||'\'||$FileNam
+              let $ReportName1 = $RepGenerationFic ||'\'||$FileNam
               NEW-REPORT $ReportName1
               Do mainfacman
           	end-if
@@ -2344,8 +2340,10 @@ FacAlg.ZZ80 &ZZ80	! montant ï¿½ payer pour le modele de facture F2 sans timbre f
 	Do NBRTOSTRF3(&Z97) 
 	Do MSGPERSOF3(&idtfac)                                                                                           
 	let $_ZZ80 = ltrim(edit(&ZZ80,'999999999999.99'),' ')                                                         
-FacAlg.Z101 &Z101 					! Montant hors taxe                                                                 
-	let $_Z101 = ltrim(edit(&Z101,'999999999999.99'),' ')                                                         
+! FNE : FacAlg.Z101 &Z101 					! Montant hors taxe 
+FACALG.Z97 + &_Solde  &Z101 					! Montant hors taxe 
+	!let $_Z101 = ltrim(edit(&Z101,'999999999999.99'),' ')   
+  !show 'net à payer 1 :' $_Z101                                                      
 FacAlg.Z103 &Z103 ! calcul du timbre fiscal(payement en espï¿½ce)                                                 
 	let $_Z103 = ltrim(edit(&Z103,'999999999999.99'),' ') 
 	let $_netplustimbre = ltrim(edit(&Z101+&Z103,'999999999999.99'),' ')
@@ -3473,14 +3471,15 @@ nvl(FacAlg.Z86,0) &Z86 ! montant sur valeur ajoutï¿½e MntTva de la facture
 	let $_Z86 = ltrim(edit(&Z86,'999999999999.99'),' ')
 nvl(FacAlg.Z97,0) &Z97 					! Montant de la facture
 	let $_Z97 = ltrim(edit(&Z97,'999999999999.99'),' ')
+  show 'Montant Facture: ' $_Z97
 FacAlg.z99 &Z99 					! Solde Exigible Antï¿½rieur de la facture
 	! let $_Z99 = ltrim(edit(&Z99,'999999999999.99'),' ')
 	! let $_ZZ84 = ltrim(edit(&Z99,'999999999999.99'),' ')
   
-  do Solde_Date($_idtcltssc, &Z14) 
-  show 'Solde Date: ' &_Solde
-  let $_Z99 = ltrim(edit(&_Solde,'999999999999.99'),' ')
-	let $_ZZ84 = ltrim(edit(&_Solde,'999999999999.99'),' ')                                                     
+  do Solde_Date2($_idtcltssc, &Z14, #Solde_Date) 
+  show 'Solde Date: ' #Solde_Date
+  let $_Z99 = ltrim(edit(#Solde_Date,'999999999999.99'),' ')
+	let $_ZZ84 = ltrim(edit(#Solde_Date,'999999999999.99'),' ')                                                     
 
 
 FacAlg.ZZ80 &ZZ80	! montant ï¿½ payer pour le modele de facture F2 sans timbre fiscal
@@ -3490,7 +3489,9 @@ FacAlg.ZZ80 &ZZ80	! montant ï¿½ payer pour le modele de facture F2 sans timbre f
 	Do MSGPERSOF3(&idtfac)
 	let $_ZZ80 = ltrim(edit(&ZZ80,'999999999999.99'),' ') 
 FacAlg.Z101 &Z101 					! Montant hors taxe
-	let $_Z101 = ltrim(edit(&Z101,'999999999999.99'),' ')
+!  let $_Z101 = ltrim(edit(&Z101,'999999999999.99'),' ')   
+ let $_Z101 = ltrim(edit(&Z97 + #Solde_Date,'999999999999.99'),' ')   
+  show 'net à payer 2 :' $_Z101
 FacAlg.Z103 &Z103 ! calcul du timbre fiscal(payement en espï¿½ce)
 	let $_Z103 = ltrim(edit(&Z103,'999999999999.99'),' ')
 	let $_netplustimbre = ltrim(edit(&Z101+&Z103,'999999999999.99'),' ')
