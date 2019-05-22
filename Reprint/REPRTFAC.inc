@@ -221,3 +221,13 @@ BEGIN-PROCEDURE Maj_OPR (#IdtOpr)
 	 WHERE IdtOpr = #IdtOpr
   END-SQL
 END-PROCEDURE
+
+Begin-procedure Timbre_fiscal(#montant_fac, :#Timbre)
+BEGIN-select
+CASE WHEN (#montant_fac<= 0) THEN 0 ELSE
+NVL (LEAST (2500,GREATEST (5, CEIL((#Montant_fac) / 100))), 0)
+END &_timbre 
+ let #Timbre = &_timbre 
+from dual
+END-Select
+END-PROCEDURE
