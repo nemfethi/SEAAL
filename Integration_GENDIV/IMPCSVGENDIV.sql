@@ -1,3 +1,4 @@
+Drop table IMPCSVGENDIV purge;
 -- Create table
 create table IMPCSVGENDIV
 (
@@ -5,7 +6,8 @@ create table IMPCSVGENDIV
   idtpntlvrgen VARCHAR2(254),
   idtpntcpggen VARCHAR2(254),
   idtpntlvrdiv VARCHAR2(254),
-  idtpntcpgdiv VARCHAR2(254)
+  idtpntcpgdiv VARCHAR2(254),
+  IdtTrnTyp    VARCHAR2(254)
 )
 organization external
 (

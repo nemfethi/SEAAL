@@ -190,6 +190,7 @@ sum(Sld) &_Solde2
 from SLDOPR_VIEW1 
 where IdtClt=$pIdtClt 
 and datdeb<=to_date($pdate, 'DD/MM/YYYY')
+and NVL(idtltt, 0)=0
 end-select 
 End-Procedure
 

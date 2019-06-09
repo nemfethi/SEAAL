@@ -1,0 +1,73 @@
+a.info {
+   position: relative;
+   color: black;
+   text-decoration: none;
+   border-bottom: 1px gray dotted; /* on souligne le texte */
+}
+a.info span {
+   display: none; /* on masque l'infobulle */
+}
+a.info:hover {
+   background: none; /* correction d'un bug IE */
+   z-index: 500; /* on définit une valeur pour l'ordre d'affichage */
+
+   cursor: help; /* on change le curseur par défaut en curseur d'aide */
+}
+a.info:hover span {
+   display: inline; /* on affiche l'infobulle */
+   position: absolute;
+
+   white-space: nowrap; /* on change la valeur de la propriété white-space pour qu'il n'y ait pas de retour à la ligne non-désiré */
+
+   top: 30px; /* on positionne notre infobulle */
+   left: 20px;
+
+   background: white;
+
+   color: black;
+   padding: 3px;
+
+   border: 1px solid orange;
+   border-left: 4px solid orange;
+   border-right: 4px solid orange;
+}
+
+table {
+width:90%;
+border-top:2px solid #e5eff8;
+border-right:2px solid #e5eff8;
+margin:1em auto;
+border-collapse:collapse;
+}
+td {
+border-bottom:2px solid #e5eff8;
+border-left:2px solid #e5eff8;
+padding:.3em 1em;
+text-align:center;
+}
+
+caption { /* la légende du tableau */
+font-family: "Times New Roman";
+font-weight: bold;
+font-size: 140%;
+color: #330099;
+margin-left: auto; /* pour centrer la légende */
+margin-right: auto; /* pour centrer la légende */
+margin-bottom: 4px; /* titre placé à 4px au-dessus du tableau */
+}
+#rouge{
+color: red;
+font-weight:bold; 
+}
+#orange{
+color: orange;
+font-weight:bold; 
+}
+#violet{
+color: #C76CAC;
+font-weight:bold; 
+}
+a{
+color: #330099; 
+text-decoration:none; 
+}

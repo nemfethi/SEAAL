@@ -1,33 +1,8 @@
-create or replace package Alg_GenDiv is
-
-  -- Author  : FETHI
-  -- Created : 18/07/2017 08:54:55
-  -- Purpose : gestion de l'intégration des compteurs Gen/Div
-  gNewCodTypCtr varchar2(6) := 'REPEGL';
-  procedure nettoyage;
-  procedure load_file;
-  Procedure Controle;
-  PROCEDURE Import;
-  Procedure Resilier_Contrat(pIdtCtr in ctr.idtctr%type, pcr out number);
-  Procedure Creer_Contrat(pIdtCtrAnc in ctr.idtctr%type,
-                          pIdtCtrnve out ctr.idtctr%type,
-                          pcr        out number);
-  Procedure Creer_avenant(pIdtCtrAnc in ctr.idtctr%type,
-                          pIdtCtrNve in ctr.idtctr%type);
-
-  Procedure Rattacher_PC(pIdtPntLvrGen    in x7.pntcpg.idtpntlvr%type,
-                         pIdtPntLvrDiv    in x7.pntcpg.idtpntlvr%type,
-                         pIdtPntCpgDiv    in x7.pntcpg.idtpntCpg%type,
-                         pIdtPntCpgDivNew out x7.pntcpg.idtpntCpg%type,
-                         pCr              out number);
-  Procedure Traitement;
-end Alg_GenDiv;
-/
 create or replace package body Alg_GenDiv is
   procedure nettoyage is
   begin
     begin
-      /*Vide la table intermédiaire IMPCLT.*/
+      /*Vide la table intermï¿½diaire IMPCLT.*/
       execute immediate 'truncate table IMPCLT.IMPGENDIV';
     end;
   end;
@@ -35,7 +10,7 @@ create or replace package body Alg_GenDiv is
     v_maxImp number;
   begin
     /*
-    Charge la table intermédiaire IMPCLT.depuis
+    Charge la table intermï¿½diaire IMPCLT.depuis
     la table externe IMPDATA
     */
     select nvl(max(idtimpentgendiv), 0) + 1
@@ -48,13 +23,15 @@ create or replace package body Alg_GenDiv is
        idtpntlvrgen,
        idtpntcpggen,
        idtpntlvrdiv,
-       idtpntcpgdiv)
+       idtpntcpgdiv,
+       IdtTrnTyp)
       select v_maxImp,
              numero,
              idtpntlvrgen,
              idtpntcpggen,
              idtpntlvrdiv,
-             idtpntcpgdiv
+             idtpntcpgdiv,
+             IdtTrnTyp
         from impcsvgendiv;
   
     insert into impentgendiv
@@ -80,17 +57,18 @@ create or replace package body Alg_GenDiv is
     1. plusieurs GEN dans le fichier
     2. le GEN n'est pas de type GEN
     3. au moins un DIV dans la liste des PREDIV
-    4. le GEN et les PREDIV ne sont pas dans la même trounée
+    4. le GEN et les PREDIV ne sont pas dans la mÃªme trounÃ©e
     5. le GEN est en cours de facturation
     6. au moins un PREDIV est en cour de facturation
-    7. le GEN est résilié
-    8. au moins un PREDIV est résilié
-    9. le GEN et au moins un PREDIV n'ont pas le même cycle
+    7. le GEN est rÃ©siliÃ©
+    8. au moins un PREDIV est rÃ©siliÃ©
+    9. le GEN et au moins un PREDIV n'ont pas le mÃªme cycle
     10. au moins un PREDIV n''a pas de contrat
-    11. le compteur général n''existe pas
+    11. le compteur gÃ©nÃ©ral n''existe pas
+    12. la trounÃ©e type destination n'existe pas
     */
   
-    dbms_output.put_line('Controles d''intégration GENDIV: ');
+    dbms_output.put_line('Controles d''intÃ©gration GENDIV: ');
     -- 01. plusieurs GEN dans le fichier
     dbms_output.put_line('   01. plusieurs GEN dans le fichier : ');
     begin
@@ -98,7 +76,7 @@ create or replace package body Alg_GenDiv is
         into nbgen
         from (select distinct idtpntlvrgen, idtpntcpggen from impgendiv);
       if nbgen > 1 then
-        dbms_output.put_line('     ----> Erreur détectée.'); /*controle*/
+        dbms_output.put_line('     ----> Erreur dÃ©tectÃ©e.'); /*controle*/
         update impgendiv set stt = 1;
         commit;
         return;
@@ -120,7 +98,7 @@ create or replace package body Alg_GenDiv is
        where (Idtpntlvr, IdtPntCpg) =
              (select distinct idtpntlvrgen, idtpntcpggen from impgendiv);
       if TypCpgGen != 3 then
-        dbms_output.put_line('     ----> Erreur détectée.');
+        dbms_output.put_line('     ----> Erreur dÃ©tectÃ©e.');
         update impgendiv set stt = 1;
         commit;
         return;
@@ -133,7 +111,7 @@ create or replace package body Alg_GenDiv is
         dbms_output.put_line(sqlerrm);
     end;
     --3. au moins un DIV dans la liste des PREDIV
-    dbms_output.put_line('   03. au moins un PC déjà Divisionnaire dans la liste des PRE-Divisionnaires ');
+    dbms_output.put_line('   03. au moins un PC dÃ©jÃ  Divisionnaire dans la liste des PRE-Divisionnaires ');
     begin
       select count(*)
         into nbdiv
@@ -142,7 +120,7 @@ create or replace package body Alg_GenDiv is
          and pntcpg.idtpntcpg = impgendiv.idtpntcpgdiv
          and idttypcpg = 4;
       if nbdiv > 1 then
-        dbms_output.put_line('     ----> Erreur détectée.');
+        dbms_output.put_line('     ----> Erreur dÃ©tectÃ©e.');
         update impgendiv set stt = 1;
         commit;
         return;
@@ -156,8 +134,8 @@ create or replace package body Alg_GenDiv is
         dbms_output.put_line('     ----> Autre Erreur.');
         dbms_output.put_line(sqlerrm);
     end;
-    --4. le GEN et les PREDIV ne sont pas dans la même tournée
-    dbms_output.put_line('   04. le Général et les PRE-Divisionnaires ne sont pas dans la même tournée');
+    --4. le GEN et les PREDIV ne sont pas dans la mÃªme tournÃ©e
+    dbms_output.put_line('   04. le GÃ©nÃ©ral et les PRE-Divisionnaires ne sont pas dans la mÃªme tournÃ©e');
     begin
       select count(*)
         into nbtrn
@@ -168,7 +146,7 @@ create or replace package body Alg_GenDiv is
          and pcd.idtpntcpg = impgendiv.idtpntcpgdiv
          and pcg.idttrntyp != pcd.idttrntyp;
       if nbtrn > 1 then
-        dbms_output.put_line('     ----> Erreur détectée.');
+        dbms_output.put_line('     ----> Erreur dÃ©tectÃ©e.');
         return;
       else
         dbms_output.put_line('     Aucune erreur.');
@@ -181,7 +159,7 @@ create or replace package body Alg_GenDiv is
         dbms_output.put_line(sqlerrm);
     end;
     --5.le GEN est en cours de facturation
-    dbms_output.put_line('   05. le Général est en cours de facturation');
+    dbms_output.put_line('   05. le GÃ©nÃ©ral est en cours de facturation');
     begin
       Select count(*)
         into nbgen
@@ -189,9 +167,9 @@ create or replace package body Alg_GenDiv is
        where (Idtpntlvr, IdtPntCpg) in
              (select distinct idtpntlvrgen, idtpntcpggen from impgendiv)
          and ctr.datrsl is null
-         and ettctrfct != 1;
+         and ettctrfct = 1;
       if nbgen > 1 then
-        dbms_output.put_line('     ----> Erreur détectée.');
+        dbms_output.put_line('     ----> Erreur dÃ©tectÃ©e.');
         update impgendiv set stt = 1;
         commit;
         return;
@@ -213,7 +191,7 @@ create or replace package body Alg_GenDiv is
          and ctr.datrsl is null
          and ettctrfct != 1;
       if nbdiv > 1 then
-        dbms_output.put_line('     ----> Erreur détectée.');
+        dbms_output.put_line('     ----> Erreur dÃ©tectÃ©e.');
         update impgendiv set stt = 1;
         commit;
         return;
@@ -227,8 +205,8 @@ create or replace package body Alg_GenDiv is
         dbms_output.put_line('     ----> Autre Erreur.');
         dbms_output.put_line(sqlerrm);
     end;
-    --7.le GEN est résilié
-    dbms_output.put_line('   07. le Général est résilié');
+    --7.le GEN est rï¿½siliï¿½
+    dbms_output.put_line('   07. le GÃ©nÃ©ral est rÃ©siliÃ©');
     begin
       Select count(*)
         into nbgen
@@ -237,7 +215,7 @@ create or replace package body Alg_GenDiv is
              (select distinct idtpntlvrgen, idtpntcpggen from impgendiv)
          and ctr.datrsl is not null;
       if nbgen > 1 then
-        dbms_output.put_line('     ----> Erreur détectée.');
+        dbms_output.put_line('     ----> Erreur dÃ©tectÃ©e.');
         update impgendiv set stt = 1;
         commit;
         return;
@@ -252,7 +230,7 @@ create or replace package body Alg_GenDiv is
         dbms_output.put_line(sqlerrm);
     end;
     --8.
-    dbms_output.put_line('   08. au moins un PREDIV est résilié');
+    dbms_output.put_line('   08. au moins un PREDIV est rÃ©siliÃ©');
     begin
       Select count(*)
         into nbdiv
@@ -263,7 +241,7 @@ create or replace package body Alg_GenDiv is
          and x7.estpntcpginactif(impgendiv.idtpntlvrdiv,
                                  impgendiv.idtpntcpgdiv) != 0;
       if nbdiv > 1 then
-        dbms_output.put_line('     ----> Erreur détectée.');
+        dbms_output.put_line('     ----> Erreur dÃ©tectÃ©e.');
         update impgendiv set stt = 1;
         commit;
         for c in (Select numero
@@ -273,7 +251,7 @@ create or replace package body Alg_GenDiv is
                      and ctr.datrsl is not null
                      and x7.estpntcpginactif(impgendiv.idtpntlvrdiv,
                                              impgendiv.idtpntcpgdiv) != 0) loop
-          dbms_output.put_line('       ----> Numéro: ' || c.numero);
+          dbms_output.put_line('       ----> Numï¿½ro: ' || c.numero);
         end loop;
         return;
       else
@@ -287,7 +265,7 @@ create or replace package body Alg_GenDiv is
         dbms_output.put_line(sqlerrm);
     end;
     --9.
-    dbms_output.put_line('   09. le GEN et au moins un PREDIV n''ont pas le même cycle');
+    dbms_output.put_line('   09. le GEN et au moins un PREDIV n''ont pas le mÃªme cycle');
     begin
       Select count(*)
         into nbdiv
@@ -309,7 +287,7 @@ create or replace package body Alg_GenDiv is
                  and impgendiv.stt = 0
                  and avtctr.idtfactyp = factyp.idtfactyp);
       if nbdiv > 1 then
-        dbms_output.put_line('     ----> Erreur détectée.');
+        dbms_output.put_line('     ----> Erreur dÃ©tectÃ©e.');
         update impgendiv set stt = 1;
         commit;
         for c in (Select numero
@@ -319,7 +297,7 @@ create or replace package body Alg_GenDiv is
                      and ctr.datrsl is not null
                      and x7.estpntcpginactif(impgendiv.idtpntlvrdiv,
                                              impgendiv.idtpntcpgdiv) != 0) loop
-          dbms_output.put_line('       ----> Numéro: ' || c.numero);
+          dbms_output.put_line('       ----> NumÃ©ro: ' || c.numero);
         end loop;
         return;
       else
@@ -342,7 +320,7 @@ create or replace package body Alg_GenDiv is
          and ctr.idtpntcpg(+) = impgendiv.idtpntcpgdiv
          and idtpntlvr is null;
       if nbdiv > 1 then
-        dbms_output.put_line('     ----> Erreur détectée.');
+        dbms_output.put_line('     ----> Erreur dÃ©tectÃ©e.');
         update impgendiv set stt = 1;
         commit;
         for c in (Select numero
@@ -351,7 +329,7 @@ create or replace package body Alg_GenDiv is
                    where ctr.idtpntlvr(+) = impgendiv.idtpntlvrdiv
                      and ctr.idtpntcpg(+) = impgendiv.idtpntcpgdiv
                      and idtpntlvr is null) loop
-          dbms_output.put_line('       ----> Numéro: ' || c.numero);
+          dbms_output.put_line('       ----> NumÃ©ro: ' || c.numero);
         end loop;
         return;
       else
@@ -365,7 +343,7 @@ create or replace package body Alg_GenDiv is
         dbms_output.put_line(sqlerrm);
     end;
     --11.
-    dbms_output.put_line('   11. le compteur général n''existe pas');
+    dbms_output.put_line('   11. le compteur gÃ©nÃ©ral n''existe pas');
     begin
       Select count(*)
         into nbdiv
@@ -374,7 +352,7 @@ create or replace package body Alg_GenDiv is
          and ctr.idtpntcpg(+) = impgendiv.idtpntcpggen
          and idtpntlvr is null;
       if nbdiv > 1 then
-        dbms_output.put_line('     ----> Erreur détectée.');
+        dbms_output.put_line('     ----> Erreur dÃ©tectÃ©e.');
         update impgendiv set stt = 1;
         commit;
         for c in (Select numero
@@ -382,7 +360,7 @@ create or replace package body Alg_GenDiv is
                    where ctr.idtpntlvr(+) = impgendiv.idtpntlvrgen
                      and ctr.idtpntcpg(+) = impgendiv.idtpntcpggen
                      and idtpntlvr is null) loop
-          dbms_output.put_line('       ----> Numéro: ' || c.numero);
+          dbms_output.put_line('       ----> NumÃ©ro:  '|| c.numero);
         end loop;
         return;
       else
@@ -410,11 +388,11 @@ create or replace package body Alg_GenDiv is
          set DatFin = vDatRsl
        where idtctr = pIdtCtr
          and DatFin is Null;
-      dbms_output.put_line('Succès Résiliation Contrat: ' || pIdtCtr);
+      dbms_output.put_line('SuccÃ¨s RÃ©siliation Contrat: ' || pIdtCtr);
       pcr := 0;
     exception
       when others then
-        dbms_output.put_line('Erreur Résiliation Contrat: ' || pIdtCtr);
+        dbms_output.put_line('Erreur RÃ©siliation Contrat: ' || pIdtCtr);
         dbms_output.put_line(sqlerrm);
         pcr := 1;
     end;
@@ -517,12 +495,12 @@ create or replace package body Alg_GenDiv is
            from X7.Ctr
           where idtctr = pIdtCtrAnc);
       Creer_avenant(pIdtCtrAnc, vIdtCtr);
-      dbms_output.put_line('Succès Création Contrat: ' || vIdtCtr);
+      dbms_output.put_line('SuccÃ¨s CrÃ©ation Contrat: ' || vIdtCtr);
       pIdtCtrNve := vIdtCtr;
       pCr        := 0;
     exception
       when others then
-        dbms_output.put_line('Erreur Création Contrat: ' || vIdtCtr);
+        dbms_output.put_line('Erreur CrÃ©ation Contrat: ' || vIdtCtr);
         dbms_output.put_line(sqlerrm);
         pcr := 1;
     end;
@@ -597,11 +575,11 @@ create or replace package body Alg_GenDiv is
          where ctr.idtctr = avtctr.idtctr
            and ctr.idtctr = pIdtCtrAnc
            and numavn = sqcavn;
-      dbms_output.put_line('Succès Création Avenant Contrat: ' ||
+      dbms_output.put_line('SuccÃ¨s CrÃ©ation Avenant Contrat: ' ||
                            pIdtCtrNve);
     exception
       when others then
-        dbms_output.put_line('Erreur Création Avenant Contrat: ' ||
+        dbms_output.put_line('Erreur CrÃ©ation Avenant Contrat: ' ||
                              pIdtCtrNve);
         dbms_output.put_line(sqlerrm);
       
@@ -646,7 +624,7 @@ create or replace package body Alg_GenDiv is
          set SqcPntCpg = pIdtPntCpgDivNew
        where IdtPntLvr = pIdtPntLvrGen;
       pCr := 0;
-      dbms_output.put_line('Succès Rattachement PC: ' || pIdtPntLvrDiv ||
+      dbms_output.put_line('SuccÃ¨s Rattachement PC: ' || pIdtPntLvrDiv ||
                            ' / ' || pIdtPntCpgDiv || ' ==> ' ||
                            pIdtPntLvrGen || ' / ' || pIdtPntCpgDivNew);
     EXCEPTION
@@ -711,7 +689,7 @@ create or replace package body Alg_GenDiv is
       if pcr = 0 then
         commit;
         dbms_output.put_line('==============================================');
-        dbms_output.put_line('traitement Généraux/Divisionnaire effectué avec succès');
+        dbms_output.put_line('traitement GÃ©nÃ©raux/Divisionnaire effectuÃ© avec succÃ¨s');
       else
         rollback to s1;
       end if;
