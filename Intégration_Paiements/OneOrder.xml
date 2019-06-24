@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <orderStatuses>
+        <date>1414485649233</date>
+        <amount>2500</amount>
+        <orderNumber>57drs0Pes459Hdsddd0567a0</orderNumber>
+        <bankCountryCode>RU</bankCountryCode>
+        <ip>212.5.125.194</ip>
+        <errorCode>0</errorCode>
+        <orderStatus>2</orderStatus>
+        <actionCode>0</actionCode>
+        <currency>643</currency>
+        <bankCountryName>Russian Federation</bankCountryName>
+        <actionCodeDescription>Request processed successfully</actionCodeDescription>
+        <orderDescription>Opisanie</orderDescription>
+    </orderStatuses>
+    <errorCode>0</errorCode>
+    <pageSize>100</pageSize>
+    <page>0</page>
+    <totalCount>5</totalCount>
+</root>

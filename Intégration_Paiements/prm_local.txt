@@ -1,0 +1,13 @@
+bddIP=VM-Alger
+bddSID=X7ALGFNE
+bddPort=1521
+bddPwd=X7
+IDTTYPTCHE=TRT5020
+Log=D:\temp\
+out=D:\temp\
+IdtCss=DC_001
+mysqlIP=127.0.0.1
+mysqlPort=3306
+mysqlUser=root
+mysqlPwd=fethi
+mysqlDB=Epay_Seaal

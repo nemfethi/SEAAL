@@ -1,0 +1,1163 @@
+!----------------------------------------------------
+!-- Integration des fichiers d'Algérie Poste en X7
+!----------------------------------------------------
+!-- variables globales
+
+#include 'msg.inc'
+#include 'sql.inc'
+#include 'dft_cste.h'
+
+#define TrtAep02
+
+#INCLUDE 'o_cstglb.h'
+
+#IFNDEF IDTTYPTCHE_DMD_PRL
+  #DEFINE IDTTYPTCHE_DMD_PRL TRT5002
+#ENDIF
+
+#IFNDEF TRT
+  #DEFINE TRT TRT5002
+#ENDIF
+
+
+! Error constants
+
+#DEFINE ERR_PATH                    '***ERREUR*** Imposible d''ouvrir le fichier : '
+#DEFINE ERR_FORMAT_FILE             '***ERREUR*** Le format du fichier n''a pas été trouvé : '
+#DEFINE ERR_FORMAT_LINE             '***ERREUR*** Le longueur de la ligne est incorrect'
+#DEFINE ERR_FILE_NOT_FOUND          '***ERREUR*** Le fichier n''existe pas : '
+#DEFINE ERR_FILE_PROCESSED          '***ERREUR*** Le fichier a déjà été traité : '
+#DEFINE ERR_BILL_NOT_EXIST          '***ERREUR*** L''opération n''existe pas : '
+!----------------------------------------------------
+!-- Programme principal
+!----------------------------------------------------
+
+BEGIN-PROGRAM
+  INPUT $User maxlen={MAX_USER_LEN} type=char NOPROMPT
+  INPUT $Mode maxlen=1 type=char NOPROMPT
+  INPUT $RepGeneration NOPROMPT
+  INPUT $RepLog NOPROMPT
+  INPUT $FileTxtPath NOPROMPT
+  INPUT $FileName NOPROMPT
+  
+! Pour test, à effacer!!!!!!
+  !Let $User = 'FNE'
+  !Let $Mode = 'R'
+  !Let $RepGeneration = '.'
+  !Let $RepLog = '.\toto.log'
+  !Let $FileTxtPath = '.'
+  !Let $FileName = 'c:\temp\AP_IN.TXT'
+! Fin test
+
+  Let $FileName = replace($FileName,$FileTxtPath || '\', '')
+
+alter-locale
+  locale='System'
+  date-edit-mask  ='DD/MM/YYYY'
+
+
+alter-printer font=4 point-size=10
+NEW-REPORT $RepGeneration
+
+  
+  LET $datfic = edit($current-date,'YYYYMMDD')
+
+BEGIN-SELECT on-error=TrtError('ERROR_SQL')
+to_char(sysdate,'YYYYMMDD HH24:MI:SS') &DatImp
+  Let $DatImp = &DatImp
+  Let $DatCrt = $DatImp
+from dual
+END-SELECT
+
+  
+! Initialization of error management
+  DO MSG_Init
+  DO MSG_DefinirUtilisateur ($user)
+  DO MSG_DefinirTraitement ('{TRT}')
+
+! Start of Treatment
+  DO MSG_DefinirLocalisation ('{TRT}_PROGRAM')
+  DO MSG_Ecrire('MSG_DEBUT',#Rst)
+
+! Variable to save file record information
+  LET $Record = ''
+  LET #Line   = 0
+  LET #IdtFmtFchPrl = 01
+
+! CngEnt global variables
+  LET $IdtCss    = 'PRELMG'
+  LET #IDTCNG    = 0
+
+  IF $User = 'BATCH'
+    LET $IDTAGT  = 'BATCH'
+  ELSE
+    LET $IDTAGT  = $User
+  END-IF
+
+  LET $DftDat = DateAdd($current-date,'day',-1)
+  MOVE $current-date to $DatCrt 'YYYYMMDD'
+  MOVE $DftDat to $DatRgl 'YYYYMMDD'
+  LET #TTLCNG    = 0
+  LET #NBRPMTCNG = 0
+  LET $DATCTL    = ''
+  LET $SITCNG    = '0'
+  ! une seule devise dinar algerien
+  LET $IDTDVS    = 'DA'
+  LET $RFRFIC    = ''
+  LET $RFRFICOUT = ''
+  LET $REFADDCNG = ''
+  
+  !CngLgnCss global variables
+  LET #IDTLGNCSSCNG    = 0
+  LET $REFADDLGNCSSCNG = ''
+  LET $IDTCLT          = ''
+  LET #IDTCPTCLT       = 1
+  LET $NUMFCT          = ''
+  LET #MNTPMT          = 0
+  LET #MNTAVC          = 0
+  !il faut créer un ModRgl pour Algerie Poste, pour l''instant on le met 1 = espece.
+  LET #IDTMODRGL       = 104
+  !il faut creer un banque Algerie Poste
+  LET $IDTBNQ          = '01'
+  LET $IDTGCH          = '01'
+  LET $NUMCPTBNC       = ''
+  LET $CLERIB          = ''
+  LET $NOMTRR          = ''
+  LET $NUMCHQ          = ''
+  LET $CODBRRRGT       = ''
+  LET #IdtTypMvmCng    = 1
+
+  
+  !----------------------------------------------------------
+
+
+  DO main
+  Do HistFile($FileName)
+
+END-PROGRAM
+
+!----------------------------------------------------
+!-- Procedure Main
+!----------------------------------------------------
+BEGIN-PROCEDURE main
+  DO MSG_DefinirLocalisation('{TRT}_Main')
+
+  DO ChooseFileFormat
+
+
+END-PROCEDURE
+
+!----------------------------------------------------
+!-- Mise en page des rapports
+!----------------------------------------------------
+
+BEGIN-SETUP
+    DECLARE-LAYOUT defaut
+        paper-size=(A4)
+        orientation= portrait
+        left-margin=0.19
+        right-margin=0.5
+        top-margin = 1
+        bottom-margin = 1
+        line-height = 0.31
+        char-width = 0.19
+    END-DECLARE
+END-SETUP
+
+!----------------------------------------------------
+!-- Lire le fichier
+!----------------------------------------------------
+!!!!!!! ATENTION!!!!!!!!! Procedure LOCAL, donc les variables globales
+!                         doivent etre traites avec _
+BEGIN-PROCEDURE readfile01 LOCAL
+
+!FBE NEW-REPORT 'd:\temp\rapport'
+NEW-REPORT $_RepGeneration
+
+DO MSG_DefinirLocalisation ('{TRT}_ReadFile01')
+
+  LET $_DatRgl = ''
+  Let $_vOldIdtCss = ''
+  Let $_vOldDatRgl = ''
+  Let #_TtlCngFile = 0
+  Let #_NbrPmtCngFile = 0
+  Let #_vTtlCng = 0
+  Let #_vNbrPmtCng = 0
+  Let #_vSwFileImp = 0
+  Let #_MajCngEnt = 1
+  Let $_GlbIdtCss = $IdtCss
+  Let #_LinesProcessed = 0
+  Let #_ConsignementsCreated = 0
+
+!  Let #SwNewAP = 0
+  Let $Dump = ''
+
+  LET $vFileTxt = $_FileTxtPath ||'\'||$_FileName
+  OPEN $vFileTxt as 1  For-Reading record=500:VARY status=#vFileStat
+
+! Ctrl si le fichier AP_IN_..._01 ou AP_IN_..._02 existent
+
+  IF #vFileStat <> 0
+    
+    !Rapport d'erreur d'existance du fichier
+    DO Rap03
+    
+  ELSE
+    
+    ! est-il deja integré
+    ! FBE: On laisse le contrôle au programme de controle
+    ! LET $var01 = ''
+    LET $var01 = $FileName
+  do MSG_DefinirRequeteCourante('select from ALG_EAPHST')
+!BEGIN-SELECT on-error=TrtError('ERROR_SQL')
+!nom_fichier &var01
+!  MOVE &var01 TO $var01
+!FROM ALG_EAPHST
+!WHERE nom_fichier = $_FileName
+!END-SELECT
+
+    IF $var01 = '' 
+      
+      ! Initialisation des variables pour les totaux
+      LET #_nbrcltimp = 0          ! Nombre de clients importe
+      LET #_nbroprimp = 0          ! Nombre d'operations importe
+      LET #_MntTotImp = 0             ! Montant total importe
+      LET #_Line = 0               ! Nombre de lignes dans le fichier
+      Let #_NbrLinesImp = 0
+
+      ! Effacement de la table temporaire
+      do MSG_DefinirRequeteCourante('delete ALG_EAPINT')
+      BEGIN-SQL on-error=TrtError('ERROR_SQL')
+      delete ALG_EAPINT;
+      END-SQL
+      do MSG_DefinirRequeteCourante('delete ALG_EAPINT')
+      
+      WHILE 1
+
+        ! Initialisation des variables de lecture du fichier
+        LET $_x = ''
+        LET $_wi_ech = ''
+        LET $_IdtClt = ''            ! Identifiant du client
+        LET $_Pmt = ''               ! Montant lu du le fichier
+        LET $_DatPmt = ''            ! Date de reglement lu du fichier format text (AAAAMMDD)
+        LET $_Typ = ''               ! Type d'enregistrement
+        LET $_MntIN = ''             ! Montant lu du le fichier     
+        LET $_CodAgcPst = ''         ! Code Agence Postale
+        Let $_AncRfr = ''            ! Ancienne reference sans le code de la caisse
+
+        ! Initialisation des variables 
+        Let $_IdtCntOpr = ''         ! Identifiant du centre operationnel
+        Let $_Rfr = ''               ! Reference de l'operation
+        Let #_MntAvc = 0             ! Montant non affecte (avance)
+        Let #_Mnt    = 0
+        Let #_MntPmt = 0
+
+
+        ! Ligne a utiliser si le fichier contient le code client X7
+        !read 1 into $x:2 $wi_ech:4 $IdtClt:6 $MntIN:11 $Pmt:1 $DatPmt:8 $Typ:2 $CodAgcPst:8
+        ! Ligne a utiliser si le fichier contient le code client X7
+        if #_SwNewAP = 1
+!          read 1 into $_x:2 $_wi_ech:2 $_AncRfr:8 $_IdtClt:8 $_MntIN:11 $_Pmt:1 $_DatPmt:8 $_Typ:2 $_CodAgcPst:8
+          read 1 into $_AncRfr:8 $_IdtClt:8 $_MntIN:11 $_Pmt:1 $_DatPmt:8 $_Typ:2 $_CodAgcPst:8
+          Let $_x = ''
+          Let $_wi_ech = ''
+        ! Ligne a utiliser si le fichier ne contient pas le code client X7
+        else
+          read 1 into $_x:2 $_wi_ech:2 $_AncRfr:8 $_MntIN:11 $_Pmt:1 $_DatPmt:8 $_Typ:2 $_CodAgcPst:9
+        end-if
+
+        IF #_end-file
+          break   ! End of file reached .
+        END-IF
+        
+        ! Le nombre des lines corresponde au nombre de lines du fichier
+        LET #_Line = #_Line + 1
+        ! On teste le longueur de la ligne
+        Let #Len = length($_x || $_wi_ech || $_IdtClt || $_AncRfr || $_MntIN || $_Pmt || $_DatPmt || $_Typ || $_CodAgcPst)
+
+!        Let $Msg = 
+        if #_SwNewAP = 0 and #Len <> 42
+          DO TrtError({ERR_FORMAT_LINE})
+          GOTO EndTrtLgn
+        end-if
+        if #_SwNewAP = 1 and #Len <> 46
+          DO TrtError({ERR_FORMAT_LINE})
+          GOTO EndTrtLgn
+        end-if
+        if $_x = '' and #_SwNewAP = 0 
+          goto EndTrtLgn
+        end-if
+
+        Move $_MntIn to #_Mnt
+        Let $_IdtCntOpr = substr($_wi_ech,1,2)
+        Let $_DatRgl = $_DatPmt
+!        MOVE $_DatPmt to $_DatRgl 'YYYYMMDD'
+        
+        ! On efface les spaces du code client
+        LET $_IdtClt = rtrim(LTRIM($_IdtClt,'0'),' ')
+
+        ! Totalisation
+        ! Le montant total a inscrire dans l'entete de la consignation
+        ! corresponde au montant de paiements dans le fichier afin
+        ! de donner un message d'erreur si il existen des lines vides
+        LET #_TTLCNG    = #_TTLCNG + #_Mnt
+!        LET #_NbrOprImp = #_NbrOprImp + 1
+        LET #_MntTotImp = #_MntTotImp + #_Mnt
+        LET #_NBRPMTCNG = #_NbrPmtCng + 1
+
+        ! Si le code client n'est pas fourni, on cherche le code client base sur
+        ! l'ancienne reference
+        if $_IdtClt = ''
+          do MSG_DefinirRequeteCourante('select from CLT')
+
+! avant de récupérer l'identifiant du client, il faut "récupérer"
+! l'ancienne référence pour BMR (04) et BZR (11)
+  IF $_wi_ech = '04' or $_wi_ech = '11'
+    let $_ancrfr = substr($_ancrfr,3,6)
+  END-IF
+
+BEGIN-SELECT on-error=TrtError('ERROR_SQL')
+IdtClt &IdtClt
+IdtCntOpr &IdtCntOpr
+    Let $_IdtClt = &IdtClt
+    if $_IdtCntOpr = ''
+      Let $_IdtCntOpr = &IdtCntOpr
+    end-if
+from X7.CLT
+where AncRfr = $_ancrfr
+END-SELECT
+
+        end-if !$IdtClt = ''
+
+        if $_IdtCntOpr = ''
+BEGIN-SELECT
+IdtCntOpr &IdtcntOpr2
+  Let $_IdtCntOpr = &IdtCntOpr2
+from X7.CLT
+where IdtClt = $_IdtClt
+END-SELECT  
+
+        end-if
+!        if #_Mnt > 0
+!          LET #_nbrcltimp = #_nbrcltimp + 1
+          do InsALG_EAPINT
+!        end-if
+        IF #_end-file
+          break   ! End of file reached .
+        END-IF
+        Let #_NbrLinesImp = #_NbrLinesImp + 1
+
+EndTrtLgn:
+
+      END-WHILE
+      commit
+      Let #_NbrLinesFic = #_Line
+      do InsCssOffLine
+!      DO InsEapHst
+  
+    ELSE !IF $var01 = ''
+      !rapport d'erreur d'integration
+      DO Rap01
+      rollback
+    END-IF !$var01 = ''
+END-IF !#vFileStat <> 0
+
+CLOSE 1
+
+END-PROCEDURE !readfile01
+
+
+!----------------------------------------------------
+!-- Procedure d'insertion sur les tables de caisse off-line
+!-- a partir de la table temporaire ALG_EAPINT
+!----------------------------------------------------
+BEGIN-PROCEDURE InsCssOffLine
+
+  DO MSG_DefinirLocalisation ('{TRT}_InsCssOffLine')
+
+  Let $OldIdtCss = 'zzzz'
+  Let $OldIdtClt = 'zzzz'
+  Let $NumFct = ''
+  Let #MntPmt = 0
+  Let #MntAvc = 0
+  Let $IdtCss = ''
+  Let #TtlCng = 0
+  Let #MntImp = 0
+  Let #NbrPmtCng = 0
+  Let #IdtCng = 0
+  Let #NbrOprImp = 0
+  Let #MntxClt   = 0
+  Let $RfrFicExp = replace($RfrFic,'IN','OUT')
+  Let $RfrFicExp = substr($RfrFicExp,1,15)
+  Let $RfrFicOut = ''
+  
+BEGIN-SELECT on-error=TrtError('ERROR_SQL')
+max(IdtFic) &RfrFicOut
+
+from ALG_EAP
+where DatTrt = (select max(DatTrt) from ALG_EAP)
+END-SELECT
+  Let $RfrFicOut = &RfrFicOut
+
+
+  do MSG_DefinirRequeteCourante('select from OPR')
+  BEGIN-SELECT on-error=TrtError('ERROR_SQL')
+  !ALG_EAP.IdtFic       &RfrFicOut
+ALG_CSSCNTOPR.IdtCss &IdtCss
+ALG_EAPINT.IdtClt    &IdtClt
+ALG_EAP.IdtOpr       &IdtOpr
+OPR.Rfr              &Rfr
+OPR.Sld              &Sld
+least(nvl(OPR.Sld,0),nvl(ALG_EAP.Mnt,0)) &MntAff
+sum(ALG_EAPINT.MNTPMT) over (partition by ALG_EAPINT.IdtClt, ALG_EAPINT.Lgn, nvl(OPR.Rfr,'zzz')) &MntxClt
+ALG_EAP.Mnt          &MntExp
+ALG_EAPINT.MntPmt    &MntImp
+ALG_EAPINT.Pmt       &Pmt
+to_char(ALG_EAPINT.DatRgl,'YYYYMMDD')    &DatRgl
+ALG_EAPINT.CodAgn    &CodAgn
+ALG_EAPINT.Lgn       &Lgn
+
+  
+!  if $RfrFicOut = ''
+!    Let $RfrFicOut = &RfrFicOut
+!  end-if
+  Let $NumFct = ''
+  Let #MntPmt = 0
+  Let #MntAvc = 0
+  Let $IdtClt = &IdtClt
+
+  if $IdtClt <> $OldIdtClt or &Lgn <> #Line
+
+    if $IdtClt <> ''
+      LET #nbrcltimp = #nbrcltimp + 1
+    end-if
+
+    if $OldIdtClt <> 'zzzz'
+      Let $NumFct = ''
+      Let #MntPmt = 0
+      Let #MntAvc = #MntxClt
+      if #MntAvc > #MntImp
+        Let #MntAvc = #MntImp
+      end-if
+      Let #MntxClt = #MntxClt - #MntAvc
+      Let #TtlCng    = #TtlCng + #MntPmt + #MntAvc
+      if round(#MntAvc,2) > 0
+        Let #NbrPmtCng = #NbrPmtCng + 1
+        Let $IdtClt = $OldIdtClt
+        do InsCngLgnCss
+        Let $IdtClt = &IdtClt
+        Let #MntAvc = 0
+      end-if
+    end-if
+
+    Let $OldIdtClt = $IdtClt
+    Let #MntxClt = &MntxClt
+    if #MntxClt < 0
+      Let #MntxClt = 0
+    end-if
+
+  end-if
+
+  Let $IdtCss = &IdtCss
+  if $IdtCss <> $OldIdtCss
+    ! Il faut finir les donnees de la consignation anterieure
+    if $OldIdtCss <> 'zzzz'
+      Let $IdtCss = $OldIdtCss
+      do UpdCngEnt
+      do InsCngTtx
+      do UpdCss
+    end-if
+    ! Fin du traitement de la consignation anterieure
+    Let $IdtCss = &IdtCss
+    Let #IdtCng = 0
+    Let #TtlCng = 0
+    Let #NbrPmtCng = 0
+    Let #Line   = &Lgn
+    do InsCngEnt
+    Let $OldIdtCss = $IdtCss
+  end-if
+  Let #Line   = &Lgn
+
+  Let $IdtCss = &IdtCss
+  Let $IdtClt = &IdtClt
+  Let #IdtOpr = &IdtOpr
+  Let $Pmt    = &Pmt
+  Let $DatRgl = &DatRgl
+  Let $CodAgn = &CodAgn
+  Let $NumFct = &Rfr
+  Let #Line    = &Lgn
+  Let #MntExp  = &MntExp
+  Let #MntAff  = &MntAff
+  Let #MntImp  = &MntImp
+
+  if #MntAff > #MntxClt
+    Let #MntAff = #MntxClt
+  end-if
+
+  Let #MntPmt = 0
+  Let #MntAvc = 0
+  if #MntAff > 0
+    Let #MntPmt = #MntAff
+    if #MntPmt > #MntxClt
+      Let #MntPmt = #MntxClt
+    end-if
+    Let #MntxClt = #MntxClt - #MntPmt
+
+  end-if
+  Let #MntAvc = #MntExp - #MntPmt
+  if #MntAvc < 0
+    Let #MntAvc = 0
+  end-if
+  if #MntAvc > #MntxClt
+    Let #MntAvc = #MntxClt
+  end-if
+  if #MntAvc > #MntImp
+    Let #MntAvc = #MntImp
+  end-if
+  Let #MntxClt = #MntxClt - #MntAvc
+  !--
+  if $NumFct <> '' 
+    do InsCngLgnCss
+    Let #NbrPmtCng = #NbrPmtCng + 1
+  end-if
+
+  if #IdtOpr <> 0
+    LET #NbrOprImp = #NbrOprImp + 1
+  end-if
+
+  Let #TtlCng    = #TtlCng + #MntPmt + #MntAvc
+
+
+from X7.OPR, X7.ALG_EAP_VIEW1 ALG_EAP, X7.ALG_CSSCNTOPR, X7.ALG_EAPINT
+where ALG_CSSCNTOPR.IdtCntOpr(+) = ALG_EAPINT.IdtCntOpr
+and   ALG_EAP.IdtClt(+)          = ALG_EAPINT.IdtClt
+and   OPR.IdtOpr(+)              = ALG_EAP.IdtOpr
+and  trunc(DatRgl) between nvl(trunc(DatTrt+1),DatRgl-1) and nvl(trunc(DatTrtSvn),sysdate+1)
+order by ALG_CSSCNTOPR.IdtCss, ALG_EAPINT.Lgn, trunc(OPR.DatCrt), OPR.IdtOpr
+END-SELECT
+
+  ! Il nous reste fermer la derniere consignation et traiter le relicat
+  ! du dernier client
+  if #MntxClt > 0
+    Let $NumFct = ''
+    Let #MntPmt = 0
+    Let #MntAvc = #MntxClt
+    Let #NbrPmtCng = #NbrPmtCng + 1
+    Let #TtlCng    = #TtlCng + #MntPmt + #MntAvc
+    do InsCngLgnCss
+  end-if
+
+  ! Il faut finir les donnees de la consignation anterieure
+  do UpdCngEnt
+  do InsCngTtx
+  do UpdCss
+  ! Fin du traitement de la consignation anterieure
+
+  do MSG_DefinirRequeteCourante('delete ALG_EAPINT')
+  ! Effacement de la table temporaire
+!  BEGIN-SQL on-error=TrtError('ERROR_SQL')
+!    delete ALG_EAPINT
+!      where RfrFic = $RfrFic;
+!  END-SQL
+
+END-PROCEDURE !InsCssOffLine
+  
+
+!----------------------------------------------------
+!-- Rapport si l'un des fichiers est deja integré
+!----------------------------------------------------
+
+!rapport de non existance
+BEGIN-PROCEDURE Rap03
+  DO MSG_DefinirLocalisation('{TRT}_Rap03')
+  ! si le fichier est deja existant
+        PRINT 'FICHIER ALGERIE POSTE' (5,1) center bold underline
+        LET #var05 = 1
+        PRINT 'Erreur en existance des fichiers : ' (+2,10)
+        PRINT 'Veuillez vérifier l''emplacement des ' (+1,10)
+        PRINT 'fichier(s) suivant(s) : ' (+2,10)
+        PRINT $FileName (+2,20)
+
+END-PROCEDURE
+
+BEGIN-PROCEDURE Rap01
+  DO MSG_DefinirLocalisation('{TRT}_Rap01')
+  LET $DatInt = edit($current-date,'DD/MM/YYYY')
+      ! si le fichier est deja integré
+        IF #var05 = 1
+        PRINT 'INTEGRATION DU FICHIER ALGERIE POSTE' (+5,1) center bold underline
+        ELSE
+        PRINT 'INTEGRATION DU FICHIER ALGERIE POSTE' (5,1) center bold underline
+        END-IF
+        PRINT $DatInt (+2,10)
+        PRINT 'fichier(s) suivant(s) : ' (+2,10)
+        PRINT $FileName (,35)
+        PRINT 'Echec de l''importation : ' (+2,10)
+        PRINT 'Veuillez Consulter le fichier log correspondant ' (+1,10)
+END-PROCEDURE
+
+!-----------------------------------------------------
+!Insertion dans ALG_EAPHST
+!-----------------------------------------------------
+BEGIN-PROCEDURE InsEapHst
+  DO MSG_DefinirLocalisation('{TRT}_InsEapHst')
+  
+  Let #SwExist = 0
+
+BEGIN-SELECT on-error=TrtError('ERROR_SQL')
+DatFic    &DatFic
+NbrCltExp &NbrCltExp
+NbrOprExp &NbrOprExp
+MntExp    &MntExpFch
+RfrFicIn  &RfrFicIn
+nvl(Stt,0) &Stt
+
+    if nvl(&Stt,0) = 0 and (&RfrFicIn = '' or &RfrFicIn = $FileName)
+      Let #SwExist = 1
+    end-if
+
+from X7.ALG_EAPHST
+where Nom_Fichier = $RfrFicOut
+ order by DatImp
+ !and  (RfrFicIN is null or RfrFicIN = $FileName)
+END-SELECT
+
+    if #SwExist = 0
+      BEGIN-SQL on-error=TrtError('ERROR_SQL')
+        INSERT INTO X7.ALG_EAPHST (nom_fichier, datfic, DatImp, NbrCltExp, NbrOprExp, MntExp, nbrcltimp, nbroprimp, mntimp, Stt, RfrFicIn) 
+          VALUES ($RfrFicOut, &Datfic, to_date($DatImp,'YYYYMMDD HH24:MI:SS'), &NbrCltExp, &NbrOprExp, &MntExpFch, #NbrCltImp, #NbrOprImp, #MntTotImp,0, $FileName);
+      END-SQL
+    else
+      BEGIN-SQL on-error=TrtError('ERROR_SQL')
+        update X7.ALG_EAPHST
+          set DatImp = to_date($DatImp,'YYYYMMDD HH24:MI:SS'),
+              RfrFicIn = $FileName,
+              NbrCltImp = #NbrCltImp,
+              NbrOprImp = #NbrOprImp,
+              MntImp    = #MntTotImp,
+              Stt = 0
+          where Nom_Fichier = $RfrFicOut
+           and  (RfrFicIn = $FileName or RfrFicIn is null)
+           and  Nvl(Stt,0) = 0;
+      END-SQL
+    end-if
+
+!DO Rap02
+
+END-PROCEDURE
+
+!----------------------------------------------------
+!-- Rapport d'intégration
+!----------------------------------------------------
+BEGIN-PROCEDURE Rap02
+  DO MSG_DefinirLocalisation('{TRT}_Rap02')
+      
+        PRINT 'INTEGRATION DU FICHIER ALGERIE POSTE' (5,1) center bold underline
+        
+        LET $var2 = edit($current-date,'DD/MM/YYYY')
+        LET $txt = 'Importé le : ' || $var2
+        PRINT $txt (+2,10) 
+        
+        LET $txt = 'Nom du fichier importé : ' || $fileName
+        PRINT  $txt (+3,10) 
+        
+        PRINT 'Importation du fichier réussie' (+3,10)
+        
+        PRINT 'Nombre de clients importés: '  (+3,10)
+        PRINT #NbrCltImp (,33) edit 9999999999 bold
+        
+        PRINT 'Montant importé ' (+2,10)
+        PRINT #MntImp (,30) edit 9999999999.99 bold
+      
+END-PROCEDURE
+
+!-------------------------------------------------------------------------------
+! Procédure Maj_Tche Mise à jour de l'état de la tâche: $stt
+!-------------------------------------------------------------------------------
+BEGIN-PROCEDURE Maj_Tche ($rowid, $stt, #NbrEnt)
+   do MSG_DefinirLocalisation ('{TRT}_Maj_Tche')
+   do MSG_DefinirRequeteCourante ('UPDATE TCHE')
+   BEGIN-SQL on-error=TrtError('ERROR_SQL')
+     UPDATE TCHE set STT = $stt, DATRLS = SYSDATE, NBRENT = #NbrEnt
+   WHERE ROWID = $rowid
+   END-SQL
+END-PROCEDURE
+
+!-------------------------------------------------------------------------------
+!-- ! If file name is not given, we run the process for all parameterized files in FMTFCHPRL.
+!-- OR $mode ='B'
+!-- FindFileName
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
+!-- ChooseFileName
+!-------------------------------------------------------------------------------
+
+BEGIN-PROCEDURE ChooseFileFormat
+  DO MSG_DefinirLocalisation('{TRT}_ChooseFileFormat')
+
+  LET $FileName = upper($FileName)
+  Let #SwNewAP = 0
+  Let $Dump = ''
+
+! Test in order to know if file exists and record length
+  LET $vFileTxtTest = $FileTxtPath || '\' || $FileName
+  OPEN $vFileTxtTest as 1  For-Reading record=512:VARY status=#vFileStat
+
+  LET $vFileLog1 = $RepLog !|| '\' || {IDTTYPTCHE_DMD_PRL} || '.LOG'
+  OPEN $vFileLog1 as 3  For-Append record=1024:VARY
+  write 3 from '======================================================================'
+  Let $EnteteLog = edit($current-date,'DD-MM-YYYY HH24:MI:SS') || ' : Importation du fichier ' || $vFileTxtTest
+  write 3 from $EnteteLog
+
+! If file does not exists
+  IF #vFileStat <> 0
+    close 1
+    LET $vMsgErr = {ERR_FILE_NOT_FOUND} || $FileTxtPath || '\' || $FileName
+    rollback
+    DO TrtError($vMsgErr)
+    GOTO EndTrtFile
+  ELSE
+    read 1 into $Dump:100
+    Let #LenLgn = length($Dump)
+    if #LenLgn = 46
+      Let #SwNewAP = 1
+    else
+      Let #SwNewAP = 0
+    end-if
+
+    CLOSE 1
+  END-IF
+  
+
+  LET #Nbr = 0
+! We look for the file format according to file name.
+
+! Les enregistrements de la caisse off-line sont effaces s'ils ne sont pas encore 
+! integres. Cas de erreur lors de l'integration precedente pour le meme fichier
+  do MSG_DefinirRequeteCourante('delete ALG_EAPHST')
+!begin-sql on-error=TrtError('ERROR_SQL')
+!  delete ALG_EAPHST
+!    where nom_fichier = $FileName
+!     and Stt = 0;
+!end-sql
+  do MSG_DefinirRequeteCourante('delete CNGLGNCSS')
+begin-sql on-error=TrtError('ERROR_SQL')
+  delete CNGLGNCSS
+    where (IdtCss, IdtCng) in (select IdtCss, IdtCng
+                                 from CNGENT
+                                 where DatInt is null
+                                  and  RfrFic = $FileName);
+end-sql
+  do MSG_DefinirRequeteCourante('delete CNGTTX')
+begin-sql on-error=TrtError('ERROR_SQL')
+  delete CNGTTX
+    where (IdtCss, IdtCng) in (select IdtCss, IdtCng
+                                 from CNGENT
+                                 where DatInt is null
+                                  and  RfrFic = $FileName);
+end-sql
+  do MSG_DefinirRequeteCourante('delete CNGANO')
+begin-sql on-error=TrtError('ERROR_SQL')
+  delete X7.CNGANO
+    where (IdtCss, IdtCng) in (select IdtCss, IdtCng
+                                 from CNGENT
+                                 where DatInt is null
+                                  and  RfrFic = $FileName);
+end-sql
+  do MSG_DefinirRequeteCourante('delete CNGENT')
+begin-sql on-error=TrtError('ERROR_SQL')
+  delete CNGENT
+    where DatInt is null
+     and  RfrFic = $FileName;
+end-sql
+
+BEGIN-SQL on-error=TrtError('ERROR_SQL')
+  ! Nettoyage de la table
+  delete X7.ALG_EAPHST where Nom_Fichier is null;
+  delete X7.ALG_EAPHST 
+    where RfrFicIn not in (select RfrFic from CNGENT) 
+     and nvl(Stt,0) = 0
+     and RowId <> (select min(RowId)
+                      from X7.ALG_EAPHST b
+                      where b.Nom_Fichier = ALG_EAPHST.Nom_Fichier);
+  delete X7.ALG_EAPHST
+    where RfrFicIn = $FileName
+     and  nvl(Stt,0) = 0
+     and  (RowId <> (select min(RowId)
+                      from X7.ALG_EAPHST b
+                      where b.Nom_Fichier = ALG_EAPHST.Nom_Fichier
+                       and  b.RfrFicIN    = ALG_EAPHST.RfrFicIN)
+     or   Nom_Fichier is null);
+END-SQL
+
+! In order insert detail data, we need to create a new consignement if does not exists.
+! At this moment, information for this consignement is not correct
+! about totals because, this insert process is made before read data from the file.
+
+  LET #Line = 0
+
+  LET $RfrFic = $FileName
+
+  LET #TTLCNG    = 0
+  LET #NBRPMTCNG = 0
+
+  LET #IdtLgnCssCng = 0
+
+  EVALUATE #IdtFmtFchPrl
+    when = 01 
+      DO readfile01
+      DO InsEapHst
+      break
+  END-EVALUATE  
+
+!  CLOSE 1
+
+  COMMIT
+
+  write 3 from ' '
+  Let $Txt = '- Nombre de lignes dans le fichier : '
+  Let $Txt = $Txt || edit(#NbrLinesFic, '999,999,999')
+  write 3 from $Txt
+
+  Let $Txt = '- Nombre de lignes importées       : '
+  Let $Txt = $Txt || edit(#NbrLinesImp, '999,999,999')
+  write 3 from $Txt
+
+  Let $Txt = '- Nombre de clients importés       : '
+  Let $Txt = $Txt || edit(#NbrCltImp, '999,999,999')
+  write 3 from $Txt
+
+  write 3 from ' '
+  write 3 from '********  Fin normale du traitement d''importation ********'
+  write 3 from ' '
+  close 3  
+
+EndTrtFile:
+
+END-PROCEDURE ChooseFileFormat
+
+!-----------------------------------------------------------------------------------------
+! procedure d'insertion dans la table temporaire AP
+!-----------------------------------------------------------------------------------------
+BEGIN-PROCEDURE InsALG_EAPINT
+  DO MSG_DefinirLocalisation('{TRT}_InsAlg_EAPINT')
+
+  do MSG_DefinirRequeteCourante('Insert into ALG_EAPINT')
+BEGIN-SQL on-error=TrtError('ERROR_SQL')
+    INSERT INTO ALG_EAPINT (RfrFic,
+                            IdtCntOpr,
+                            IdtClt,
+                            AncRfr,
+                            MntPmt,
+                            Pmt,
+                            DatRgl,
+                            CodAgn,
+                            Lgn)
+                    values ($RfrFic,
+                            $IdtCntOpr,
+                            $IdtClt,
+                            $AncRfr,
+                            #Mnt,
+                            $Pmt,
+                            to_date($DatRgl,'YYYYMMDD'),
+                            $CodAgcPst,
+                            #Line);
+  !COMMIT;
+END-SQL
+END-PROCEDURE
+
+!-----------------------------------------------------------------------
+! Procedure UpdCngEnt
+! OBJETIVO: Actualizar el encabezado de consignacion de acuerdo con la
+!           informacion obtenida del archivo. El total de pagos es 
+!           actualizado con el total de registros en el archivo. Si 
+!           no ha sido posible importar un registro, este sera tomado
+!           en cuenta en el numero de pagos. Este procedimiento es
+!           llamado solo si se genera automaticamente el encabezado de
+!           consignacion
+!-----------------------------------------------------------------------
+BEGIN-PROCEDURE UpdCngEnt
+
+  DO MSG_DefinirLocalisation ('{TRT}_UpdCngEnt')
+
+  DO MSG_DefinirRequeteCourante ('UPDATE CNGENT')
+  BEGIN-SQL on-error=TrtError('ERROR_SQL')
+    update CNGENT
+      set SitCng    = 0,
+          DatRgl    = to_date($DatCrt,'yyyymmdd'),
+          TtlCng    = #TtlCng,
+          NbrPmtCng = #NbrPmtCng,
+          rfrFic    = $RfrFic,
+          DrnNmrLgnCssCng = #IdtLgnCssCng
+      where IdtCss = $IdtCss
+       and  IdtCng = #IdtCng
+  END-SQL
+END-PROCEDURE UpdCngEnt
+
+!-----------------------------------------------------------------------
+! Procedure InsCngTtx
+! OBJETIVO: Realiza la insercion en la tabla de totales por modo de pago
+!           de acuerdo a la informacion de la consignacion. Este 
+!           procedimiento se llama solamente si hay generacion
+!           automatica del encabezado de consignacion
+!-----------------------------------------------------------------------
+BEGIN-PROCEDURE InsCngTtx
+
+  DO MSG_DefinirLocalisation ('{TRT}_InsCngTtx')
+
+  DO MSG_DefinirRequeteCourante ('INSERT INTO CNGTTX')
+  BEGIN-SQL on-error=TrtError('ERROR_SQL')
+    INSERT INTO CNGTTX (IDTCSS,
+                        IDTCNG,
+                        IDTMODRGL,
+                        TTLENCMODRGL,
+                        NBRENCMODRGL)
+                 select IdtCss,
+                        IdtCng,
+                        IdtModRgl,
+                        sum(nvl(MntPmt,0) + nvl(MntAvc,0)),
+                        count(*)
+                   from CNGLGNCSS
+                   where IdtCss = $IdtCss
+                    and  IdtCng = #IdtCng
+                   group by IdtCss,
+                            IdtCng,
+                            IdtModRgl;
+!     Commit;
+  END-SQL
+END-PROCEDURE InsCngTtx
+
+!-----------------------------------------------------------------------
+! Procedure UpdCss
+! OBJETIVO: Actualizacion de la caja con la secuencia de consignacion
+!-----------------------------------------------------------------------
+BEGIN-PROCEDURE UpdCss
+
+  DO MSG_DefinirLocalisation ('{TRT}_UpdCss')
+
+  DO MSG_DefinirRequeteCourante ('UPDATE CSS')
+  BEGIN-SQL on-error=TrtError('ERROR_SQL')
+    update Css
+      set sqcCng = #IdtCng
+      where IdtCss = $IdtCss;
+!    Commit;
+  END-SQL
+END-PROCEDURE UpdCss
+
+! Procedimiento InsCngEnt
+! OBJETIVO: Insercion de la informacion en la tabla CNGENT. Este procedimiento
+!           es llamado solamente si la generacion del encabezado de consignacion
+!           se realiza automaticamente. Si no hay registro de control en el
+!           archivo a importar, se completa la informacion.
+!-------------------------------------------------------------------------------
+BEGIN-PROCEDURE InsCngEnt
+
+  DO MSG_DefinirLocalisation ('{TRT}_InsCngEnt')
+
+
+!  do MSG_DefinirRequeteCourante('select from DVS')
+!BEGIN-SELECT on-error=TrtError('ERROR_SQL')           
+!IdtDvs &IdtDvs
+!from X7.DVS
+!where DvsRfr = 1
+!END-SELECT
+!
+!  LET $IdtDvs = &IdtDvs
+  
+  if #IdtCng = 0
+    do MSG_DefinirRequeteCourante('select from CSS')
+BEGIN-SELECT on-error=TrtError('ERROR_SQL')
+SqcCng &SqcCng
+
+  Let #IdtCng = nvl(&SqcCng,0) + 1
+
+from X7.CSS
+where IdtCss = $IdtCss
+END-SELECT
+
+  end-if !#IdtCng = 0
+ 
+  DO MSG_DefinirRequeteCourante ('INSERT INTO CNGENT')
+
+  BEGIN-SQL on-error=TrtError('ERROR_SQL')
+    INSERT INTO X7.CNGENT (IDTCSS,
+                           IDTCNG,
+                           IDTAGT,
+                           DATRGL,
+                           TTLCNG,
+                           NBRPMTCNG,
+                           DATCTL,
+                           SITCNG,
+                           DATINT,
+                           IDTDVS,
+                           RFRFIC,
+                           DRNNMRLGNCSSCNG,
+                           DATCRT)
+                    VALUES($IdtCss,
+                           #IdtCng,
+                           !** RECUPERER LE NOM UTILISATEUR A PARTIR D'UNE PROCEDURE A CREER
+                           $IdtAgt,
+         !** DATE DE REGLEMENT DECLAREE A PARTIR DE PROGRAM
+                           to_date($DatCrt,'YYYYMMDD'),
+                           #TtlCng,
+                           #NbrPmtCng,
+                           !AAB Null, !DatCtl
+                           null,
+                           null,    !Recaudo Externo
+                           Null, !DatInt
+                           $IdtDvs,  !IdtDvs
+                           $RfrFic,
+                           Null, !DrnNmrLgnCssCng
+                           to_date($DatCrt,'YYYYMMDD'));
+!     COMMIT;
+
+  END-SQL
+
+END-PROCEDURE InsCngEnt
+
+!-----------------------------------------------------------------------------------------
+! procedure d'insertion dans CngLgnCss voir readfile01 et 02 pour les valeurs de champs
+!-----------------------------------------------------------------------------------------
+BEGIN-PROCEDURE InsCngLgnCss
+  DO MSG_DefinirLocalisation('{TRT}_InsCngLgnCss')
+
+!!récupérer IdtCss
+!BEGIN-SELECT
+!IdtCss &IdtCss
+! MOVE &IdtCss TO $IdtCss
+!FROM LGNCSS
+!WHERE LGNCSS.IdtClt = $IdtClt 
+!END-SELECT
+
+!récupérer IdtCptClt et IdtModRgl
+!BEGIN-SELECT
+!IDTCPTCLT &IdtCptClt
+!  MOVE &IdtCptClt TO $IdtCptClt
+!IDTMODRGL &IdtModRgl
+!  MOVE &IdtModRgl TO $IdtModRgl
+!FROM CPTCLT
+!WHERE  CPTCLT.IdtClt = $IdtClt
+!END-SELECT
+
+LET #IDTLGNCSSCNG    = #IDTLGNCSSCNG + 1
+
+  do MSG_DefinirRequeteCourante('Insert into CNGLGNCSS')
+
+BEGIN-SQL on-error=TrtError('ERROR_SQL')
+    INSERT INTO CNGLGNCSS
+       (IDTCSS, 
+       IDTCNG, 
+       IDTLGNCSSCNG, 
+       REFADDLGNCSSCNG, 
+       IDTCLT, 
+       IDTCPTCLT, 
+       NUMFCT, 
+       MNTPMT, 
+       MNTAVC, 
+       IDTMODRGL, 
+       IDTBNQ, 
+       IDTGCH, 
+       NUMCPTBNC, 
+       CLERIB, 
+       NOMTRR, 
+       NUMCHQ, 
+       SITCNG, 
+       CODBRRRGT, 
+       IDTTYPMVMCNG, 
+       IDTFMTCODBRR, 
+       NBRANO,
+       DATRGL)
+values ($IdtCss,
+      #IdtCng,
+      #IdtLgnCssCng,
+      lpad(#Line,5,' '),
+      $IdtClt,
+      1,
+      $NumFct,
+      #MntPmt,
+      #MntAvc,
+      #IdtModRgl, 
+      null, 
+      null, 
+      null, 
+      null, 
+      null, 
+      null, 
+      null, 
+      null, 
+      1, 
+      null, 
+      null,
+      to_date($DatRgl,'YYYYMMDD'));
+  !COMMIT;
+END-SQL
+END-PROCEDURE
+
+
+!-----------------------------------------------------------------------
+! Procedure Rech_Num_Report
+! Recherche de la séquence des rapports
+!-----------------------------------------------------------------------
+BEGIN-PROCEDURE Rech_Num_Report(:#P1_Num_rpt)
+
+  DO MSG_DefinirLocalisation ('{TRT}_Rech_Num_Report')
+
+  DO MSG_DefinirRequeteCourante ('SELECT FROM DUAL')
+BEGIN-SELECT on-error=TrtError('ERROR_SQL')
+seq_rpt.nextval &num_rpt
+ LET #P1_Num_rpt = &num_rpt
+from dual
+End-Select 
+END-PROCEDURE
+
+!-----------------------------------------------------------------------------------------
+! procedure d'historisation des fichiers
+!-----------------------------------------------------------------------------------------
+BEGIN-PROCEDURE HistFile($pFileName)
+
+  DO MSG_DefinirLocalisation ('{TRT}_HistFile')
+
+  Do Rech_Num_Report(#Num_rpt)
+
+  MOVE $_current-date to $vDatHist 'YYYYMMDD'
+  LET $CmdDir = getenv('CMD_DIR')
+  LET $vOldFile = $_FileTxtPath || '\' || $pFileName
+  LET $vNewFile  = $pFileName || '_' || $vDatHist || '_' || to_char(#Num_Rpt)
+
+  LET $HistFile = $CmdDir || '\HistFiles.bat {TRT} ' || $vOldFile || ' ' || $vNewFile
+
+!  print $HistFile (+15,30)
+
+  call system using $HistFile #status
+END-PROCEDURE HistFile
+
+
+
+!-----------------------------------------------------------------------------------------
+! procedure de traitement des erreurs
+!-----------------------------------------------------------------------------------------
+BEGIN-PROCEDURE TrtError($pMsgErr)
+
+!  DO MSG_DefinirLocalisation('{TRT}_TrtError')
+
+  LET $vMsgErr = $pMsgErr
+  if $vMsgErr = 'ERROR_SQL'
+    rollback
+
+    Let $vLine = '  ' || $_MSG_NomLocalisation || ' - Ligne : ' || to_char(#_Line) || ' : ERREUR: Problème d''execution SQL : ' || $_Sql-error
+    write 3 from $vLine
+    write 3 from '########################## CODE SQL ##########################' 
+    write 3 from $_sql-text
+    write 3 from '########################## CODE SQL ##########################' 
+    Do MSG_EcrireErreurSQL ( $_Sql-Error, #CodeRetour )
+    stop quiet
+  else
+    Let $vLine = '  ' || $_MSG_NomLocalisation || ' - Ligne : ' || to_char(#_Line) || ' : ' || $vMsgErr
+    write 3 from $vLine
+  end-if
+
+  DO MSG_EcrireChaine(' ', $vMsgErr, #Rst)
+!  COMMIT
+
+END-PROCEDURE TrtError

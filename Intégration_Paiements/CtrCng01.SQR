@@ -1,0 +1,328 @@
+!--------------------------------------------------------------------------------
+! Generated on Wed Jul 15 19:00:08 1998 by SQR WorkBench for Windows 95/NT
+!
+! Filename: CTRCNG.SQR
+! Module  : Consigment anomalies
+! Format  : Tabular
+! Username: X7
+! Mode    : Graphic Mode. When in Graphics Mode, WorkBench generates 
+!         : code with positional coordinates in points. One point equals 
+!         : 1/72 of an inch or 0.35 millimeters. Thus, to place a column 
+!         : one inch from the left margin the code would be:
+!         :            Print &sqr_variable (1, 72)
+!         : Two inches from the left margin would be:
+!         :            Print &sqr_variable (1, 144)
+! Modificaciones : 
+!                  Marzo 4 1999
+!				    1. Actualizaciones para el nuevo servidor.
+!                  Marzo 6 1999
+!				    1. Adiccion del campo para conocer el nombre de la organizacion.
+!--------------------------------------------------------------------------------
+
+#include 'msg.inc'
+#include 'sql.inc'
+#define CTRCNG
+#include 'o_cstglb.h'
+
+Begin-Setup
+
+ Declare-Layout Default
+  Orientation = Landscape
+  Paper-Size = (A4)
+  Top-Margin    = 0.50 
+  Bottom-Margin = 0.50 
+  Left-Margin   = 1.1 
+  Right-Margin  = 0.50 
+  Line-Height = 1   ! Define a 1 by 1 point grid for
+  Char-Width  = 1   ! precise print positioning
+ End-Declare
+
+End-Setup
+
+Begin-Program
+!Recuperation des paramètres
+	INPUT $user maxlen={MAX_USER_LEN} type=char noprompt
+	INPUT $mode max_len=1 type=char noprompt
+	INPUT $IMP noprompt
+	INPUT $RepGeneration noprompt
+	INPUT $CmdDirectorio noprompt
+	!pour test
+!	LET $user='G'
+!	LET $Mode='R'
+!	LET $IMP='PRINTER:WP'
+!	LET $RepGeneration='.'
+!	Let $CmdDirectorio='.'
+	!fin test
+
+ Do Rech_Num_Report(#Num_rpt)
+ let $Dia = Edit(datenow(),'DD.MM.YYYY')
+ let $filenam = 'CtrCng01_' || to_char(#Num_Rpt) || '_' || $Dia || '.pdf'
+ let $Reportname = $RepGeneration ||'\'||$filenam
+ NEW-REPORT $Reportname
+!Initialisation de la gestion des erreurs
+ Do MSG_DefinirUtilisateur ($user)
+ Do MSG_DefinirTraitement ('{TRT}')
+ Do MSG_Ecrire ('MSG_DEBUT',#Rst)
+
+ Do BaseConsultada($BaseName,$SocName,$Nit)
+ Do Main
+ Do MSG_Ecrire('MSG_FIN',#Rst)
+ !Invocacion de los Reportes Generados (.SPF) en SQRview
+!!! let $ReportName = $ReportName || '.spf' 
+!!! NEW-REPORT 'temp.lis'
+!!! NEW-REPORT $ReportName
+!!! let $invocar = $CmdDirectorio ||  '\Mostrar.cmd' || ' ' || $ReportName
+! call system using $invocar  #status
+End-Program
+
+
+
+Begin-Procedure BaseConsultada(:$P1_BaseName,:$P2_SocName,:$P3_Nit)
+Begin-Select                                                       
+NAME		&NAME                                                      
+ Let $P1_BaseName = &NAME                                          
+ Let $P2_SocName  = 'SEAAL'                                           
+ let $P3_Nit      = ''                                             
+From V$DATABASE                                                    
+End-Select                                                         
+End-Procedure                                                      
+
+Begin-Procedure Main
+  
+  Do msg_definirlocalisation   ('{TRT}_main')
+  Do msg_definirrequetecourante('select from css')
+
+  Let $Fecha = ' '
+
+  do TRTCNG
+  
+End-Procedure
+
+!procedure de traitement par une et une seule consignation
+BEGIN-PROCEDURE TRTCNG
+!AAB Begin-Select Distinct On-error = sql_Erreur
+Begin-Select On-error = sql_Erreur
+ Alter-Printer Font=4 Point-Size=10
+To_Char(DATRGL,'DD/MM/YYYY') &Fecha    (7,90) On-Break PRINT=NEVER Set=1 Level=1
+  !Let $Fecha = &fecha
+  Alter-Printer Font=4 Point-Size=12
+CNGENT.RfrFic	&RfrFic			(,) On-break Print=never Set=1 Level=2 before=rcpficin(&RfrFic)
+	!Do rcpficin(&RfrFic)
+  Alter-Printer Font=4 Point-Size=10
+X7.CNGENT.IDTCSS                 (40,93,8)  On-Break Set=1 Level=3
+X7.CNGENT.IDtCng
+X7.CNGENT.IDTCSS || X7.CNGENT.IdtCng &Cng  (,100) On-Break PRINT=NEVER Set=1 Level=4 After=IDTCSS_After_OBP_101
+LIB||' - '||X7.CNGENT.IDtCng            (40,153,45)
+DATRGL
+  Alter-Printer Font=4 Point-Size=8
+ !Print 'Date d''encaissement'           (7,1) Bold
+  Alter-Printer Font=4 Point-Size=12
+ Print 'Fichier'              (20,1,7) Bold
+ Print &RfrFic              (,93)
+ Print 'Caisse'              (40,1,6) Bold
+  Alter-Printer Font=4 Point-Size=9
+ Print 'Total encaissement'    (15,450) Bold
+CNGENT.TtlCng                  (,550) edit 999,999,999.99
+ Print 'Total en erreur'       (+12,450) Bold
+ALG_APRECCTRL_VIEW1.MntErr     (,550) edit 999,999,999.99
+ Print 'Total à intégrer'    (+12,450) Bold
+ALG_APRECCTRL_VIEW1.MntxInt     (,550) edit 999,999,999.99
+
+ Next-Listing  Need=50
+ Do Anomalias(&X7.CNGENT.IDTCSS, &X7.CNGENT.IDTCNG)
+From  X7.CNGENT, X7.CSS, SSS, ALG_APRECCTRL_VIEW1
+Where X7.CNGENT.IDTCSS = X7.CSS.IDTCSS
+ AND  X7.CNGENT.SITCNG in (0,1)
+ and  ALG_APRECCTRL_VIEW1.IdtCss = CNGENT.IdtCss
+ and  ALG_APRECCTRL_VIEW1.IdtCng = CNGENT.IdtCng
+ and  ALG_APRECCTRL_VIEW1.RfrFicIn = CNGENT.RfrFic
+ AND Trunc(cngent.datctl)=trunc(sss_DatJou)
+ !pour test
+ !AND Trunc(cngent.datctl)=trunc(to_date('12/02/2009','DD/MM/YYYY'))
+ !fin test
+Order By CNGENT.RfrFic, X7.CNGENT.DATRGL, X7.CNGENT.IDTCSS, X7.CNGENT.IDTCNG
+End-Select
+END-PROCEDURE
+
+!procedure de nouvelle page
+Begin-Procedure IDTCSS_After_OBP_101 Local
+ New-Page
+ Alter-Printer Font=4 Point-Size=12
+End-Procedure
+
+
+Begin-Procedure IDTCNG_After_OBP_301 Local
+ Next-Listing  Need=3
+ Graphic (4,1,650) Horz-Line 10 
+ Position (+0,)
+ Next-Listing  Need=57
+ Alter-Printer Font=4 Point-Size=8
+End-Procedure
+
+Begin-Procedure Anomalias ($P1_IDTCSS, #P2_IDTCNG)
+Do msg_definirlocalisation   ('{TRT}_main')
+Do msg_definirrequetecourante('select from cngano')
+Let #_NewPage = 0
+Begin-Select On-error = sql_Erreur
+  if #_NewPage = 1
+    do IDTCNG_Before_OBP_201
+    Let #_NewPage = 0
+  end-if
+ Alter-Printer Font=4 Point-Size=8
+X7.CNGANO.IDTCNG                           (13,21) On-Break Set=2 Level=1 Print=Never Before=IDTCNG_Before_OBP_201 Edit 9999999na
+X7.CNGANO.IDTLGNCSSCNG                     !(13,1) Edit 9,999nu
+LGN.IdtClt                     (,300) 
+SUBSTR(CLT.ANCRFR,3,8)         (,340) 
+LGN.Idtlgncsscng
+LGN.RefAddLgnCssCng								(,1)
+TO_CHAR(LGN.DatRgl,'DD/MM/YYYY')         (,240)
+LGN.NumFct                     (,400)
+LGN.MntPmt                     (,470) Edit 99,999,999.99nu
+LGN.MntAvc                     (,550) Edit 99,999,999.99nu
+LGN.MntPmt + LGN.MntAvc        (,650) Edit 99,999,999.99nu bold
+MSG_LIBELLE                      (13,60) Wrap 50 3 line-height=10 Keep-Top 
+ Next-Listing  Need=22
+From  X7.CNGANO, X7.SYS_MSG, CNGLGNCSS LGN, CLT
+Where X7.CNGANO.MSG_CODE = X7.SYS_MSG.MSG_CODE
+ and  CNGANO.IDTCSS = LGN.IdtCss(+)
+ and  CNGANO.IDTCNG = LGN.IdtCng(+)
+ !and  LGN.IdtTypMvmCng = 100
+ and  CNGANO.IDTLGNCSSCNG = LGN.Idtlgncsscng(+)
+ and  LGN.IdtClt = CLT.IdtClt
+ and  X7.CNGANO.IDTCSS = $P1_IDTCSS
+ and  X7.CNGANO.IDTCNG = #P2_IDTCNG
+Order By nvl(X7.CNGANO.IDTLGNCSSCNG,0)
+End-Select
+End-Procedure
+
+!--------------------------------------------------------------------
+!-- Procedure : rcpficin
+!-- Objectif : recapitulatif de fichiers integres
+!--------------------------------------------------------------------
+
+begin-procedure rcpficin($rfrficin)
+
+  Alter-Printer Font=4 Point-Size=12
+	Print 'RECAPITULATIF' (10,) bold center underline
+	Print 'Fichier  ' (+20,5) bold
+  let #te = 1
+  let #ti = 1
+!  position (-30)
+begin-select
+  Alter-Printer Font=4 Point-Size=12
+rfrficin &rfrficin 
+	!let $ficin = &rfrficin
+	!let #te = 1
+	if #te = 1
+  	Print &rfrficin (,65)
+  	!position (-30)
+	end-if
+		let #te = 0
+		position (-30)
+	Print 'Caisse  ' (+70,25) bold
+CSS.IdtCss || ' ' || CSS.Lib || ' - ' || IdtCng  (,70)
+ Alter-printer Font=4 point-size=10
+  Print 'Exporté' (+20,140) bold
+  Graphic (,110,600) Horz-Line 10
+  Print 'Importé' (,300) bold
+  Print 'En anomalie' (,440) bold
+  Print 'A intégrer' (,630) bold
+
+ Alter-printer Font=4 point-size=8
+  Print 'Date' (+15,5) Bold
+to_char(DatExp,'DD/MM/YYYY')	 (,140)
+to_char(DatImp,'DD/MM/YYYY')		(,300)
+max(to_char(DatCtl,'DD/MM/YYYY')) (,440)
+
+  Print 'Nombre de clients' (+13,5)  Bold
+nvl(NbrCltExp,0) (,119) Edit 999,999,999,999
+nvl(sum(NbrCltImp),0) (,279) Edit 999,999,999,999
+nvl(sum(NbrCltErr),0) (,419)  Edit 999,999,999,999
+nvl(sum(NbrCltXInt),0) (,609)  Edit 999,999,999,999
+  
+  Print 'Montant' (+13,5)  Bold
+  Graphic (,1,710) Horz-Line 8
+nvl(MntExp,0) (,119) Edit 9999,999,999.99na
+nvl(sum(MntImp),0) (,279) Edit 9999,999,999.99na
+nvl(sum(MntErr),0) (,419) Edit 9999,999,999.99na
+nvl(sum(MntXInt),0) (,609) Edit 9999,999,999.99na
+
+	Next-Listing  Need=50
+ from alg_aprecctrl_view1 a, X7.CSS
+  where a.IdtCss = CSS.IdtCss
+   and  a.rfrficin = $rfrficin
+   and  DatInt is null
+  group by rfrficin,CSS.IdtCss, CSS.IdtCss || ' ' || CSS.Lib || ' - ' || IdtCng, to_char(datimp,'DD/MM/YYYY'),to_char(datexp,'DD/MM/YYYY'),nbrcltexp,MntExp
+  order by CSS.idtcss
+end-select
+	new-page
+
+end-procedure
+
+!--------------------------------------------------------------------
+!-- Procedure : titles
+!-- Objectif : titres du récapitulatif
+!--------------------------------------------------------------------
+
+Begin-Procedure IDTCNG_Before_OBP_201 Local
+ Position (+10,)
+ Next-Listing  Need=17
+
+ Alter-Printer Font=4 Point-Size=14
+ Print 'Détail des anomalies' (17,300) Bold
+ Alter-Printer Font=4 Point-Size=8
+ !Print 'Ligne'                    (+17,5) Bold
+ Print 'Ligne fichier'            (+17,1) Bold
+ Print 'Description Erreur'       (,60) Bold
+ Print 'Date Rgl.'                (,240) Bold
+ Print 'Client'                   (,290) Bold
+ Print 'Ancienne Réf.'            (,330) Bold  
+ Print 'Référence'                (,400) Bold
+ Print 'Montant Aff.'             (,480) Bold
+ Print 'Montant Avc.'             (,570) Bold
+ Print 'Montant Ttl.'             (,660) Bold
+
+ Graphic (+2,1,710) Horz-Line 12
+
+ !Position (+10,)
+ Next-Listing  Need=22
+ Alter-Printer Font=4 Point-Size=8
+End-Procedure
+
+!-----------------------------------------------------------------------
+! Procedure Rech_Num_Report
+!-----------------------------------------------------------------------
+Begin-procedure Rech_Num_Report(:#P1_Num_rpt)
+Begin-Select
+seq_rpt.nextval &num_rpt
+ let #P1_Num_rpt = &num_rpt
+from dual
+End-Select
+End-Procedure
+!-----------------------------------------------------------------------
+! Fin Procedure Rech_Num_Report
+!-----------------------------------------------------------------------
+
+Begin-Heading 33
+ Alter-Printer Font=4 Point-Size=12
+ Print $current-date (16,650) edit 'DD/MM/YYYY'
+ print $SocName                      (16,1,13) Underline  Bold 
+ Print 'CONTROLE ENCAISSEMENTS ALGERIE POSTE'    (16,) Bold center
+ Graphic (24,1,710) Horz-Line 12 
+ Let #NewPage = 1
+End-Heading
+
+Begin-Footing 33
+ Alter-Printer Font=4 Point-Size=10
+ Print $filenam (21,200) 
+ Let $Heure = Edit(Datenow(), 'HH:MI')
+ Print 'Heure : ' (21,415)
+ Print $Heure (21,455)
+
+ print #page-count (21,680) edit 999
+ Print '/'   (21,698)
+ Last-Page   (21,705)
+
+ Graphic (4,1,710) Horz-Line 12
+ Print 'CTRCNG01' (21,1,10) Bold
+End-Footing

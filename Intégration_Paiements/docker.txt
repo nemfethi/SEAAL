@@ -1,0 +1,15 @@
+Lancement de Docker MySql
+docker run --name other-mysql -e MYSQL_ROOT_PASSWORD=fethi -d mysql:latest -v /host_mnt/D/docker/mysql:/var/lib/mysql
+
+Creation de la DB 
+CREATE DATABASE `Epay_Seaal` CHARACTER SET 'utf8';
+
+
+Pour la connection à la DB
+mysql -DEpay_Seaal -pfethi
+
+Pour copier le script sur le container
+docker cp .\epayment_transactions.sql 48add64921ed:/
+
+pour exécuter le script de la table
+mysql -DEpay_Seaal -pfethi <./epayment_transactions.sql

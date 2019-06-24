@@ -1,0 +1,22 @@
+{
+  "errorCode": 0,
+  "orderStatuses": [
+    {
+      "errorCode": "0",
+      "orderNumber": "57drs0Pes459Hdsddd0567a0",
+      "orderStatus": 2,
+      "actionCode": 0,
+      "actionCodeDescription": "Request processed successfully",
+      "amount": 250000,
+      "currency": "643",
+      "date": 1414485649233,
+      "orderDescription": "Opisanie",
+      "ip": "212.5.125.194",
+      "bankCountryCode": "RU",
+      "bankCountryName": "Russian Federation"
+    }
+  ],
+  "totalCount": 1,
+  "page": 0,
+  "pageSize": 100
+}
