@@ -33,7 +33,7 @@ BEGIN-PROGRAM
 	LET $mode = 'R'       
 	! LET $pIdtFac = '13116952'       
 	! LET $pIdtFac = '22144963'       
-	LET $pIdtFac = '18757850'       
+	LET $pIdtFac = '2377674'       
   !LET $IMP  = ''
   ! LET $RepGeneration = 'c:\temp'
   LET $RepGenerationfic = 'c:\temp\spool'
@@ -3505,7 +3505,7 @@ FacAlg.Z103 &Z103 ! calcul du timbre fiscal(payement en espï¿½ce)
   show 'temp_net: ' #temp_net
   do timbre_fiscal( #temp_net , #timbre_net)
   show 'Timbre fiscal net à payer: ' #timbre_net
-	let $_Z103 = ltrim(edit(&Z103,'999999999999.99'),' ')
+	let $_Z103 = ltrim(edit(#timbre_net,'999999999999.99'),' ')
 	! let $_netplustimbre = ltrim(edit(&Z97 + #Solde_Date + &Z103,'999999999999.99'),' ')
 	let $_netplustimbre = ltrim(edit(&Z97 + #Solde_Date + #timbre_net,'999999999999.99'),' ')
 	show 'net à payer + timbre :' $_netplustimbre

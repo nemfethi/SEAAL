@@ -1,5 +1,5 @@
-bddIP=172.16.40.190
-bddSID=X7ALGFNE
+bddIP=Siege-env-X7.siege.seaal
+bddSID=X7ALGTST
 bddPort=1521
 bddPwd=X7
 IDTTYPTCHE=TRT5020

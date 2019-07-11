@@ -1,5 +1,6 @@
 create or replace procedure ALG_epay_TRT( idTraitement in number, 
-                                          nbLignesIntegrees out number) is
+                                          nbLignesIntegrees out number,
+                                          pErr out Varchar2) is
 vIdtCss Css.IdtCss%type :='DC_001';
 vSqcCng Css.SqcCng%type;
 vIdtDvs Dvs.IdtDvs%type;
@@ -115,5 +116,9 @@ update Css
       set sqcCng = vSqcCng
       where IdtCss = vIdtCss;
 return;
+
+exception
+  when others then
+    pErr:='E';
 end ALG_epay_TRT;
 /
