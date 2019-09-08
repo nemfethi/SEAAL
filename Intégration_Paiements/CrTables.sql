@@ -22,7 +22,7 @@ transaction_statut varchar2(256),
 Satim_stt number(1)
 );
 
-Drop table Alg_Epay_Ent;
+Drop table Alg_Epay_Ent purge;
 
 Create table Alg_Epay_Ent
 (

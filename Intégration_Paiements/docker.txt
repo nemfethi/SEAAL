@@ -10,6 +10,7 @@ mysql -DEpay_Seaal -pfethi
 
 Pour copier le script sur le container
 docker cp .\epayment_transactions.sql 48add64921ed:/
+docker cp .\table_data.sql 48add64921ed:/
 
 pour exécuter le script de la table
 mysql -DEpay_Seaal -pfethi <./epayment_transactions.sql
