@@ -8,3 +8,4 @@ Intégration_Distribution/ALG_DIST_ENT.xml
 Reprint/~$Référentiel Détail facture V2.xlsx
 Reprint/Référentiel Détail facture V2.xlsx
 .gitignore
+Facture_en_local/*.sqt
