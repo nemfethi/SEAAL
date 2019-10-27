@@ -1,11 +1,16 @@
+Drop table Alg_Dist_Ent;
+
 Create table Alg_Dist_Ent (
 IDTDST number,
 FICDST VARCHAR2(255),
 DATFIC Date,
-STT VARCHAR2(1)
-DATIMP Date
+STT VARCHAR2(1),
+DATIMP Date,
+SizeFic number,
+DateFic date
 );
 
+Drop Table  Alg_Dist_Dtl;
 
 Create table Alg_Dist_Dtl (
 IDTDST number,
@@ -13,7 +18,14 @@ CLEDST VARCHAR2(255),
 CLTDST VARCHAR2(6),
 AGTDST VARCHAR2(6),
 STTDST VARCHAR2(1),
-COMDST VARCHAR2(255)
+COMDST VARCHAR2(255),
+ORGDATDST VARCHAR2(255),
 DATDSTDTL Date,
-LNGDTS number,
-LATDST number);
+LNGDST number,
+ORGLNGDST VARCHAR2(255),
+LATDST number,
+ORGLATDST VARCHAR2(255),
+NUMFCT VARCHAR2(10),
+IDTSQCGNR number,
+INT number(1),
+STT VARCHAR2(1));
