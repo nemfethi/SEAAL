@@ -4,5 +4,6 @@ Spool init.log
 @@migration.pkb
 @@Alg_impclt.pks
 @@Alg_impclt.pkb
+@@data.sql
 
 spool off

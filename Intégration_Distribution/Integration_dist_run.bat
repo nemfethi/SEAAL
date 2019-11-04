@@ -1,0 +1,3 @@
+%~d0
+cd %~dp0
+java -Dtalend.component.manager.m2.repository=%cd%/../lib -Xms256M -Xmx1024M -cp .;../lib/routines.jar;../lib/advancedPersistentLookupLib-1.2.jar;../lib/commons-collections-3.2.2.jar;../lib/dom4j-1.6.1.jar;../lib/filecopy.jar;../lib/jakarta-oro-2.0.8.jar;../lib/jboss-serialization.jar;../lib/jxl.jar;../lib/log4j-1.2.17.jar;../lib/ojdbc14.jar;../lib/ojdbc6.jar;../lib/ojdbc7.jar;../lib/talend-oracle-timestamptz.jar;../lib/talend_file_enhanced_20070724.jar;../lib/talendcsv.jar;../lib/trove.jar;integration_dist_0_3.jar;inseretache_model_0_1.jar;postintegration_seaal_0_2.jar; interfaces_seaal.integration_dist_0_3.Integration_dist  --context_param contextFile=./distribution.properties %*

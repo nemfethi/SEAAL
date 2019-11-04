@@ -12,3 +12,6 @@ TalendDate.isDate(row2.Date_de_d_stribution,"dd/MM/yy HH:mm:ss")?TalendDate.pars
 TalendDate.isDate(row2.Date_de_d_stribution,"dd/MM/yy HH:mm:ss")?(
 TalendDate.isDate(row2.Date_de_d_stribution,"dd/MM/yy hh:mm:ss")?TalendDate.parseDate("dd/MM/yy hh:mm:ss",row2.Date_de_d_stribution,true):null) 
 TalendDate.parseDate("dd/MM/yy HH:mm:ss",row2.Date_de_d_stribution,true):null 
+
+
+StringHandling.TRIM(row3.Date_de_d_stribution)!=""

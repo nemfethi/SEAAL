@@ -140,7 +140,9 @@ end Import;
   -- *********************************
   -- N° 1. Total de la consignation = Total encaissé par mode de règlement
   -- *********************************
-  PROCEDURE CtrlTotCngModRglt (pIdtCss CNGENT.IdtCss%TYPE, pIdtCng CNGENT.IdtCng%TYPE)
+  PROCEDURE CtrlTotCngModRglt ( pIdtCss CNGENT.IdtCss%TYPE, 
+                                pIdtCng CNGENT.IdtCng%TYPE, 
+                                nErr out number)
   IS
     vSwControl NUMBER(1);
     CURSOR cWork IS SELECT MAX(CNGENT.IDTCSS) IDTCSS,
@@ -159,6 +161,7 @@ end Import;
                     GROUP BY CNGENT.IdtCss, CNGENT.IdtCng;
   BEGIN
     TrtMsg01.InsertItem(Err_TableName,'CTRLTOTCNGMODRGLT');
+    nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -170,6 +173,7 @@ end Import;
         VALUES (cCng.IdtCss, cCng.IdtCng, 1, NULL, 'MSGCNG_ERR0001', 'C: ' ||
                 TO_CHAR(cCng.TtlCng,'999,999,990.99') || ' | P: ' ||
                 TO_CHAR(cCng.TtlModRgl,'999,999,990.99'));
+                nErr := nErr + 1 ;
         vCptAno := 1;
       END LOOP;
     END IF;
@@ -178,7 +182,9 @@ end Import;
   -- *********************************
   -- N° 2. Total de la consignation = Total des montants du paiement des lignes d'encaissement
   -- *********************************
-  PROCEDURE CtrlTotPmtLgnEcss(pIdtCss CNGENT.IdtCss%TYPE, pIdtCng CNGENT.IdtCng%TYPE, nErr out number)
+  PROCEDURE CtrlTotPmtLgnEcss(pIdtCss CNGENT.IdtCss%TYPE, 
+                              pIdtCng CNGENT.IdtCng%TYPE, 
+                              nErr out number)
   IS
     vSwControl NUMBER(1);
     CURSOR cWork IS SELECT MAX(CNGENT.IDTCSS) IdtCss,
@@ -219,7 +225,9 @@ end Import;
   -- N° 3. Total par mode de règlement des montants du paiement des lignes d'encaissement = total
   --     encaissé par mode de règlement
   -- *********************************
-  PROCEDURE CtrlTotModRglt (pIdtCss CNGENT.IdtCss%TYPE, pIdtCng CNGENT.IdtCng%TYPE)
+  PROCEDURE CtrlTotModRglt (pIdtCss CNGENT.IdtCss%TYPE, 
+                            pIdtCng CNGENT.IdtCng%TYPE,
+                            nErr out number)
   IS
     vSwControl NUMBER(1);
     CURSOR cWork IS SELECT MAX(CNGTTX.IDTCSS) IdtCss,
@@ -242,6 +250,7 @@ end Import;
                   GROUP BY CNGTTX.IdtCss,CNGTTX.IdtCng,MODRGL.ModPmt;
   BEGIN
     TrtMsg01.InsertItem(Err_TableName,'CTRLTOTMODRGLT');
+    nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -255,6 +264,7 @@ end Import;
                 ' | P: ' || TO_CHAR(cCng.TtlModRglLgn,'999,999,990.99') || ' | ' ||
                 cCng.ModPmt);
         vCptAno := 1;
+        nErr := nErr + 1 ;
       END LOOP;
     END IF;
     TrtMsg01.DeleteItem(Err_TableName);
@@ -263,9 +273,9 @@ end Import;
   -- N° 4. Nombre de paiements de la consignation = nombre de lignes des lignes d'encaissement
   --     pour cette consignation
   -- *********************************
-  PROCEDURE CtrlNbPmtCng
-  (pIdtCss CNGENT.IdtCss%TYPE,
-    pIdtCng CNGENT.IdtCng%TYPE)
+  PROCEDURE CtrlNbPmtCng( pIdtCss CNGENT.IdtCss%TYPE,
+                          pIdtCng CNGENT.IdtCng%TYPE, 
+                          nErr out number)
   IS
     vSwControl NUMBER(1);
     CURSOR cWork IS SELECT MAX(CNGENT.IDTCSS) IdtCss,
@@ -284,6 +294,7 @@ end Import;
                 GROUP BY CNGENT.IdtCss, CNGENT.IdtCss;
   BEGIN
     TrtMsg01.InsertItem(Err_TableName,'CTRLNBPMTCNG');
+    nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -296,6 +307,7 @@ end Import;
                 'C: ' || TO_CHAR(cCng.NBRPMTCNG,'99,999,999,990') || '      | P: ' ||
                 TO_CHAR(cCng.NbrPmtLgn,'99,999,999,990'));
         vCptAno := 1;
+        nErr := nErr + 1 ;
       END LOOP;
     END IF;
     TrtMsg01.DeleteItem(Err_TableName);
@@ -304,9 +316,10 @@ end Import;
   -- N° 5. Nombre d'encaissement par mode de règlement = Nombre de lignes des lignes d'encaissement
   --     pour cette consignation pour ce mode de règlement
   -- *********************************
-  PROCEDURE CtrlNbEcssModRglt
-  (pIdtCss CNGENT.IdtCss%TYPE,
-    pIdtCng CNGENT.IdtCng%TYPE)
+  PROCEDURE CtrlNbEcssModRglt(pIdtCss CNGENT.IdtCss%TYPE,
+                              pIdtCng CNGENT.IdtCng%TYPE, 
+                              nErr out number)
+  
   IS
     vSwControl NUMBER(1);
     CURSOR cWork IS SELECT
@@ -352,6 +365,7 @@ end Import;
         AND  IdtCng = pIdtCng);
   BEGIN
     TrtMsg01.InsertItem(Err_TableName,'CTRLNBECSSMODRGLT');
+    nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -364,6 +378,7 @@ end Import;
                 'C: ' || TO_CHAR(cCng.NbrEncModRgl,'99,999,999,999') || '      | P: ' ||
                 TO_CHAR(cCng.NbrModRglLgn,'99,999,999,999') || '      | ' || cCng.ModPmt);
         vCptAno := 1;
+        nErr := nErr + 1 ;
       END LOOP;
     END IF;
     TrtMsg01.DeleteItem(Err_TableName);
@@ -371,9 +386,9 @@ end Import;
   -- *********************************
   -- N° 6. Une seule consignation par caisse et par jour (date de règlement)
   -- *********************************
-  PROCEDURE CtrlUneCngCssJour
-  (pIdtCss CNGENT.IdtCss%TYPE,
-    pIdtCng CNGENT.IdtCng%TYPE)
+  PROCEDURE CtrlUneCngCssJour(pIdtCss CNGENT.IdtCss%TYPE,
+                              pIdtCng CNGENT.IdtCng%TYPE, 
+                              nErr out number)
   IS
     vSwControl NUMBER(1);
     CURSOR cWork IS
@@ -384,6 +399,7 @@ end Import;
     nLigne NUMBER;
   BEGIN
     TrtMsg01.InsertItem(Err_TableName,'CTRLUNECNGCSSJOUR');
+    nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -400,6 +416,7 @@ end Import;
           INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
           VALUES (cCng.IDTCSS, cCng.IDTCNG, 6, NULL, 'MSGCNG_ERR0006', TO_CHAR(cCng.DATRGL));
                   vCptAno := 1;
+                  nErr := nErr + 1 ;
         END IF;
       END LOOP;
     END IF;
@@ -408,9 +425,9 @@ end Import;
   -- *********************************
   -- N° 8. Date de règlement de la consignation <= Date du jour
   -- *********************************
-  PROCEDURE CtrlDatRgltCng
-  (pIdtCss CNGENT.IdtCss%TYPE,
-    pIdtCng CNGENT.IdtCng%TYPE)
+  PROCEDURE CtrlDatRgltCng (pIdtCss CNGENT.IdtCss%TYPE,
+                            pIdtCng CNGENT.IdtCng%TYPE, 
+                            nErr out number)
   IS
     vSwControl NUMBER(1);
     CURSOR cWork IS SELECT IDTCSS,IDTCNG, DATRGL
@@ -420,6 +437,7 @@ end Import;
         AND TRUNC(DATRGL) > (SELECT TRUNC(SYSDATE) FROM dual);
   BEGIN
     TrtMsg01.InsertItem(Err_TableName,'CTRLDATRGLTCNG');
+    nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -430,6 +448,7 @@ end Import;
         INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
         VALUES (cCng.IDTCSS, cCng.IDTCNG, 8, NULL, 'MSGCNG_ERR0008', TO_CHAR(cCng.DATRGL));
         vCptAno := 1;
+        nErr := nErr + 1 ;
       END LOOP;
     END IF;
     TrtMsg01.DeleteItem(Err_TableName);
@@ -437,9 +456,9 @@ end Import;
   -- *********************************
   -- N° 16. Cliente existe
   -- *********************************
-  PROCEDURE CtrlExistClt
-  (pIdtCss CNGENT.IdtCss%TYPE,
-    pIdtCng CNGENT.IdtCng%TYPE)
+  PROCEDURE CtrlExistClt( pIdtCss CNGENT.IdtCss%TYPE,
+                          pIdtCng CNGENT.IdtCng%TYPE, 
+                          nErr out number)
   IS
     vSwControl NUMBER(1);
     CURSOR cWork IS SELECT IDTCSS, IDTCNG,
@@ -452,6 +471,7 @@ end Import;
                   WHERE CNGLGNCSS.IdtClt = CLT.IdtClt);
   BEGIN
     TrtMsg01.InsertItem(Err_TableName,'CTRLEXISTCLT');
+    nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -462,6 +482,7 @@ end Import;
         INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
         VALUES (cCng.IDTCSS, cCng.IDTCNG, 16, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0016', cCng.IDTCLT);
         vCptAno := 1;
+        nErr := nErr + 1 ;
         -- *FNE: vExistFct := 0;
       END LOOP;
     END IF;
@@ -470,9 +491,9 @@ end Import;
   -- *********************************
   -- N° 17. Pas deux fois le même numéro de Client dans une même consignation
   -- *********************************
-  PROCEDURE CtrlPasDeuxNbCltCng
-  (pIdtCss CNGENT.IdtCss%TYPE,
-    pIdtCng CNGENT.IdtCng%TYPE)
+  PROCEDURE CtrlPasDeuxNbCltCng(  pIdtCss CNGENT.IdtCss%TYPE,
+                                  pIdtCng CNGENT.IdtCng%TYPE, 
+                                  nErr out number)
   IS
     vSwControl NUMBER(1);
     CURSOR cWork IS
@@ -490,6 +511,7 @@ end Import;
                         AND CNGLGNCSS1.IdtTypMvmCng = 3);
   BEGIN
     TrtMsg01.InsertItem(Err_TableName,'CTRLPASDEUXNBCLTCNG');
+    nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -500,6 +522,7 @@ end Import;
         INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
         VALUES (cCng.IDTCSS, cCng.IDTCNG, 17, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0017', cCng.IDTCLT);
         vCptAno := 1;
+        nErr := nErr + 1 ;
       END LOOP;
     END IF;
     TrtMsg01.DeleteItem(Err_TableName);
@@ -507,9 +530,9 @@ end Import;
   -- *********************************
   -- N° 25. Une seule consignation par référence externe
   -- *********************************
-  PROCEDURE CtrlUneCngRfrExt
-  (pIdtCss CNGENT.IdtCss%TYPE,
-    pIdtCng CNGENT.IdtCng%TYPE)
+  PROCEDURE CtrlUneCngRfrExt( pIdtCss CNGENT.IdtCss%TYPE,
+                              pIdtCng CNGENT.IdtCng%TYPE, 
+                              nErr out number)
   IS
     vSwControl NUMBER(1);
     CURSOR cWork IS
@@ -525,6 +548,7 @@ end Import;
     nLigne NUMBER;
   BEGIN
     TrtMsg01.InsertItem(Err_TableName,'CTRLUNECNGRFREXT');
+    nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -535,6 +559,7 @@ end Import;
         INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
         VALUES (cCng.IDTCSS, cCng.IDTCNG, 25, NULL, 'MSGCNG_ERR0025', cCng.RefAddCng);
         vCptAno := 1;
+        nErr := nErr + 1 ;
       END LOOP;
     END IF;
     TrtMsg01.DeleteItem(Err_TableName);
@@ -542,9 +567,9 @@ end Import;
   -- *********************************
   -- N° 27. Cliente con un solo pago en la consiganci?n
   -- *********************************
-  PROCEDURE CtrlCltDeuxRglCng
-  (pIdtCss CNGENT.IdtCss%TYPE,
-    pIdtCng CNGENT.IdtCng%TYPE)
+  PROCEDURE CtrlCltDeuxRglCng( pIdtCss CNGENT.IdtCss%TYPE,
+                              pIdtCng CNGENT.IdtCng%TYPE, 
+                              nErr out number)
   IS
     vSwControl NUMBER(1);
     CURSOR cWork IS
@@ -560,6 +585,7 @@ end Import;
                         AND CNGLGNCSS1.ROWID != CNGLGNCSS.ROWID);
   BEGIN
     TrtMsg01.InsertItem(Err_TableName,'CTRLCLTDEUXRGLCNG');
+    nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -570,6 +596,7 @@ end Import;
         INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
         VALUES (cCng.IDTCSS, cCng.IDTCNG, 27, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0027', cCng.IDTCLT);
         vCptAno := 1;
+        nErr := nErr + 1 ;
       END LOOP;
     END IF;
     TrtMsg01.DeleteItem(Err_TableName);
@@ -577,9 +604,9 @@ end Import;
   -- *********************************
   -- N° 28. Cliente con un solo pago en la consiganci?n por el mismo valor
   -- *********************************
-  PROCEDURE CtrlCltMntDeuxRglCng
-  (pIdtCss CNGENT.IdtCss%TYPE,
-    pIdtCng CNGENT.IdtCng%TYPE)
+  PROCEDURE CtrlCltMntDeuxRglCng( pIdtCss CNGENT.IdtCss%TYPE,
+                                  pIdtCng CNGENT.IdtCng%TYPE, 
+                                  nErr out number)
   IS
     vSwControl NUMBER(1);
     CURSOR cWork IS
@@ -597,6 +624,7 @@ end Import;
                         AND CNGLGNCSS1.ROWID != CNGLGNCSS.ROWID);
   BEGIN
     TrtMsg01.InsertItem(Err_TableName,'CTRLCLTMNTDEUXRGLCNG');
+    nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -607,6 +635,7 @@ end Import;
         INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
         VALUES (cCng.IDTCSS, cCng.IDTCNG, 28, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0028', cCng.IDTCLT);
         vCptAno := 1;
+        nErr := nErr + 1 ;
       END LOOP;
     END IF;
     TrtMsg01.DeleteItem(Err_TableName);
@@ -615,9 +644,9 @@ end Import;
   -- N° 13. Si le mode de règlement est prélèvement, le nom du tireur, le code banque,
   --    le numéro de compte bancaire, la clé RIB et le code guichet sont obligatoires
   -- *********************************
-  PROCEDURE CtrlModRgltChq
-  (pIdtCss CNGENT.IdtCss%TYPE,
-    pIdtCng CNGENT.IdtCng%TYPE)
+  PROCEDURE CtrlModRgltChq( pIdtCss CNGENT.IdtCss%TYPE,
+                          pIdtCng CNGENT.IdtCng%TYPE, 
+                          nErr out number)
   IS
     vSwControl NUMBER(1);
     CURSOR cWork IS SELECT IDTCSS, IDTCNG, NUMFCT, IDTLGNCSSCNG
@@ -632,6 +661,7 @@ end Import;
         );
   BEGIN
     TrtMsg01.InsertItem(Err_TableName,'CTRLMODRGLTCHQ');
+    nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -642,6 +672,7 @@ end Import;
         INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
         VALUES (cCng.IDTCSS, cCng.IDTCNG, 13, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0013', NULL);
         vcptano := 1;
+        nErr := nErr + 1 ;
       END LOOP;
     END IF;
     TrtMsg01.DeleteItem(Err_TableName);
@@ -651,9 +682,9 @@ end Import;
   -- *********************************
   -- N° 31. Paiement date is valid (SEAAL)
   -- *********************************
-  PROCEDURE CtrlDatRglVld_SEAAL
-  (pIdtCss CNGENT.IdtCss%TYPE,
-    pIdtCng CNGENT.IdtCng%TYPE)
+  PROCEDURE CtrlDatRglVld_SEAAL(  pIdtCss CNGENT.IdtCss%TYPE,
+                                  pIdtCng CNGENT.IdtCng%TYPE, 
+                                  nErr out number)
   IS
     vSwControl NUMBER(1);
     vNbrJouDec number := 2; -- Jours de decalage avec la semaine en algerie, la semaine demarre le samedi, pas le lundi
@@ -676,6 +707,7 @@ end Import;
     nLigne NUMBER;
   BEGIN
     TrtMsg01.InsertItem(Err_TableName,'CtrlDatRglVld_SEAAL');
+    nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -686,6 +718,7 @@ end Import;
         INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
         VALUES (cCng.IDTCSS, cCng.IDTCNG, 31, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0031', null);
         vCptAno := 1;
+        nErr := nErr + 1 ;
       END LOOP;
     END IF;
     TrtMsg01.DeleteItem(Err_TableName);
@@ -693,9 +726,9 @@ end Import;
   -- *********************************
   -- N° 32. Le client a ete exporte (SEAAL)
   -- *********************************
-  PROCEDURE CltUneFois_SEAAL
-  (pIdtCss CNGENT.IdtCss%TYPE,
-    pIdtCng CNGENT.IdtCng%TYPE)
+  PROCEDURE CltUneFois_SEAAL( pIdtCss CNGENT.IdtCss%TYPE,
+                              pIdtCng CNGENT.IdtCng%TYPE, 
+                              nErr out number)
   IS
     vSwControl NUMBER(1);
     CURSOR cWork IS
@@ -714,6 +747,7 @@ end Import;
     nLigne NUMBER;
   BEGIN
     TrtMsg01.InsertItem(Err_TableName,'CltUneFois_SEAAL');
+    nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -724,6 +758,7 @@ end Import;
         INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
         VALUES (cCng.IDTCSS, cCng.IDTCNG, 32, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0032', null);
         vCptAno := 1;
+        nErr := nErr + 1 ;
       END LOOP;
     END IF;
     TrtMsg01.DeleteItem(Err_TableName);
@@ -731,9 +766,9 @@ end Import;
   -- *********************************
   -- N° 33. Date de reglement inferieure a la date du jour (SEAAL)
   -- *********************************
-  PROCEDURE DatRglFut_SEAAL
-  (pIdtCss CNGENT.IdtCss%TYPE,
-    pIdtCng CNGENT.IdtCng%TYPE)
+  PROCEDURE DatRglFut_SEAAL( pIdtCss CNGENT.IdtCss%TYPE,
+                          pIdtCng CNGENT.IdtCng%TYPE, 
+                          nErr out number)
   IS
     vSwControl NUMBER(1);
     CURSOR cWork IS
@@ -748,6 +783,7 @@ end Import;
     nLigne NUMBER;
   BEGIN
     TrtMsg01.InsertItem(Err_TableName,'DatRglFut_SEAAL');
+    nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -758,6 +794,7 @@ end Import;
         INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
         VALUES (cCng.IDTCSS, cCng.IDTCNG, 33, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0008', null);
         vCptAno := 1;
+        nErr := nErr + 1 ;
       END LOOP;
     END IF;
     TrtMsg01.DeleteItem(Err_TableName);
@@ -765,9 +802,9 @@ end Import;
   -- *********************************
   -- N° 34. Le client n'a pas deja ete importe dans un autre fichier (SEAAL)
   -- *********************************
-  PROCEDURE CltImp_SEAAL
-  (pIdtCss CNGENT.IdtCss%TYPE,
-    pIdtCng CNGENT.IdtCng%TYPE)
+  PROCEDURE CltImp_SEAAL( pIdtCss CNGENT.IdtCss%TYPE,
+                          pIdtCng CNGENT.IdtCng%TYPE, 
+                          nErr out number)
   IS
     vSwControl NUMBER(1);
     CURSOR cWork IS
@@ -787,6 +824,7 @@ end Import;
     nLigne NUMBER;
   BEGIN
     TrtMsg01.InsertItem(Err_TableName,'CltImp_SEAAL');
+    nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -797,6 +835,7 @@ end Import;
         INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
         VALUES (cCng.IDTCSS, cCng.IDTCNG, 34, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0034', null);
         vCptAno := 1;
+        nErr := nErr + 1 ;
       END LOOP;
     END IF;
     TrtMsg01.DeleteItem(Err_TableName);
@@ -804,9 +843,9 @@ end Import;
   -- *********************************
   -- N° 35. L'encaissement n'a pas deja ete INTEGRE auparavant
   -- *********************************
-  PROCEDURE RglInt_SEAAL
-  (pIdtCss CNGENT.IdtCss%TYPE,
-    pIdtCng CNGENT.IdtCng%TYPE)
+  PROCEDURE RglInt_SEAAL( pIdtCss CNGENT.IdtCss%TYPE,
+                          pIdtCng CNGENT.IdtCng%TYPE, 
+                          nErr out number)
   IS
     vSwControl NUMBER(1);
   -- FBE: 10 06 2010   CURSOR cWork IS
@@ -835,6 +874,7 @@ end Import;
     nLigne NUMBER;
   BEGIN
     TrtMsg01.InsertItem(Err_TableName,'RglInt_SEAAL');
+    nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -845,13 +885,14 @@ end Import;
         INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
         VALUES (cCng.IDTCSS, cCng.IDTCNG, 35, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0035', null);
         vCptAno := 1;
+        nErr := nErr + 1 ;
       END LOOP;
     END IF;
     TrtMsg01.DeleteItem(Err_TableName);
   END RglInt_SEAAL;
 PROCEDURE Controles(  idTraitement in number, 
                       nbLignesIntegrees out number,
-                      pErr out Varchar2)
+                      pErr out NUMBER)
 IS
 pIdtCss CngEnt.IdtCss%type;
 pIdtCng CngEnt.IdtCng%type;
@@ -868,40 +909,51 @@ BEGIN
   nbLignesIntegrees := nbLignesIntegrees + nbAno;
   -- Total par mode de règlement des montants du paiement des lignes d'encaissement = total
   --     encaissé par mode de règlement
-  CtrlTotModRglt (pIdtCss, pIdtCng);
+  CtrlTotModRglt (pIdtCss, pIdtCng, nbAno)  ;
+  nbLignesIntegrees := nbLignesIntegrees + nbAno;
   -- Nombre de paiements de la consignation = nombre de lignes des lignes d'encaissement
   --     pour cette consignation
-  CtrlNbPmtCng (pIdtCss, pIdtCng);
+  CtrlNbPmtCng (pIdtCss, pIdtCng, nbAno)  ;
+  nbLignesIntegrees := nbLignesIntegrees + nbAno;
   -- Nombre d'encaissement par mode de règlement = Nombre de lignes des lignes d'encaissement
   --     pour cette consignation pour ce mode de règlement
-  CtrlNbEcssModRglt (pIdtCss, pIdtCng);
+  CtrlNbEcssModRglt (pIdtCss, pIdtCng, nbAno)  ;
+  nbLignesIntegrees := nbLignesIntegrees + nbAno;
   -- *********************************
   -- Contrôle des données de la table consignation en-tête
   -- Date cohérente
   -- *********************************
   --     Une seule consignation par caisse et par jour (date de règlement)
-  CtrlUneCngCssJour (pIdtCss, pIdtCng);
+  CtrlUneCngCssJour (pIdtCss, pIdtCng, nbAno)  ;
+  nbLignesIntegrees := nbLignesIntegrees + nbAno;
   -- Control una sola consignaci?n por referencia externa
-  CtrlUneCngRfrExt (pIdtCss, pIdtCng);
+  CtrlUneCngRfrExt (pIdtCss, pIdtCng, nbAno)  ;
+  nbLignesIntegrees := nbLignesIntegrees + nbAno;
   -- Control una sola consignaci?n por archivo importado
 
-  CtrlDatRgltCng (pIdtCss, pIdtCng);
+  CtrlDatRgltCng (pIdtCss, pIdtCng, nbAno)  ;
+  nbLignesIntegrees := nbLignesIntegrees + nbAno;
   -- *********************************
   -- Contrôle des données de la table consignation lignes d'encaissement
   -- *********************************
   -- Cliente existe
-  CtrlExistClt (pIdtCss, pIdtCng);
+  CtrlExistClt (pIdtCss, pIdtCng, nbAno)  ;
+  nbLignesIntegrees := nbLignesIntegrees + nbAno;
     -- Pas deux fois le même numéro de client dans une même consignation
-    CtrlPasDeuxNbCltCng (pIdtCss, pIdtCng);
+    CtrlPasDeuxNbCltCng (pIdtCss, pIdtCng, nbAno)  ;
+  nbLignesIntegrees := nbLignesIntegrees + nbAno;
     -- Pas deux fois le même numéro de facture dans une même consignation
   --   end if;
   -- Control un solo pago por cliente en la consignaci?n
-  CtrlCltDeuxRglCng (pIdtCss, pIdtCng);
+  CtrlCltDeuxRglCng (pIdtCss, pIdtCng, nbAno)  ;
+  nbLignesIntegrees := nbLignesIntegrees + nbAno;
   -- Control un solo cliente por consignaci?n con el mismo valor
-  CtrlCltMntDeuxRglCng (pIdtCss, pIdtCng);
+  CtrlCltMntDeuxRglCng (pIdtCss, pIdtCng, nbAno)  ;
+  nbLignesIntegrees := nbLignesIntegrees + nbAno;
   -- Si le mode de règlement est chèques, le nom du tireur, le numéro de chèque, le code banque
   --     et le code guichet sont obligatoires
-  CtrlModRgltChq (pIdtCss, pIdtCng);
+  CtrlModRgltChq (pIdtCss, pIdtCng, nbAno)  ;
+  nbLignesIntegrees := nbLignesIntegrees + nbAno;
   --------------------------------------------------------------
   -- Control de coherencia entre el valor reportado en el c?digo
   -- de barras y el valor del pago, para el caso que es introducido
@@ -911,13 +963,21 @@ BEGIN
   -- CtrlCodBrrMntPmt (pIdtCss, pIdtCng);
   -- CtrlUneCngFicDatRgl(pIdtCss, pIdtCng);
   -- CtrlUneCltOprxFic_SEAAL(pIdtCss, pIdtCng);
-  CtrlDatRglVld_SEAAL(pIdtCss, pIdtCng);
-  CltUneFois_SEAAL(pIdtCss,pIdtCng);
-  DatRglFut_SEAAL(pIdtCss,pIdtCng);
-  CltImp_SEAAL(pIdtCss,pIdtCng);
-  RglInt_SEAAL(pIdtCss,pIdtCng);
+  CtrlDatRglVld_SEAAL(pIdtCss, pIdtCng, nbAno)  ;
+  nbLignesIntegrees := nbLignesIntegrees + nbAno;
+  CltUneFois_SEAAL(pIdtCss,pIdtCng, nbAno)  ;
+  nbLignesIntegrees := nbLignesIntegrees + nbAno;
+  DatRglFut_SEAAL(pIdtCss,pIdtCng, nbAno)  ;
+  nbLignesIntegrees := nbLignesIntegrees + nbAno;
+  CltImp_SEAAL(pIdtCss,pIdtCng, nbAno)  ;
+  nbLignesIntegrees := nbLignesIntegrees + nbAno;
+  RglInt_SEAAL(pIdtCss,pIdtCng, nbAno)  ;
+  nbLignesIntegrees := nbLignesIntegrees + nbAno;
   TrtMsg01.DeleteItem(Err_TableName);
-  return;
+  -- return;
+  pErr := nbLignesIntegrees;
 end Controles;
 end;
+/
+alter package ALG_TRTEPAY compile debug;
 /

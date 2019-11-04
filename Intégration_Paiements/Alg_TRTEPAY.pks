@@ -4,7 +4,7 @@ Procedure import (  idTraitement in number,
                       pErr out Varchar2);
 procedure  Controles(  idTraitement in number, 
                       nbLignesIntegrees out number,
-                      pErr out Varchar2);
+                      pErr out number);
 -- Procedure Traitement(pIdtCss CNGENT.IdtCss%TYPE, pIdtCng CNGENT.IdtCng%TYPE);
 end;
 /
