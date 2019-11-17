@@ -29,11 +29,11 @@ begin
           AgtDst,
           LngDst, --to_number(replace(ORGLNGDST, '.',',')),
           LatDst, --to_number(replace(ORGLATDST, '.',',')),
-          'Facture N° '                 || NUMFCT    || cCrLf || 
-          'distribuée par l''agent : '  || AGTDST    || cCrLf ||
-          'Date : '                     || ORGDATDST || cCrLf ||
-          'Longitude : '                || ORGLNGDST || cCrLf ||
-          'Latitude : '                 || ORGLATDST || cCrLf || 
+          'Facture N° '                 || NUMFCT                                     || cCrLf || 
+          'distribuée par l''agent : '  || AGTDST                                     || cCrLf ||
+          'Date : '                     || to_date(DATDSTDTL, 'DD/MM/YY HH24:mi:ss')  || cCrLf ||
+          'Longitude : '                || LNGDST                                     || cCrLf ||
+          'Latitude : '                 || LATDST                                     || cCrLf || 
           case when Ltrim(ComDst) is null then 
             null 
           else 

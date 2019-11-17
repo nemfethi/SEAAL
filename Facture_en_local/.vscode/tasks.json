@@ -35,7 +35,7 @@
             "args": [
                 "${file}",
                 "${config:plsql-language.connection.activeInfos}",
-                " -ziv -KEEP -s"
+                " -ziv -KEEP -s -o"
             ],
             "problemMatcher": [],
             "type": "shell",

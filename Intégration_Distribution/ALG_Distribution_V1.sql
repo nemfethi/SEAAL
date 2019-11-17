@@ -24,13 +24,14 @@ select a.*,
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 create or replace view ALG_Distribution_V2 as
-select a.*,
-       clt.AdrLbr,
+select  a.*,
+        clt.AdrLbr,
+        a.TrnDst,
         PntCpg.IdtTrnTyp,
         fac.idtfac,
         CtrFac.IdtPrdFac,
-       trunc(ALG_INTDST.distance(latdst, lngdst, anclat, anclng), 4) dist,
-       24 * (datdstdtl - ancdat) duree_H
+        trunc(ALG_INTDST.distance(latdst, lngdst, anclat, anclng), 4) dist,
+        24 * (datdstdtl - ancdat) duree_H
   from (select alg_dist_dtl.*,
                nvl(lag(latdst) over(partition by idtdst order by datdstdtl),
                    latdst) anclat,
@@ -53,14 +54,16 @@ select a.*,
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 create or replace view ALG_Distribution_V3 as
-select IDtdst,Clt.IdtCntOpr, 
-       clt.idtclt, 
-       numfct, 
-       Opr.datcrt DatVldFct, 
-       datdstdtl, 
-       datdstdtl-Opr.datcrt delai,
-       Opr.Mnt,
-       Opr.sld
+select  IDtdst,
+        Clt.IdtCntOpr, 
+        TrnDst,
+        clt.idtclt, 
+        numfct, 
+        Opr.datcrt DatVldFct, 
+        datdstdtl, 
+        datdstdtl-Opr.datcrt delai,
+        Opr.Mnt,
+        Opr.sld
   from alg_dist_dtl, opr, clt
  where rfr = numfct
    and clt.idtclt = opr.idtclt

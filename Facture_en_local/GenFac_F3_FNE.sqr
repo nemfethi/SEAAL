@@ -11,7 +11,7 @@
 #DEFINE IDTTYPTCHE_LSTRTG_FAC 'TRT2045'
 
 #INCLUDE 'o_cstglb.h'
-!#DEFINE IS_TEST 
+#DEFINE IS_TEST 
 
 BEGIN-SETUP
   DECLARE-LAYOUT defaut
@@ -46,7 +46,7 @@ BEGIN-PROGRAM
 BEGIN-SQL
    !Update Tche set STT=null, Datrls=null where Idtagt='BATCH' and  idttyptche='TRT2005' and Prm2 in ('35165')
    !Update Tche set STT=null, Datrls=null where Idtagt='M01016'
-   Update Tche set STT=null, Datrls=null where Idtagt='M55423' and MODDCL='R' and idttyptche='TRT2005' and PRM1=52891614  
+   Update Tche set STT=null, Datrls=null where Idtagt='M23361' and MODDCL='R' and idttyptche='TRT2005' and PRM1=52891738  
    
 END-SQL
 #Else
@@ -1832,7 +1832,7 @@ BEGIN-PROCEDURE titles_eau
      image-size= (7,4)
 
   ! impression du nom de la soci?t? en bleu
-  let $txt = 'Soci?t? des Eaux et de l''Assainissement d''Alger'
+  let $txt = 'Société des Eaux et de l''Assainissement d''Alger'
   Alter-Printer font=4 Point-Size=9
   set-color print-text-foreground =('blue')
   print $txt (1,9) bold
@@ -1987,8 +1987,8 @@ BEGIN-PROCEDURE titles
   
   !print '????' (25,2) bold
   
-  print 'é ' (,12) bold
-  print 'Quantit? ' (,41) bold
+  print 'Désignation ' (,12) bold
+  print 'Quantité ' (,41) bold
   print 'Prix Unitaire ' (,50) bold
   print 'Montant HT (DA)' (,60) bold
   
@@ -2095,7 +2095,7 @@ ALG_CPTBNC.idtfscrglfct &_idtfscrglfct !identifiant fiscal des regles de factura
 !ALG_CPTBNC.artfscrglfct &_artfscrglfct !article fiscal des regles de facturation
 ALG_ARTFSC(clt.AdrStr10, cntopr.IdtCntOpr) &_artfscrglfct
 	alter-printer font=4 point-size=12
-'T?l :'||STR.telrns &telrns (10,5) !numero de telephone de l'agence
+'Tél :'||STR.telrns &telrns (10,5) !numero de telephone de l'agence
 CLT.IdtClt||' / '||substr(CLT.ancrfr,1,2)||' '||substr(CLT.ancrfr,3,8) &ancrfr (10,42)
 CLT.nom|| ' ' ||CLT.Prn &nom (11,42) bold
 Ltrim(rtrim(substr(CLT.AdrLbr,
@@ -2241,13 +2241,14 @@ END-SQL
     Print $Z82_de (+1,5) bold wrap 82 3 line-height=1
 
     alter-printer font=4 point-size=8
-    Print 'En cas de paiement en esp?ces, vous ajouteriez la somme du timbre fiscal : ' (+2,5)
+    Print 'En cas de paiement en espèces, vous ajouteriez la somme du timbre fiscal : ' (+2,5)
     alter-printer font=4 point-size=10
     print #_mnttimfsc_de (-1,56) bold edit B999,999,999,999.99nu
     alter-printer font=4 point-size=8
-    Print 'Soit un net ? payer de : '(+1,5)       
+    Print 'Soit un net à payer de : '(+1,5)       
     alter-printer font=4 point-size=10
     print #_mntttc1_e (,56) bold edit B999,999,999,999.99nu
+    Print 'DA' (,66)
 
 END-PROCEDURE  !SelDetFacEau
 
@@ -2343,11 +2344,11 @@ END-SQL
     Print $Z82 (+1,5) bold wrap 82 3 line-height=1
 
     alter-printer font=4 point-size=8
-    Print 'En cas de paiement en esp?ces, vous ajouteriez la somme du timbre fiscal : ' (+2,5)
+    Print 'En cas de paiement en espèces, vous ajouteriez la somme du timbre fiscal : ' (+2,5)
     alter-printer font=4 point-size=10
     print #_mnttimfsc (-1,56) bold edit B999,999,999,999.99nu
     alter-printer font=4 point-size=8
-    Print 'Soit un net ? payer de : '(+1,5)       
+    Print 'Soit un net à payer de : '(+1,5)       
     alter-printer font=4 point-size=10
     print #_mntttc1 (,56) bold edit B999,999,999,999.99nu
 

@@ -2,6 +2,7 @@ Drop table Alg_Epay_Dtl purge;
 Create table Alg_Epay_Dtl
 (
 IdtTrt number,
+transaction_ID number,
 transaction_date_payment date,
 transaction_montant number,
 epayment_transaction_id varchar2(20),
@@ -19,7 +20,8 @@ date_send date,
 cc varchar2(4),
 transaction_com Clob,
 transaction_statut varchar2(256),
-Satim_stt number(1)
+Satim_stt number(1),
+Stt varchar2(1)
 );
 
 Drop table Alg_Epay_Ent purge;

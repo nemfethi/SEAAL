@@ -12,6 +12,20 @@ Create or replace package body ALG_TRTEPAY is
   Err_IdtOprCrt OPR.IdtOpr%TYPE  := NULL;
   Err_TableName TrtMsg01.TableType := TrtMsg01.MakeTable;
   vCptAno NUMBER;
+  vModaffpmt NUMBER;
+  vExistFct  NUMBER := 0;
+
+  type rLstEnc is record( RowidOpr   rowid,
+                            RowScn     varchar2(200),
+                            Rfr        opr.rfr%type,
+                            IdtTypOpr  opr.IdtTypOpr%type,
+                            Mnt        opr.mnt%type,
+                            Sld        opr.sld%type,
+                            MntAff     opr.mnt%type
+    );
+    type ttLstEnc is table of rLstEnc index by binary_integer;
+    tLstEnc ttLstEnc;
+
   Procedure import (  idTraitement in number, 
                       nbLignesIntegrees out number,
                       pErr out Varchar2) is
@@ -873,8 +887,8 @@ end Import;
           and OPR.IdtTypOpr = 2;
     nLigne NUMBER;
   BEGIN
-    TrtMsg01.InsertItem(Err_TableName,'RglInt_SEAAL');
-    nErr := 0;
+    -- TrtMsg01.InsertItem(Err_TableName,'RglInt_SEAAL');
+    -- nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
@@ -965,19 +979,376 @@ BEGIN
   -- CtrlUneCltOprxFic_SEAAL(pIdtCss, pIdtCng);
   CtrlDatRglVld_SEAAL(pIdtCss, pIdtCng, nbAno)  ;
   nbLignesIntegrees := nbLignesIntegrees + nbAno;
-  CltUneFois_SEAAL(pIdtCss,pIdtCng, nbAno)  ;
-  nbLignesIntegrees := nbLignesIntegrees + nbAno;
+  -- CltUneFois_SEAAL(pIdtCss,pIdtCng, nbAno)  ;
+  -- nbLignesIntegrees := nbLignesIntegrees + nbAno;
   DatRglFut_SEAAL(pIdtCss,pIdtCng, nbAno)  ;
   nbLignesIntegrees := nbLignesIntegrees + nbAno;
   CltImp_SEAAL(pIdtCss,pIdtCng, nbAno)  ;
   nbLignesIntegrees := nbLignesIntegrees + nbAno;
-  RglInt_SEAAL(pIdtCss,pIdtCng, nbAno)  ;
-  nbLignesIntegrees := nbLignesIntegrees + nbAno;
+  -- RglInt_SEAAL(pIdtCss,pIdtCng, nbAno)  ;
+  -- nbLignesIntegrees := nbLignesIntegrees + nbAno;
   TrtMsg01.DeleteItem(Err_TableName);
   -- return;
   pErr := nbLignesIntegrees;
 end Controles;
-end;
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- *********************************
+-- Maj des lignes consignations valides
+-- *********************************
+PROCEDURE MajCngValid
+ (pIdtCss CNGENT.IdtCss%TYPE,
+  pIdtCng CNGENT.IdtCng%TYPE)
+IS
+  vSss date;
+BEGIN
+   TrtMsg01.InsertItem(Err_TableName,'MAJCNGVALID');
+   select sss_DatJou
+     into vSss
+     from SSS;
+   -- Maj des lignes valides
+   UPDATE CNGENT SET SITCNG = 1,
+    DATCTL = TRUNC (vSss)
+   WHERE IDTCSS = pIdtCss
+     AND IDTCNG = pIdtCng;
+  TrtMsg01.DeleteItem(Err_TableName);
+END MajCngValid;
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- *********************************
+-- Maj des lignes consignations non valides
+-- *********************************
+PROCEDURE MajCngNonValid
+ (pIdtCss CNGENT.IdtCss%TYPE,
+  pIdtCng CNGENT.IdtCng%TYPE)
+IS
+  vSss date;
+BEGIN
+  TrtMsg01.InsertItem(Err_TableName,'MAJCNGNONVALID');
+   select sss_DatJou
+     into vSss
+     from SSS;
+   -- Maj des lignes non valides
+   UPDATE CNGENT SET SITCNG = 0,
+    DATCTL = TRUNC (vSss)
+   WHERE IDTCSS = pIdtCss
+     AND IDTCNG = pIdtCng;
+   MajCngLgnNbrAno(pIdtCss, pIdtCng);
+  TrtMsg01.DeleteItem(Err_TableName);
+END MajCngNonValid;
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- *********************************
+-- Maj des lignes consignations avec le nombre de anomalies
+-- *********************************
+PROCEDURE MajCngLgnNbrAno
+ (pIdtCss CNGENT.IdtCss%TYPE,
+  pIdtCng CNGENT.IdtCng%TYPE)
+IS
+  CURSOR cCNGLGN IS
+    SELECT IdtCss, IdtCng, IdtLgnCssCng, COUNT(*) NbrAno
+      FROM CNGANO
+      WHERE IdtCss = pIdtCss
+       AND  IdtCng = pIdtCng
+       AND  IdtLgnCssCng IS NOT NULL
+      GROUP BY IdtCss, IdtCng, IdtLgnCssCng;
+BEGIN
+  TrtMsg01.InsertItem(Err_TableName,'MAJCNGNONVALID');
+  FOR rCNGLGN IN cCNGLGN LOOP
+    UPDATE CNGLGNCSS
+      SET NbrAno = rCNGLGN.NbrAno
+      WHERE IdtCss       = rCNGLGN.IdtCss
+       AND  IdtCng       = rCNGLGN.IdtCng
+       AND  IdtLgnCssCng = rCNGLGN.IdtLgnCssCng;
+  END LOOP;
+  TrtMsg01.DeleteItem(Err_TableName);
+END MajCngLgnNbrAno;
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+PROCEDURE TRTCNG
+   (pMode    NUMBER,
+    pIdtCss  CNGENT.IdtCss%TYPE,
+    pIdtCng  CNGENT.IdtCng%TYPE)
+--
+--  pMode 1 ==> Controle uniquement
+--  Pmode 2 ==> Controle et integration
+--
+IS
+BEGIN
+TrtMsg01.InsertItem(Err_TableName,'TRTCNG');
+   -- Purge des éventuelles anomalies de la consignation
+  --  PURGE(pIdtCss, pIdtCng);
+   -- Recherche du mode d'affectation des paiements
+   SELECT NVL(modaffpmt,1)
+   INTO vModaffpmt
+   FROM PRMGNR;
+   -- Contrôle des lignes consignations
+   vCptAno := 0;
+   vExistFct := 1;
+   Err_Msg := 'Consignacion ===> ' || pIdtCss || ' - ' || pIdtCng;
+  -- ! FNE Controles (pIdtCss, pIdtCng);
+--   DBMS_OUTPUT.PUT_LINE('vCptAno := ' || vCptAno);
+   IF vCptAno = 0 THEN
+     -- Pas d'anomalies dans la consignation
+     MajCngValid (pIdtCss, pIdtCng);
+     IF pMode = 2 THEN
+       -- Intégration de la consignation
+       integration (pIdtCss, pIdtCng);
+     END IF;
+   ELSE
+     -- Anomalies dans la consignation
+     MajCngNonValid (pIdtCss, pIdtCng);
+     -- On force l'integration
+     IF pMode = 2 THEN
+       -- Intégration de la consignation
+       integration (pIdtCss, pIdtCng);
+     END IF;
+   END IF;
+TrtMsg01.DeleteItem(Err_TableName);
+END TrtCng;
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- *********************************
+-- Intégration de consignation
+-- *********************************
+PROCEDURE Integration
+ (pIdtCss CNGENT.IdtCss%TYPE,
+  pIdtCng CNGENT.IdtCng%TYPE)
+IS
+  CURSOR cWork IS
+    SELECT IDTAGT         ,
+           DATRGL         ,
+           TTLCNG         ,
+           NBRPMTCNG      ,
+           DATCTL         ,
+           SITCNG         ,
+           DATINT         ,
+           IDTDVS         ,
+           REFADDCNG      ,
+           ROWID
+      FROM CNGENT
+      WHERE IDTCSS = pIdtCss
+        AND IDTCNG = pIdtCng
+        AND SITCNG = 1;
+  -- Next variable is used in order to send all CNGLGNCSS information to the
+  -- specific package.
+  rCngLgnCss CNGLGNCSS%ROWTYPE;
+  vLgnCss     NUMBER;
+  v1idttypopr NUMBER;
+  vMntPmt     NUMBER(15,4);
+  vMntAff     NUMBER(15,4);
+  vIdtCtr     CTR.IdtCtr%TYPE;
+  vIdtTabSeq  TABSEQ.IdtTabSeq%TYPE;
+  vOprRfr     OPR.RFR%TYPE;
+  vMsgOpr     VARCHAR2(2000);
+  vOldIdtClt  CLT.IdtClt%TYPE := 'zzzz';
+  vTotAvcxLgn number := 0; -- Montant cumule de l'avance
+  vTotPmtxLgn number := 0; -- Montant cumule de reglement par ligne de caisse
+  vNbrPmtInt  number := 0; -- Nombre des lignes integrees
+  vSwUneLgnxClt number := 1;
+  vSss_datJou date;
+BEGIN
+  TrtMsg01.InsertItem(Err_TableName,'INTEGRATION');
+  -- Pour chaque lot de consignation à traiter
+  SELECT IdtTabSeq, sss_Datjou
+    INTO vIdtTabSeq, vsss_DatJou
+    FROM TYPMVM, SSS
+    WHERE IdtTypMvm = 5;
+  CSSCNG01_SPC.TrtCng(pIdtCss,pIdtCng);
+  FOR cCng IN cWork LOOP
+    -- Pour chaque ligne de paiement du lot
+    DECLARE
+      vPrpCptBnc VARCHAR2(40);
+      --La siguiente variable almacena la informaci?n sobre si se debe o no realizar una afectaci?n
+      --de pago, es decir, es un pago realizado diferente de abono. Si es el caso, se insertan l?neas
+      --en la tabla LGNCSS
+--      vAffPmt number;
+      CURSOR cLgnWork IS
+        SELECT IDTLGNCSSCNG   ,
+               REFADDLGNCSSCNG,
+               IDTCLT         ,
+               IDTCPTCLT      ,
+               NUMFCT         ,
+               MNTPMT         ,
+               MNTAVC         ,
+               sum(MntPmt+nvl(MntAvc,0)) over (partition by IdtClt) MntPmtxClt,  -- Montant total des affectations pour le client
+               sum(MntAvc) over (partition by IdtClt) MntAvcxClt,                -- Montant total des avances pour le client
+               count(*) over (partition by IdtClt) NbrLgnxClt,                   -- Nombre de lignes total par client
+               count(*) over (partition by IdtClt order by IdtLgnCssCng range unbounded preceding) LgnxClt, -- Numero de ligne pour chaque client
+               CNGLGNCSS.IDTMODRGL,
+               IDTBNQ         ,
+               IDTGCH         ,
+               NUMCPTBNC      ,
+               CLERIB         ,
+               NOMTRR         ,
+               NUMCHQ         ,
+               nvl(CNGLGNCSS.DatRgl,CNGENT.DATRGL) DatRgl  ,
+               CNGLGNCSS.IdtTypMvmCng,
+               NVL(CNGTYPMVM.Pmt,0) Pmt
+          FROM CNGTYPMVM, CNGLGNCSS,CNGENT
+          WHERE CNGENT.IDTCSS   = pIdtCss
+            AND CNGENT.IDTCNG    = pIdtCng
+            AND CNGLGNCSS.IDTCSS = CNGENT.IDTCSS
+            AND CNGLGNCSS.IDTCNG = CNGENT.IDTCNG
+            AND CNGTYPMVM.IdtTypMvmCng = CNGLGNCSS.IdtTypMvmCng
+            and NVL(CNGTYPMVM.Pmt,0) = 1
+          order by IdtClt;
+    BEGIN
+      Err_Msg := 'Recherche du mode d''affectation des paiements';
+      SELECT NVL(modaffpmt,1)
+        INTO vModaffpmt
+        FROM PRMGNR;
+      FOR cLgnCng IN cLgnWork LOOP
+        Err_Msg := 'Consignement ===> ' || pIdtCss || ' - ' || pIdtCng ||
+                 ' Line ===> ' || cLgnCng.IdtLgnCssCng;
+        if vSwUneLgnxClt = 1 then
+          vTotPmtxLgn := cLgnCng.MntPmtxClt;
+          vTotAvcxLgn := cLgnCng.MntAvcxClt;
+        else
+          vTotPmtxLgn := cLgnCng.MNTPMT + NVL(cLgnCng.MNTAVC,0);
+          vTotAvcxLgn := NVL(cLgnCng.MNTAVC,0);
+        end if;
+        -- on ne crée qu'un identifiant de  ligne de caisse (i.e. une seule opéraiton) par client
+        if vSwUneLgnxClt = 1 then
+          if cLgnCng.idtclt <> nvl(rCngLgncss.IdtClt,'zzzz') then
+            X7_TRTSEQ01.X7_NXTTABSEQ(vIdtTabSeq,vLgnCss);
+          else
+            vTotAvcxLgn := 0;
+          end if;
+        else
+          X7_TRTSEQ01.X7_NXTTABSEQ(vIdtTabSeq,vLgnCss);
+        end if;
+        rCngLgnCss.IDTCSS          := pIDTCSS;
+        rCngLgnCss.IDTCNG          := pIDTCNG;
+        rCngLgnCss.IDTLGNCSSCNG    := cLgnCng.IDTLGNCSSCNG;
+        rCngLgnCss.REFADDLGNCSSCNG := cLgnCng.REFADDLGNCSSCNG;
+        rCngLgnCss.IDTCLT          := cLgnCng.IDTCLT;
+        rCngLgnCss.IDTCPTCLT       := cLgnCng.IDTCPTCLT;
+        rCngLgnCss.NUMFCT          := cLgnCng.NUMFCT;
+        rCngLgnCss.MNTPMT          := cLgnCng.MNTPMT;
+        rCngLgnCss.MNTAVC          := cLgnCng.MNTAVC;
+        rCngLgnCss.IDTMODRGL       := cLgnCng.IDTMODRGL;
+        rCngLgnCss.IDTBNQ          := cLgnCng.IDTBNQ;
+        rCngLgnCss.IDTGCH          := cLgnCng.IDTGCH;
+        rCngLgnCss.NUMCPTBNC       := cLgnCng.NUMCPTBNC;
+        rCngLgnCss.CLERIB          := cLgnCng.CLERIB;
+        rCngLgnCss.NOMTRR          := cLgnCng.NOMTRR;
+        rCngLgnCss.NUMCHQ          := cLgnCng.NUMCHQ;
+        rCngLgnCss.IDTTYPMVMCNG    := cLgnCng.IDTTYPMVMCNG;
+        rCngLgnCss.DatRgl          := cLgnCng.DatRgl;
+        IF vTotAvcxLgn > 0 THEN
+          Err_Msg := '1er insert LGNCSS';
+          INSERT INTO LGNCSS (IdtTypMvm           , IdtLgnCss            ,
+                              IdtAgt              , IdtCss               ,
+                              IdtModRgl           , IdtDvs               ,
+                              MntDvs              , MtnDvsTot            ,
+                              Mnt                 , SldOpr               ,
+                              MntRnd              , DatCrt               ,
+                              IdtClt              , IdtCptClt            ,
+                              IdtTypOpr           , Rfr                  ,
+                              CLERIB              , NUMCPTBNC            ,
+                              IdtBnq              , IdtGch               ,
+                              NomTrr              , NumChq               ,
+                              IDTCNG              , IDTLGNCSSCNG         ,
+                              REFADDCNG           , DATMAJ               ,
+                              REFADDLGNCSSCNG     , IdtNatRgl)
+          VALUES (            5                   ,   vLgnCss             ,
+                              cCng.IDTAGT         , pIdtCss             ,
+                              cLgnCng.IDTMODRGL   , cCng.IDTDVS         ,
+                              vTotAvcxLgn         , vTotPmtxLgn,
+                              vTotAvcxLgn         , NULL                ,
+                              0                   ,   cLgnCng.datrgl      ,
+                              cLgnCng.IDTCLT      , cLgnCng.IDTCPTCLT   ,
+                              2                   , NULL                ,
+                              cLgnCng.CLERIB      , cLgnCng.NUMCPTBNC   ,
+                              cLgnCng.IDTBNQ      , cLgnCng.IDTGCH      ,
+                              cLgnCng.NOMTRR      , cLgnCng.NUMCHQ      ,
+                              pIdtCng             , cLgnCng.IDTLGNCSSCNG,
+                              cCng.REFADDCNG      , TRUNC(SYSDATE)      ,
+                              cLgnCng.REFADDLGNCSSCNG, 1);
+        END IF; --cLgnCng.MNTAVC > 0;
+        -- Si se realiza inserci?n de pago sobre la tabla LGNCSS
+        IF cLgnCng.Pmt = 1 THEN
+          vNbrPmtInt := vNbrPmtInt + 1;
+          -- Si le mode d'affectation des paiements est sur une facture
+          IF vModaffpmt = 1 THEN
+            if nvl(rCngLgnCss.MntPmt,0) > 0 then
+              -- Insertion d'une ligne de caisse
+              SELECT idttypopr INTO v1idttypopr
+                FROM OPR
+                WHERE rfr =  cLgnCng.NUMFCT
+                 AND  idttypopr IN (1,7);
+              Err_Msg := '2eme insert LGNCSS';
+              INSERT INTO LGNCSS (IdtTypMvm           , IdtLgnCss            ,
+                                  IdtAgt              , IdtCss               ,
+                                  IdtModRgl           , IdtDvs               ,
+                                  MntDvs              , MtnDvsTot            ,
+                                  Mnt                 , SldOpr               ,
+                                  MntRnd              , DatCrt               ,
+                                  IdtClt              , IdtCptClt            ,
+                                  IdtTypOpr           , Rfr                  ,
+                                  CLERIB              , NUMCPTBNC            ,
+                                  IdtBnq              , IdtGch               ,
+                                  NomTrr              , NumChq               ,
+                                  IDTCNG              , IDTLGNCSSCNG         ,
+                                  REFADDCNG           , DATMAJ               ,
+                                  REFADDLGNCSSCNG     , IdtNatRgl)
+              VALUES (            5                   ,   vLgnCss             ,
+                                  cCng.IDTAGT         , pIdtCss             ,
+                                  cLgnCng.IDTMODRGL   , cCng.IDTDVS         ,
+                                  cLgnCng.MNTPMT      , vTotPmtxLgn         ,
+                                  cLgnCng.MNTPMT      , NULL                ,
+                                  0                   ,   cLgnCng.DatRgl      ,
+                                  cLgnCng.IDTCLT      , cLgnCng.IDTCPTCLT   ,
+                                  v1idttypopr         , cLgnCng.NUMFCT      ,
+                                  cLgnCng.CLERIB      , cLgnCng.NUMCPTBNC   ,
+                                  cLgnCng.IDTBNQ      , cLgnCng.IDTGCH      ,
+                                  cLgnCng.NOMTRR      , cLgnCng.NUMCHQ      ,
+                                  pIdtCng             , cLgnCng.IDTLGNCSSCNG,
+                                  cCng.REFADDCNG      , TRUNC(SYSDATE)      ,
+                                  cLgnCng.REFADDLGNCSSCNG, 1);
+            END IF; --nvl(cLgnCng.MNTPMT,0) <> 0
+          END IF; --vModaffpmt = 1
+          -- Mise à jour du compte client
+          vOprRfr := null;
+          vMsgOpr := null;
+          if vTotPmtxLgn > 0 then
+            if (vSwUneLgnxClt = 1 and cLgnCng.NbrLgnxClt = cLgnCng.LgnxClt) or (vSwUneLgnxClt = 0) then
+----            IF cLgnCng.MntPmt > 0 THEN  --pourquoi cette condition ?
+              CltBtc01.X7_crtopr(pIdtTypOpr => 2,
+                                 pIdtAgt => cCng.IDTAGT, --SJ 02 mars 2015 traitement de la fiche 12439
+                                 pRfr => vOprRfr,
+                                 pIdtLgnCss => vLgncss,
+                                 pMsg => vMsgOpr);
+              if vMsgOpr is not null then
+                rollback;
+                Err_Msg := 'Consignement ===> ' || pIdtCss || ' - ' || pIdtCng ||
+                 ' Line ===> ' || cLgnCng.IdtLgnCssCng;
+                Raise_Application_Error(-20101, vMsgOpr);
+              end if;
+            end if; --(vSwUneLgnxClt = 1 and cLgnCng.NbrLgnxClt = cLgnCng.LgnxClt) or (vSwUneLgnxClt = 0)
+          END IF; --vTotPmtxLgn > 0
+        END IF; --cLgnCng.Pmt = 1
+        CSSCNG01_SPC.TRTLGNCSSCNG(rCngLgnCss);
+      END LOOP; --cursor cLgnWork
+    END;
+    -- La date d'intégration est renseignée à la date du jour et Situation
+    -- de consignation à 2 (intégré) si au moins un reglement est integre
+    if vNbrPmtInt > 0 then
+      UPDATE CNGENT
+        SET DATINT = TRUNC(vSss_Datjou),
+            SITCNG = 2
+        WHERE ROWID = cCng.ROWID;
+    end if;
+  END LOOP; --cursor cWork
+  TrtMsg01.DeleteItem(Err_TableName);
+END Integration;
+end ALG_TRTEPAY;
 /
-alter package ALG_TRTEPAY compile debug;
-/
+-- alter package ALG_TRTEPAY compile debug;
+-- /
