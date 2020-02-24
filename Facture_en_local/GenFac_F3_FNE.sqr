@@ -11,7 +11,7 @@
 #DEFINE IDTTYPTCHE_LSTRTG_FAC 'TRT2045'
 
 #INCLUDE 'o_cstglb.h'
-#DEFINE IS_TEST 
+!#DEFINE IS_TEST 
 
 BEGIN-SETUP
   DECLARE-LAYOUT defaut
@@ -1851,7 +1851,7 @@ BEGIN-PROCEDURE titles_eau
   print $txt (+1,9)
   set-color print-text-foreground =('black')
 
-  IF &prm3 = 'D'   ! on imprime un duplicata
+  IF &prm3 = 'D' and $_Z27 = 'C1' ! on imprime un duplicata
     Alter-Printer Font=4 Point-Size=24
     set-color print-text-foreground =('gray')
     ! Print 'DUPLICATA'   (19,25) bold

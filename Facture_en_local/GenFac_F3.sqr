@@ -174,7 +174,8 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
 
       when = 0    ! facture de service
        show 'eval #ValFctMnlUtl = 0'
-        IF &PRM3 = 'D'    ! duplicata 
+        IF &PRM3 = 'D'  ! duplicata 
+        if &est_redresse ='0'
           IF isnull(&PRM2) ! Imprimer en Duplicata une Facture de service migr?e uniquement
           	IF &IDTTYPFCT = '1' !FNE: on autorise le duplicata pour toute facture !!and &facsrv = 'M'
               Do Rech_Num_Report(#Num)
@@ -185,6 +186,9 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
               Do mainfacEau
             end-if
           End-if
+        else
+        	stop  
+        end-if  
         else
           IF isnull(&PRM2) ! on r?-imprime un original de facture de service
 			      if &est_redresse ='1'
@@ -420,6 +424,7 @@ FROM TCHE, FAC
               )
        )
   and decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},null,TCHE.PRM1) = FAC.IDTFAC (+) 
+  and FctAnn=0
 END-SELECT
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1986,7 +1991,7 @@ END-procedure  !mainfacman
 
 BEGIN-PROCEDURE mainfacman
 	let $pg='facman'
-  DO selfacman
+  DO selfacMan
   DO vrt
   DO titles
   DO seldetfac
@@ -2047,10 +2052,11 @@ BEGIN-PROCEDURE titles_eau
   print $txt (+1,9)
   set-color print-text-foreground =('black')
 
-  IF &prm3 = 'D'   ! on imprime un duplicata
+  IF &prm3 = 'D' and &AcvFac = 'C1'    ! on imprime un duplicata
     Alter-Printer Font=4 Point-Size=24
     set-color print-text-foreground =('gray')
-    !Print 'DUPLICATA'   (19,25) bold
+    show '$AcvFac:' &AcvFac
+    Print 'DUPLICATA'   (19,25) bold
     set-color print-text-foreground =('dark')
   END-IF  
 
@@ -2165,20 +2171,20 @@ BEGIN-PROCEDURE titles
   !print 'Objet : ' (22,5) bold
   print 'Item' (25,2) bold
   
-  !TEMP-FNE:let $img_pathnom=getenv('SQT_DIR') || '\dsgfacar.BMP'
-  let $img_pathnom=getenv('SQT_DIR') || '\dsgfacar.BMP'
-  !show 'image=' $img_pathnom
-  print-image (24,1)
-     type = BMP-file
-     source = $img_pathnom !For-printer=(PD,GIF-FILE, $img_pathnom)
-     image-size= (6,1)
-  
-  let $img_pathnom=getenv('SQT_DIR') || '\dsgfacar.BMP'
-  !show 'image=' $img_pathnom
-  print-image (24,15)
-     type = BMP-file
-     source = $img_pathnom !For-printer=(PD,GIF-FILE, $img_pathnom)
-     image-size= (8,1)
+!  !TEMP-FNE:let $img_pathnom=getenv('SQT_DIR') || '\dsgfacar.BMP'
+!  let $img_pathnom=getenv('SQT_DIR') || '\dsgfacar.BMP'
+!  !show 'image=' $img_pathnom
+!  print-image (24,1)
+!     type = BMP-file
+!     source = $img_pathnom !For-printer=(PD,GIF-FILE, $img_pathnom)
+!     image-size= (6,1)
+!  
+!  let $img_pathnom=getenv('SQT_DIR') || '\dsgfacar.BMP'
+!  !show 'image=' $img_pathnom
+!  print-image (24,15)
+!     type = BMP-file
+!     source = $img_pathnom !For-printer=(PD,GIF-FILE, $img_pathnom)
+!     image-size= (8,1)
   
   
   !print '????' (25,2) bold
@@ -2248,21 +2254,24 @@ fac.numfct &numfct_e (20,35) bold
              END) &prdfac
 cntopr.libint &libabr_e (4,7) bold
 cntopr.IdtCntOpr||' - '||cntopr.lib &IdtCntOpr_e  (9,5) bold
-ctr.idtpntcpg &idtpntcpg_e
+ !ctr.idtpntcpg &idtpntcpg_e
+Avtctr.IdtAcv &AcvFac
 typfct.libfac &libfacman_e
- from fac, clt, cntopr, ctr,ALG_CPTBNC, STR, typfct, ctrfac
+ from fac, clt, cntopr, ALG_CPTBNC, STR, typfct, ctrfac, avtctr
     where fac.idtfac = #IdtFac
       and fac.idttypfct = typfct.idttypfct
       and fac.idtclt = clt.idtclt
       and clt.idtcntopr = cntopr.idtcntopr
-      and clt.IdtClt = ctr.Idtcltdst(+)
+			!and clt.IdtClt = ctr.Idtcltdst(+)
       and clt.IdtCntOpr = ALG_CPTBNC.IdtCntOpr
       and ALG_CPTBNC.IdtCntOpr  = STR.IdtCntOpr
       and fac.idtfac = ctrfac.idtfac
+      and ctrfac.numavn = AvtCtr.numavn
+      and Ctrfac.idtctr = AvtCtr.idtCtr
 END-SELECT
 
 let $libfacman_e = &libfacman_e || ' N° '
-  print $libfacman_e (20,24) bold
+  print $libfacman_e (20,22) bold
 
 
   print &prdfac (21,30) 
@@ -2332,6 +2341,9 @@ typfct.libfac &libfacman
   		and clt.IdtCntOpr = ALG_CPTBNC.IdtCntOpr
   		and ALG_CPTBNC.IdtCntOpr  = STR.IdtCntOpr
 END-SELECT
+
+let $libfacman = &libfacman || ' N° '
+  print $libfacman (20,22) bold
 END-PROCEDURE !selfacman
 
 BEGIN-PROCEDURE seldetfacEau
@@ -2575,6 +2587,7 @@ Begin-Footing 10
     
     print 'Payable au plus tard le ' (+2,5)
     print &_datexg_e (,20)
+    print &_datexg (,20)
     
     graphic (+4,5,68) horz-line 5
     
@@ -2590,6 +2603,11 @@ Begin-Footing 10
 !    Print &_numcptccp (,25)
 !    Print &_idtfscrglfct (,44)
 !    Print &_artfscrglfct (,60)
+
+    Print &_numcptbnc 						(,5)
+    Print &_numcptccp 						(,24)
+    Print &_idtfscrglfct 					(,35)
+    Print &_artfscrglfct 					(,48)
     
     Print &_numcptbnc_e 						(,5)
     Print &_numcptccp_e 						(,24)

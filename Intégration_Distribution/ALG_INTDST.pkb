@@ -29,15 +29,29 @@ begin
           AgtDst,
           LngDst, --to_number(replace(ORGLNGDST, '.',',')),
           LatDst, --to_number(replace(ORGLATDST, '.',',')),
-          'Facture NÂ° '                 || NUMFCT                                     || cCrLf || 
-          'distribuÃ©e par l''agent : '  || AGTDST                                     || cCrLf ||
-          'Date : '                     || to_date(DATDSTDTL, 'DD/MM/YY HH24:mi:ss')  || cCrLf ||
-          'Longitude : '                || LNGDST                                     || cCrLf ||
-          'Latitude : '                 || LATDST                                     || cCrLf || 
-          case when Ltrim(ComDst) is null then 
-            null 
-          else 
-          'Commentaire: ' || COMDST end,
+          case when Stt=1 then -- Distribué= Oui
+            'Facture N° '                 || NUMFCT                                     || cCrLf || 
+            'distribuée par l''agent : '  || AGTDST                                     || cCrLf ||
+            'Date : '                     || to_date(DATDSTDTL, 'DD/MM/YY HH24:mi:ss')  || cCrLf ||
+            'Longitude : '                || LNGDST                                     || cCrLf ||
+            'Latitude : '                 || LATDST                                     || cCrLf || 
+            case when Ltrim(ComDst) is null then 
+              null 
+            else 
+            'Commentaire: ' || COMDST 
+            end
+          else -- Distribué= Non
+            'Facture N° '                 || NUMFCT                                     || cCrLf || 
+            'non distribuée : (agent: '   || AGTDST ||  ' )'                            || cCrLf ||
+            'Date : '                     || to_date(DATDSTDTL, 'DD/MM/YY HH24:mi:ss')  || cCrLf ||
+            'Longitude : '                || LNGDST                                     || cCrLf ||
+            'Latitude : '                 || LATDST                                     || cCrLf || 
+            case when Ltrim(ComDst) is null then 
+              null 
+            else 
+            'Commentaire: ' || COMDST 
+            end
+          end,
           nvl(Int, 0),
           NumFct,
           DatDstDtl --to_date(ORGDATDST, 'DD/MM/YY HH24:mi:ss') 
@@ -67,10 +81,10 @@ begin
   end;
 
   if vNumFct is not null then
-    -- on vÃ©rifie si cette facture a deja Ã©tÃ© distribuÃ©e
+    -- on vérifie si cette facture a deja été distribuée
     for rDist in (Select * from Alg_Dist_Dtl where numFct = vNumFct and IdtSqcGnr!=pIdtSqcGnr )
     loop
-      if rDist.DatDstDtl <= vDatDst and rDist.STT is null then -- une date de distribution plus rÃ©cente
+      if rDist.DatDstDtl <= vDatDst and rDist.STT is null then -- une date de distribution plus récente
         update Alg_Dist_Dtl 
         set Stt='D', Int = 0
         where IdtSqcGnr = rDist.IdtSqcGnr;
@@ -124,16 +138,16 @@ end creer1CntDst;
   vIdtMtfCnt Cnt.IdtMtfCnt%type := 420;
   vT1 Cnt.T1%type :='TN_001';
   begin
-    -- Recherche de la sÃ©quence de contact
+    -- Recherche de la séquence de contact
     Select SqcCnt+1, IdtCodSns, IdtCntOpr into vSqcCnt, vIdtCodSns, vIdtCntOpr 
     from Clt 
     where IdtClt = pIdtClt;
     
-    -- CrÃ©ation du contact
+    -- Création du contact
     insert into Cnt (IdtClt, IdtCnt, IdtTypCnt, IdtMtfCnt, IdtAgt, IdtCodSns, IdtCntOpr, Int, DatFin, DatCnt, DatEnr, T1, N1, N2, Dtl)
     values (pIdtClt, vSqcCnt, vIdtTypCnt, vIdtMtfCnt, pIdtAgt, vIdtCodSns, vIdtCntOpr, 1, Sysdate, pDatDst, Sysdate, vT1, pLng, pLat, pDtl);
     
-    -- Mise Ã  jour de la sÃ©quence de contact
+    -- Mise à jour de la séquence de contact
     update CLT 
       set SqcCnt=vSqcCnt 
     where idtClt=pIdtClt;

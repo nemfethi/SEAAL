@@ -36,9 +36,10 @@ IDTSQCGNR number,
 INT number(1),
 STT VARCHAR2(1));
 
-create index IDX_ALG_DIST_DTL_NUMFCT on ALG_DIST_DTL (NUMFCT) tablespace Index_X7;
-create index IDX_ALG_DIST_DTL_SQC on ALG_DIST_DTL (IDTSQCGNR) tablespace Index_X7;
-create index IDX_ALG_DIST_DTL_TRNDST on ALG_DIST_DTL (TRNDST) tablespace Index_X7;
+create index IDX_ALG_DIST_DTL_IDTDST on ALG_DIST_DTL (IDTDST)     tablespace Index_X7;
+create index IDX_ALG_DIST_DTL_NUMFCT on ALG_DIST_DTL (NUMFCT)     tablespace Index_X7;
+create index IDX_ALG_DIST_DTL_SQCGNR on ALG_DIST_DTL (IDTSQCGNR)  tablespace Index_X7;
+create index IDX_ALG_DIST_DTL_TRNDST on ALG_DIST_DTL (TRNDST)     tablespace Index_X7;
 
 alter table alg_dist_dtl
 add constraint FK1_ALGDISTDTL foreign key (IDTDST)

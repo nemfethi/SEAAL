@@ -1,6 +1,7 @@
 create or replace package ALG_INTDST
 as
 cCrLf varchar2(2) :=  CHR(13) || CHR(10) ;
+gIdtMtfCnt Cnt.IdtMtfCnt%type := 420;
   Procedure Controles;
   procedure creer1CntDst(  pIdtSqcGnr ALG_Dist_Dtl.IdtSqcGnr%type);
   Procedure Creer1CntDst ( pIdtClt Clt.IdtClt%type,
