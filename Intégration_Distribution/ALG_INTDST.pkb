@@ -4,12 +4,15 @@ Function versionPkg return varchar2 is
 begin
   return 10000;
 end;
-  procedure Controles is
-  begin
-    null;
-    /*Agent inconnu*/
-    /*Client inconnu*/
-  end;
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+procedure Controles is
+begin
+  null;
+  /*Agent inconnu*/
+  /*Client inconnu*/
+end;
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -29,10 +32,10 @@ begin
           AgtDst,
           LngDst, --to_number(replace(ORGLNGDST, '.',',')),
           LatDst, --to_number(replace(ORGLATDST, '.',',')),
-          case when Stt=1 then -- Distribué= Oui
+          case when SttDst=1 then -- Distribué = Oui
             'Facture N° '                 || NUMFCT                                     || cCrLf || 
             'distribuée par l''agent : '  || AGTDST                                     || cCrLf ||
-            'Date : '                     || to_date(DATDSTDTL, 'DD/MM/YY HH24:mi:ss')  || cCrLf ||
+            'Date : '                     || to_char(DATDSTDTL, 'DD/MM/YYYY HH24:mi:ss')|| cCrLf ||
             'Longitude : '                || LNGDST                                     || cCrLf ||
             'Latitude : '                 || LATDST                                     || cCrLf || 
             case when Ltrim(ComDst) is null then 
@@ -40,16 +43,16 @@ begin
             else 
             'Commentaire: ' || COMDST 
             end
-          else -- Distribué= Non
-            'Facture N° '                 || NUMFCT                                     || cCrLf || 
-            'non distribuée : (agent: '   || AGTDST ||  ' )'                            || cCrLf ||
-            'Date : '                     || to_date(DATDSTDTL, 'DD/MM/YY HH24:mi:ss')  || cCrLf ||
-            'Longitude : '                || LNGDST                                     || cCrLf ||
-            'Latitude : '                 || LATDST                                     || cCrLf || 
+          else -- Distribué = Non
+            'Facture N° '                 || NUMFCT                                       || cCrLf || 
+            'non distribuée : (agent: '   || AGTDST ||  ' )'                              || cCrLf ||
+            'Date : '                     || to_char(DATDSTDTL, 'DD/MM/YYYY HH24:mi:ss')  || cCrLf ||
+            'Longitude : '                || LNGDST                                       || cCrLf ||
+            'Latitude : '                 || LATDST                                       || cCrLf || 
             case when Ltrim(ComDst) is null then 
               null 
             else 
-            'Commentaire: ' || COMDST 
+              'Commentaire: ' || COMDST 
             end
           end,
           nvl(Int, 0),
@@ -74,7 +77,7 @@ begin
     X7.GEST_ERREUR_CENTURA(VersionPkg(),
                                     0,
                                     'ALG_INTDST',
-                                    'creerCntDst',
+                                    'CREER1CNTDST',
                                     to_char(SQLERRM),
                                     sqlcode,
                                     DBMS_UTILITY.FORMAT_ERROR_BACKTRACE);
@@ -111,7 +114,7 @@ begin
           X7.GEST_ERREUR_CENTURA(VersionPkg(),
                                 0,
                                 'ALG_INTDST',
-                                'creerCntDst',
+                                'CREER1CNTDST',
                                 to_char(SQLERRM),
                                 sqlcode,
                                 DBMS_UTILITY.FORMAT_ERROR_BACKTRACE);
@@ -125,7 +128,7 @@ end creer1CntDst;
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
-  procedure creer1CntDst(  pIdtClt Clt.IdtClt%type,
+  procedure creer1CntDst( pIdtClt Clt.IdtClt%type,
                           pIdtAgt Agt.IdtAgt%type,
                           pLng Cnt.N1%type,
                           pLat Cnt.N1%type,
@@ -134,9 +137,7 @@ end creer1CntDst;
   vSqcCnt Clt.SqcCnt%type;
   vIdtCodSns Clt.IdtCodSns%type;
   vIdtCntOpr Clt.IdtCntOpr%type;
-  vIdtTypCnt Cnt.IdtTypCnt%type := 110;
-  vIdtMtfCnt Cnt.IdtMtfCnt%type := 420;
-  vT1 Cnt.T1%type :='TN_001';
+
   begin
     -- Recherche de la séquence de contact
     Select SqcCnt+1, IdtCodSns, IdtCntOpr into vSqcCnt, vIdtCodSns, vIdtCntOpr 
@@ -144,8 +145,8 @@ end creer1CntDst;
     where IdtClt = pIdtClt;
     
     -- Création du contact
-    insert into Cnt (IdtClt, IdtCnt, IdtTypCnt, IdtMtfCnt, IdtAgt, IdtCodSns, IdtCntOpr, Int, DatFin, DatCnt, DatEnr, T1, N1, N2, Dtl)
-    values (pIdtClt, vSqcCnt, vIdtTypCnt, vIdtMtfCnt, pIdtAgt, vIdtCodSns, vIdtCntOpr, 1, Sysdate, pDatDst, Sysdate, vT1, pLng, pLat, pDtl);
+    insert into Cnt (IdtClt,  IdtCnt,  IdtTypCnt,  IdtMtfCnt,  IdtOrgCnt,  IdtAgt,  IdtCodSns,  IdtCntOpr,  Int, DatFin,  DatCnt,  DatEnr,  T1,  Dtl)
+             values (pIdtClt, vSqcCnt, gIdtTypCnt, gIdtMtfCnt, gIdtOrgCnt, pIdtAgt, vIdtCodSns, vIdtCntOpr, 1,   Sysdate, pDatDst, Sysdate, gT1, pDtl);
     
     -- Mise à jour de la séquence de contact
     update CLT 
@@ -167,7 +168,10 @@ end creer1CntDst;
 procedure IntDst(pIdtDst Alg_Dist_Ent.IdtDst%type)
   is
   begin
-    for rCur in (Select * from Alg_Dist_Dtl where IdtDst = pIdtDst and SttDst is not null order by datdstdtl desc) loop
+    for rCur in (Select * from Alg_Dist_Dtl 
+                where IdtDst = pIdtDst 
+                and SttDst is not null 
+                order by datdstdtl desc) loop
       creer1CntDst(rCur.IdtSqcGnr);
     end loop;
   end IntDst;

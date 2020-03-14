@@ -1,4 +1,28 @@
 !--------------------------------------------------------------------------------
+!-- Filename: GenFac_F3.sqr
+!-- Crée le 01/02/2008
+!-- Par Abderahim ABBAS
+!-- Cas : SEAAL ALGER
+!-- Fichier de génération de fichiers textes de factures
+!-- EAU_LOT_IdtLotFac_Date_F1 ou F2_Séquence.txt (paramètre : IdtLotFac) pour les factures 
+!-- périodiques EAU_HLT_Date_F1 ou F2_Séquence.txt (paramètre : IdtFac) pour une facture non 
+!-- périodique FctMntUtl = 0
+!-- Facture manuelle (paramètre : IdtFac) où FctMnlUtl = 1
+!--------------------------------------------------------------------------------
+!-- Modications :
+!--------------------------------------------------------------------------------
+!-- Maj     : 02/06/2010
+!-- Par     : FBE
+!-- Contenu : Prise en compte du routage des documents
+!--------------------------------------------------------------------------------
+!-- Maj     : 05/09/2010
+!-- Par     : LLA
+!-- Contenu : Ajout d'un logo et des informations légales pour la facture manuelle
+!-- ==========================================================================
+!--------------------------------------------------------------------------------
+!-- Maj     : 01/08/2012
+!-- Par     : R.TIHAL & B.CHAREF
+!-- Contenu : Génération des factures F3
 !-- ==========================================================================
 #include 'msg.inc'
 #include 'sql.inc'
@@ -11,7 +35,7 @@
 #INCLUDE 'o_cstglb.h'
 !#DEFINE IS_TEST 
 
-BEGIN-SETUP
+Begin-Setup
   DECLARE-LAYOUT defaut
     paper-size=(A4)
     orientation= portrait
@@ -21,34 +45,36 @@ BEGIN-SETUP
     bottom-margin = 1
     line-height = 0.35
     char-width = 0.19
-	END-DECLARE  
-END-SETUP
+  END-DECLARE
+    
+end-setup
 
 !--------------------------------------------------------------------------------
 ! Program principal
-! Object  : - R?cup?rer les param?tres en entr?e
-!             - Appel ? la procedure principale MAIN
+! Object  : - Récupérer les paramètres en entrée
+!             - Appel à la procedure principale MAIN
 !--------------------------------------------------------------------------------
 
 BEGIN-PROGRAM 
-! R?cup?ration des param?tres
+! Récupération des paramètres
     
 #IFDEF IS_TEST
 ! Pour Test
-  LET $user = 'M23361'
-	LET $mode = 'R'     
+  !LET $user = 'M01016'
+  !LET $mode = 'R'
+  LET $user = 'BATCH'
+	LET $mode = 'B'     
   !LET $IMP  = ''
-  LET $RepGeneration = 'd:\temp\spool'
-  LET $CmdDirectorio = 'd:\temp\spool'
-  show 'is test'
+  LET $RepGeneration = 'c:\temp'
+  LET $CmdDirectorio = 'c:\temp'
 BEGIN-SQL
-   !Update Tche set STT=null, Datrls=null where Idtagt='BATCH' and  idttyptche='TRT2005' and Prm2 in ('35165')
+   !Update Tche set STT=null, Datrls=null where Idtagt='BATCH' and  idttyptche='TRT2005' and Prm2 in ('58560')
+   !Update Tche set STT=null, Datrls=null where Idtagt='BATCH' and  idttyptche='TRT2005' and Prm2 in ('57642')
+   Update Tche set STT=null, Datrls=null where Idtagt='BATCH' and  idttyptche='TRT2005' and Prm2 in ('68309')
    !Update Tche set STT=null, Datrls=null where Idtagt='M01016'
-   Update Tche set STT=null, Datrls=null where Idtagt='M23361' and MODDCL='R' and idttyptche='TRT2005' --and PRM1=39188223  
-   
 END-SQL
 #Else
-  !Recuperation des param?tres
+  !Recuperation des paramètres
   INPUT $user maxlen={MAX_USER_LEN} type=char noprompt
   INPUT $mode max_len=1 type=char noprompt
   !INPUT $IMP noprompt 
@@ -58,7 +84,7 @@ END-SQL
   ! Let $_CheckDigit = ''
   ! Let $_BankNumber = ''
 
-  ! on initialise le nombre de contrats imprim?s
+  ! on initialise le nombre de contrats imprimés
   do MSG_Init
   do MSG_DefinirUtilisateur ($user)
   ! Ce programme gere 2 taches, on defini le traitement dans main quand on connaise la tache
@@ -69,7 +95,7 @@ END-PROGRAM
 
 !--------------------------------------------------------------------------------
 ! Procedure : Main
-! Objetivo  : Choisir les donn?es de la facture en la tabla Tche
+! Objetivo  : Choisir les données de la facture en la tabla Tche
 !--------------------------------------------------------------------------------
 BEGIN-PROCEDURE Main
  do MSG_DefinirLocalisation ('{TRT}_MAIN')
@@ -108,10 +134,6 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM1,PRM2) &PRM2
 PRM3 &PRM3
 PRM4
 PRM5
-! x7.est_facture_redressee(PRM1) &est_redresse
-'0' &est_redresse
- !let est_redresse='0'
-   show 'est redressee:' &est_redresse
 MODDCL &_Moddcl
 decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM1) &IdtLotRtg
 decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
@@ -129,41 +151,42 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
   Let $Whr = ''
   if &IdtTypTche = {IDTTYPTCHE_RTG_FAC}
     ! Cas d'impression du sous lot de routage
-    Let $Whr = ' AND SOUSLOTRTG.IdtLotRtg = ''' || &IdtLotRtg || ''' AND SOUSLOTRTG.IdtSousLotRtg = ''' || &IdtSousLotRtg || ''''
+    
+    Let $_Whr = ' AND SOUSLOTRTG.IdtLotRtg = ''' || &IdtLotRtg || ''' AND SOUSLOTRTG.IdtSousLotRtg = ''' || &IdtSousLotRtg || ''''
+  	show '$_Whr 1' $Whr
   else
-    Let $Whr = ' AND SOUSLOTRTG.IdtLotRtg is null'
+    Let $_Whr = ' AND SOUSLOTRTG.IdtLotRtg is null'
+    show '$_Whr 2' $Whr
   end-if
 
 
 !-------------------------------------------------------------------------------
-! Proc?dure Balayage de la table des Taches
-!   s'il s'agit d'une tache de facturation temps r?el 
-!         appel de la proc?dure MainFacMan (Impression d'une facture manuelle)
+! Procédure Balayage de la table des Taches
+!   s'il s'agit d'une tache de facturation temps réel 
+!         appel de la procédure MainFacMan (Impression d'une facture manuelle)
 !   s'il s'agit d'une tache de facturation d'un lot 
 !         En fonction du type de facture modele01 ou modele02
-!					appel de la proc?dute SELFAC qui ecrit dans les deux fichiers AP_OUT_F1 ou AP_OUT_F2 respectivement
+!					appel de la procédute SELFAC qui ecrit dans les deux fichiers AP_OUT_F1 ou AP_OUT_F2 respectivement
 !   s'il s'agit d'une tache de facturation d'une facture hors lot
 !         En fonction du type de facture modele01 ou modele02
-!         appel de la proc?dute SELFACHLT qui ecrit dans l'un des deux fichiers AP_OUT_F1 ou AP_OUT_F2 respectivement
+!         appel de la procédute SELFACHLT qui ecrit dans l'un des deux fichiers AP_OUT_F1 ou AP_OUT_F2 respectivement
 !-----------------------------------------------------------------------------
-   ! Attention aux combinaisons des param?tres PRM1, PRM2 et PRM3
+   ! Attention aux combinaisons des paramètres PRM1, PRM2 et PRM3
    ! PRM1 <> null
-     ! =>PRM1 = identifiant de la facture ? imprimer
+     ! =>PRM1 = identifiant de la facture à imprimer
      ! si PRM2 = D, il s'agit d'un original de facture
      ! si PRM3 = D, il s'agit d'un duplicata de facture
-     ! si PRM2 = null et prm3 = null, r?-impression d'original
+     ! si PRM2 = null et prm3 = null, ré-impression d'original
      ! si PRM2 = null et prm3 = 'D', il s'agit d'un duplicata de facture de service
    ! si PRM1 = null et PRM2 <> null, alors on imprime un lot de facturation
 
 
-  IF not ISNULL(&PRM1)  ! facture interm?diaire  ou manuelle
+  IF not ISNULL(&PRM1)  ! facture intermédiaire  ou manuelle
     let #IdtFac = &PRM1  
     show 'PRM1' &PRM1
     Do FctMnl (#IdtFac,#ValFctMnlUtl,$ValChp13,$IdtLot)
-    show '#ValFctMnlUtl = ' #ValFctMnlUtl
     EVALUATE #ValFctMnlUtl
 		  when = 1   ! Facture manuelle / devis
-        show 'eval #ValFctMnlUtl = 1'
         Do Rech_Num_Report(#Num)
         let #_facsrv = 0
         let $FileNam = 'Facture_manuelle_'||to_char(#Num) ||'_FAC_' || &numfct2 ||'.PDF'
@@ -173,46 +196,30 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
       break
 
       when = 0    ! facture de service
-       show 'eval #ValFctMnlUtl = 0'
-        IF &PRM3 = 'D'  ! duplicata 
-        if &est_redresse ='0'
-          IF isnull(&PRM2) ! Imprimer en Duplicata une Facture de service migr?e uniquement
-          	IF &IDTTYPFCT = '1' !FNE: on autorise le duplicata pour toute facture !!and &facsrv = 'M'
+        IF &PRM3 = 'D'    ! duplicata 
+          IF isnull(&PRM2) ! Imprimer en Duplicata une Facture de service migrée uniquement
+          	IF &IDTTYPFCT = '1' and &facsrv = 'M'
               Do Rech_Num_Report(#Num)
               let #_facsrv = 1
               let $FileNam = 'Facture_de_service_'||to_char(#Num) ||'_FAC_' || &numfct2 ||'.PDF'
               let $ReportName1 = $RepGeneration ||'\'||$FileNam
               NEW-REPORT $ReportName1
-              Do mainfacEau
-            end-if
+              Do mainfacman
+          	end-if
           End-if
         else
-        	stop  
-        end-if  
-        else
-          IF isnull(&PRM2) ! on r?-imprime un original de facture de service
-			      if &est_redresse ='1'
-			      !stop quiet       ! on ne fait rien  !FNE !!!!
-			      	show 'PRM2: ' &PRM2
-			      	Do Rech_Num_Report(#Num)
-              let #_facsrv = 1
-              let $FileNam = 'Facture_de_service_'||to_char(#Num) ||'_FAC_' || &numfct2 ||'.PDF'
-              let $ReportName1 = $RepGeneration ||'\'||$FileNam
-              NEW-REPORT $ReportName1
-              Do mainfacEau
-            else
-              stop quiet       
-            end-if  
+          IF isnull(&PRM2)   ! on ré-imprime un original de facture de service
+			      stop quiet       ! on ne fait rien
           !end-if
           else
             Do Rech_Num_Report(#Num)
-            !Do cntoprinfo($vIdtLotFac, $IdtCntOprFil) !vu que c'est une facture hors lot, ?a ne peut que retourner "null"
+            !Do cntoprinfo($vIdtLotFac, $IdtCntOprFil) !vu que c'est une facture hors lot, ça ne peut que retourner "null"
             !let #IdtFac = &NUMFCT2
             Do cntoprinfoHLT(#idtfac, $IdtCntOprFil)
             let $date = edit ($current-date,'YYYYMMDD')
             let $file_name_root = 'EAU_HLT_'||$IdtCntOprFil||'_'||&NUMFCT2||'_'||$date||'_'||to_char(#Num)
             
-            ! test sur le centre op?rationel pour la facture F3 
+            ! test sur le centre opérationel pour la facture F3 
             if $IdtCntOprfil <> '00'
             !if not ISNULL ($IdtCntOprfil)
             
@@ -233,7 +240,7 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
             !let $file_TxtPathf2 = $RepGenerationfic||'\'||$file_namef2    
             							
 
-            ! on g?n?re le fichier F3
+            ! on génère le fichier F3
             open $file_TxtPathf as 3 for-writing record=32767:vary status=#filestate
             if #filestate <> 0
               show 'impossible d''ouvrir le fichier'
@@ -258,7 +265,7 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
             !let $file_TxtPathf2 = $RepGenerationfic||'\'||$file_namef2    
             							
 
-            ! on g?n?re le fichier F1 ou F2 en fonction de la variable $valchp13
+            ! on génère le fichier F1 ou F2 en fonction de la variable $valchp13
             open $file_TxtPathf as 3 for-writing record=32767:vary status=#filestate
             if #filestate <> 0
               show 'impossible d''ouvrir le fichier'
@@ -267,11 +274,11 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
             end-if
             DO selfachlt(#IdtFac, #NbrFacF1, #MntF1, #NbrFacF2, #MntF2, #NbrExpLot)
             CLOSE 3
-            ! on cr?e d'abord la ligne de commande ? ex?cuter pour la copie
+            ! on crée d'abord la ligne de commande à exécuter pour la copie
             let $cmddir =getenv('CMD_DIR') || '\editik_' || $valChp13 || '.bat '
             end-if             
       
-            ! on copie le fichier F1 ou F2 cr?? sur le r?pertoire de destination          
+            ! on copie le fichier F1 ou F2 créé sur le répertoire de destination          
                         
             let $doscmd = $cmddir || '"' || $file_TxtPathf || '"'
             CALL SYSTEM USING $doscmd #doserr
@@ -291,7 +298,7 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
         let $file_name_root = 'EAU_LOT_'||$IdtCntOprFil||'_'||$vIdtLotFac||'_'||$date||'_'||to_char(#Num)
       end-if
       
-      ! test sur le centre op?rationel pour la facture F3 
+      ! test sur le centre opérationel pour la facture F3 
       if $IdtCntOprfil <> '00'
       !if not ISNULL ($IdtCntOprfil)
       !if $IdtCntOprfil in ('42')
@@ -305,14 +312,14 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
             let $_filetxtF2 = $file_name_root ||'_F3_EX_F2.txt'
             let $file_TxtPathf3 = $RepGenerationfic||'\'||$file_namef3 
             let $file_TxtPathf2 = $RepGenerationfic||'\'||$file_namef2
-            ! on ouvre le fichier pour ?crire les factures de type F3
+            ! on ouvre le fichier pour écrire les factures de type F3
          open $file_TxtPathf3 as 1 for-writing record=32767:vary status=#filestat 
             if #filestat <> 0
             show 'impossible d''ouvrir fichier'
             show #filestat
             stop quiet
             end-if 
-        ! on ouvre le premier fichier pour ?crire les factures de type F2
+        ! on ouvre le premier fichier pour écrire les factures de type F2
          open $file_TxtPathf2 as 2 for-writing record=32767:vary status=#filestate
             if #filestate <> 0
             show 'impossible d''ouvrir le fichier'
@@ -327,19 +334,19 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
       close 1
       close 2
       
-      ! on copie les fichiers F3 cr??s sur le r?pertoire de destination
-      ! on cr?e d'abord la ligne de commande ? ex?cuter
+      ! on copie les fichiers F3 créés sur le répertoire de destination
+      ! on crée d'abord la ligne de commande à exécuter
       let $cmddir =getenv('CMD_DIR') || '\editik_F3.bat '
       let $doscmd = $cmddir || '"' || $file_TxtPathf3 || '"'
       CALL SYSTEM USING $doscmd #doserr
       
-      ! on refait la m?me chose avec les fichiers F2
+      ! on refait la même chose avec les fichiers F2
       let $cmddir =getenv('CMD_DIR') || '\editik_F3_EX_F2.bat '
       let $doscmd = $cmddir || '"' || $file_TxtPathf2 || '"'
       CALL SYSTEM USING $doscmd #doserr
       
 
-      ! impression d'un rapport de g?n?ration
+      ! impression d'un rapport de génération
       let $FileNam = 'EDITIQUE_'|| $file_name_root || '.pdf'
       let $ReportName2 = $repGeneration ||'\'||$FileNam
       NEW-REPORT $ReportName2
@@ -354,7 +361,7 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
             let $_filetxtF2 = $file_name_root ||'_F2.txt'
             let $file_TxtPathf1 = $RepGenerationfic||'\'||$file_namef1
             let $file_TxtPathf2 = $RepGenerationfic||'\'||$file_namef2      
-            ! on ouvre le premier fichier pour ?crire les factures de type F1
+            ! on ouvre le premier fichier pour écrire les factures de type F1
          open $file_TxtPathf1 as 1 for-writing record=32767:vary status=#filestat
             if #filestat <> 0
             show 'impossible d''ouvrir fichier'
@@ -362,7 +369,7 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
             stop quiet
             end-if
       
-            ! on ouvre le premier fichier pour ?crire les factures de type F2
+            ! on ouvre le premier fichier pour écrire les factures de type F2
          open $file_TxtPathf2 as 2 for-writing record=32767:vary status=#filestate
             if #filestate <> 0
             show 'impossible d''ouvrir le fichier'
@@ -376,18 +383,18 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
       close 1
       close 2
 
-      ! on copie les fichiers F1 cr??s sur le r?pertoire de destination
-      ! on cr?e d'abord la ligne de commande ? ex?cuter
+      ! on copie les fichiers F1 créés sur le répertoire de destination
+      ! on crée d'abord la ligne de commande à exécuter
       let $cmddir =getenv('CMD_DIR') || '\editik_F1.bat '
       let $doscmd = $cmddir || '"' || $file_TxtPathf1 || '"'
       CALL SYSTEM USING $doscmd #doserr
 
-      ! on refait la m?me chose avec les fichiers F2
+      ! on refait la même chose avec les fichiers F2
       let $cmddir =getenv('CMD_DIR') || '\editik_F2.bat '
       let $doscmd = $cmddir || '"' || $file_TxtPathf2 || '"'
       CALL SYSTEM USING $doscmd #doserr        
 
-      ! impression d'un rapport de g?n?ration
+      ! impression d'un rapport de génération
       let $FileNam = 'EDITIQUE_'|| $file_name_root || '.pdf'
       let $ReportName2 = $repGeneration ||'\'||$FileNam
       NEW-REPORT $ReportName2
@@ -398,7 +405,7 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
       End-IF   
       
     END-if
-  END-if  ! fin du test sur les param?tres de la t?che
+  END-if  ! fin du test sur les paramètres de la tâche
 
   ! Mise a jour du sous lot de routage
   do Maj_SousLotRtg(&IdtLotRtg, &IdtSousLotRtg)
@@ -424,7 +431,6 @@ FROM TCHE, FAC
               )
        )
   and decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},null,TCHE.PRM1) = FAC.IDTFAC (+) 
-  and FctAnn=0
 END-SELECT
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -441,10 +447,7 @@ BEGIN-PROCEDURE InsTche
   do MSG_DefinirLocalisation ('{TRT}_INSTCHE')
   do MSG_DefinirRequeteCourante ('DELETE TCHE')
   BEGIN-SQL on-error=SQL_Erreur
-    delete TCHE where IdtTypTche = {IDTTYPTCHE_LSTRTG_FAC} 
-    and IdtAgt = $user 
-    and ModDcl = $Mode 
-    and (Stt is null or Stt = 'C')
+    delete TCHE where IdtTypTche = {IDTTYPTCHE_LSTRTG_FAC} and IdtAgt = $user and ModDcl = $Mode and (Stt is null or Stt = 'C')
   END-SQL
   do MSG_DefinirRequeteCourante ('INSERT INTO TCHE')
   BEGIN-SQL on-error=SQL_Erreur
@@ -473,7 +476,7 @@ END-PROCEDURE
 !-- Procedure : FctMnt
 !-- Objectif : la facture est-elle imprimable en manuel ou pas !
 !---------------------------------------------------------------------------------
-BEGIN-PROCEDURE FctMnl(#IdtFac,:#ValFctMnlUtl, :$ValChp13, :$IdtLot)
+begin-procedure FctMnl(#IdtFac,:#ValFctMnlUtl, :$ValChp13, :$IdtLot)
   do MSG_DefinirLocalisation ('{TRT}_FCTMNL')
 BEGIN-SELECT  
 TYPFCT.FctMnlUtl &FctMnlUtl
@@ -491,44 +494,43 @@ WHERE FAC.IdtFac = #IdtFac
 END-SELECT
 END-PROCEDURE  ! Fctmnl
 
-
 !---------------------------------------------------------------------------------
 !-- Procedure : cntoprinfo
 !-- Objectif : idtcntopr pour l'appellation du fichier
 !---------------------------------------------------------------------------------
 
-BEGIN-PROCEDURE cntoprinfo($vIdtLotFac, :$P5_IdtCntOpr)
-BEGIN-SELECT
+begin-procedure cntoprinfo($vIdtLotFac, :$P5_IdtCntOpr)
+begin-select
 LOTFAC.IdtCntOpr &IdtCntOpr
 	let $P5_IdtCntOpr = &IdtCntOpr
 From LOTFAC
   where LOTFAC.IdtLotFac = $vIdtLotFac
-END-SELECT
-END-PROCEDURE
+end-select
+end-procedure
 
 !---------------------------------------------------------------------------------
 !-- Procedure : cntoprinfoHLT
 !-- Objectif : idtcntopr pour l'appellation du fichier
 !---------------------------------------------------------------------------------
 
-BEGIN-PROCEDURE cntoprinfoHLT(#IdtFac, :$P5_IdtCntOpr)
-BEGIN-SELECT 
+begin-procedure cntoprinfoHLT(#IdtFac, :$P5_IdtCntOpr)
+Begin-select 
 IdtCntOpr &IdtCntOpr
   let $P5_IdtCntOpr = &IdtCntOpr
 From FAC
   where IdtFac = #IdtFac 
-END-SELECT 
+End-select 
 show 'cntoprhlt' &IdtCntOpr
 end-procedure
 
 !---------------------------------------------------------------------------------
 !-- Procedure : infcntopr
-!-- Objectif : inions necessaires pour le rapport de g?n?ration
+!-- Objectif : inions necessaires pour le rapport de génération
 !---------------------------------------------------------------------------------
 
-BEGIN-PROCEDURE infcntopr($vIdtLotFac, :$P1_IdtCntOpr, :$P2_lib, :$P3_datdbtprd, :$P4_datfinprd)
+begin-procedure infcntopr($vIdtLotFac, :$P1_IdtCntOpr, :$P2_lib, :$P3_datdbtprd, :$P4_datfinprd)
 
-BEGIN-SELECT 
+begin-select 
 lotfac.idtcntopr &IdtCntOpr
 	let $P1_IdtCntOpr = &IdtCntOpr
 cntopr.lib &lib
@@ -551,15 +553,15 @@ end-procedure
 !-- Procedure : selfac
 !-- Objectif : selection des factures du lot
 !---------------------------------------------------------------------------------
-BEGIN-PROCEDURE selfac($vIdtLotFac,:#P1_NbrFacF1,:#P2_MntF1,:#P3_NbrFacF2,:#P4_MntF2,:#P5_NbrExpLot)
+begin-procedure selfac($vIdtLotFac,:#P1_NbrFacF1,:#P2_MntF1,:#P3_NbrFacF2,:#P4_MntF2,:#P5_NbrExpLot)
 
 do MSG_DefinirLocalisation ('{TRT}_SELFAC')
 
  let $_Z27 = ''
 
-BEGIN-SELECT
+begin-select
 FACALG.IdtOpr &IdtOpr
-FacAlg.Z90 &Z90 			! ancienne r?f?rence du client
+FacAlg.Z90 &Z90 			! ancienne référence du client
 	let $_Z90 = &Z90
 	let $_ZZ32 = &Z90
 FacAlg.Z91 &Z91 ! nom et prenom du client destinataire
@@ -569,10 +571,10 @@ FacAlg.ZZ10 &ZZ10 !IdtCtgClt
 	let $_ZZ10 = &ZZ10
 FacAlg.ZZ11 &ZZ11		!libelle abrege de la categorie du client
 	let $_ZZ11 = &ZZ11
-ALG_CPTBNC.numcptbnc &numcptbnc !coordonn?s bancaire
+ALG_CPTBNC.numcptbnc &numcptbnc !coordonnés bancaire
   let $_Z113  = &numcptbnc
   let $_ZZ24 = &numcptbnc             	
-ALG_CPTBNC.numcptccp &numcptccp !coordonn?s ccp
+ALG_CPTBNC.numcptccp &numcptccp !coordonnés ccp
 	let $_Z111  = &numcptccp
 	let $_ZZ26 = &numcptccp
 ALG_CPTBNC.idtfscrglfct &idtfscrglfct !identifiant fiscal des regles de facturation
@@ -648,45 +650,45 @@ FacAlg.Z16 &Z16 !cycle de facturation
   let $_ZZ20 = &Z16
 FacAlg.ZZ36 &ZZ36 !idtcltdst
 	let $_ZZ36 = &ZZ36
-!FacCnsAlg.Z19 &Z19 ! num?ro de compteur
+!FacCnsAlg.Z19 &Z19 ! numéro de compteur
 !	let $_Z19 = &Z19
-!	let $_ZZ37 = 'Compteur N?:'||&Z19
-!FacCnsAlg.Z21 &Z21			! ancien index relev?
+!	let $_ZZ37 = 'Compteur N°:'||&Z19
+!FacCnsAlg.Z21 &Z21			! ancien index relevé
 !	let $_Z21 = ltrim(edit(&Z21,'999999999999'),' ')
 !	let $_ZZ39 = ltrim(edit(&Z21,'999999999999'),' ')
 FacAlg.lib &ZZ22 !cntopr.lib
 	let $_ZZ22 = &ZZ22
-!FacCnsAlg.Z23 &Z23 		! nouveau index relev?
+!FacCnsAlg.Z23 &Z23 		! nouveau index relevé
 !	let $_Z23 = ltrim(edit(&Z23,'999999999999'),' ')
 !	let $_ZZ41 = ltrim(edit(&Z23,'999999999999'),' ')
 !FacCnsAlg.Z25 &Z25 					! consommation en metre cube
 !	let $_Z25 = ltrim(edit(&Z25,'999999999999'),' ')
 FacAlg.Z27 &Z27 		! type d''abonnement
 	let $_Z27 = &Z27
-FacAlg.Z29 &Z29 ! nombre de m?nages par rapport au code type de contrat
+FacAlg.Z29 &Z29 ! nombre de ménages par rapport au code type de contrat
 	let $_Z29 = ltrim(edit(&Z29,'999999999999'),' ')
-FacAlg.Z12 &Z12 ! Num?ro de facture
+FacAlg.Z12 &Z12 ! Numéro de facture
 	let $_Z12 = &Z12
 	let $_ZZ18 = &Z12
-nvl(FacAlg.Z86,0) &Z86 ! montant sur valeur ajout?e MntTva de la facture
+nvl(FacAlg.Z86,0) &Z86 ! montant sur valeur ajoutée MntTva de la facture
 	let #_Z86 = &Z86
 	let $_Z86 = ltrim(edit(&Z86,'999999999999.99'),' ')
 nvl(FacAlg.Z97,0) &Z97 					! Montant de la facture
 	let $_Z97 = ltrim(edit(&Z97,'999999999999.99'),' ')
-FacAlg.Z99 &Z99 					! Solde Exigible Ant?rieur de la facture
+FacAlg.Z99 &Z99 					! Solde Exigible Antérieur de la facture
 	let $_Z99 = ltrim(edit(&Z99,'999999999999.99'),' ')
 	let $_ZZ84 = ltrim(edit(&Z99,'999999999999.99'),' ')
-FacAlg.ZZ80 &ZZ80	! montant ? payer pour le modele de facture F2 sans timbre fiscal
+FacAlg.ZZ80 &ZZ80	! montant à payer pour le modele de facture F2 sans timbre fiscal
 	let #_ZZ80 = &ZZ80
 	Do NBRTOSTR(&ZZ80)
 	let $_ZZ80 = ltrim(edit(&ZZ80,'999999999999.99'),' ') 
 FacAlg.Z101 &Z101 					! Montant hors taxe
 	let $_Z101 = ltrim(edit(&Z101,'999999999999.99'),' ')
-FacAlg.Z103 &Z103 ! calcul du timbre fiscal(payement en esp?ce)
+FacAlg.Z103 &Z103 ! calcul du timbre fiscal(payement en espèce)
 	let $_Z103 = ltrim(edit(&Z103,'999999999999.99'),' ')
 	let $_netplustimbre = ltrim(edit(&Z101+&Z103,'999999999999.99'),' ')
 	let #_netplustimbre1 = $_netplustimbre!ltrim(edit(&Z101+&Z103,'999999999999.99'),' ')
-FacAlg.Z105 &Z105 ! montant ? payer pour le modele de facture F1                  
+FacAlg.Z105 &Z105 ! montant à payer pour le modele de facture F1                  
 	let $_Z105 = ltrim(edit(&Z105,'999999999999.99'),' ')
 	!modification e-paiment
 	!FacAlg.datexg &datcal
@@ -700,9 +702,9 @@ GEN_CLE_CLT(FacAlg.Z90,FacAlg.Z101,FacAlg.DATVALCLE) &cleclient  !ltrim((&Z101+&
 !GEN_CLE_CLT(605201, 41531, 090913) &cleclient
  end-if
   let $_cleclient  = &cleclient
-FacAlg.IdtTrnTyp &IdtTrn ! identifiant de la tourn?e
+FacAlg.IdtTrnTyp &IdtTrn ! identifiant de la tournée
 	let $_Z121 = &IdtTrn
-FacAlg.Rng1 &rng1 ! identifiant du rang de la tourn?e
+FacAlg.Rng1 &rng1 ! identifiant du rang de la tournée
 	let $_Z122 = ltrim(edit(&rng1,'9999'),' ')
 FacAlg.IdtCntOpr &Z123
 	let $_Z123 = &Z123
@@ -732,8 +734,8 @@ FacAlg.Z36 &Z36 !idtclt
 	
 	 !show  &idtfac ';' &Z36  ' -->'   &_datclcprc
 	 
-	!Insertion dans le fichier texte des zones retir?es de la BdD
-FacAlg.Chp13 &chp13 !0 pour g?n?rer F1 et 1 pour g?n?rer F2
+	!Insertion dans le fichier texte des zones retirées de la BdD
+FacAlg.Chp13 &chp13 !0 pour générer F1 et 1 pour générer F2
 to_char(FacAlg.DatLctPrc,'DD/MM/YYYY') &DatLctPrc    
   
   if not isnull (&DatLctPrc )
@@ -754,13 +756,13 @@ FacAlg.NbrExp &NbrExp
 	evaluate &chp13 ! 0 pour F1 et 1 pour F2
 	  when = 0
 	    Do INSINTOFILEF1(#nb1, &NbrExp)
-	    ! nombre et montant des factures g?n?r?es en F1
+	    ! nombre et montant des factures générées en F1
 	    let #P2_MntF1 = #P2_MntF1 + &ZZ80
 	    let #P1_NbrFacF1 = #P1_NbrFacF1 + 1
 	    break
 	  when = 1
 	  	Do INSINTOFILEF2(#nb1, &NbrExp)
-	  	! nombre et montant des factures g?n?r?es en F2
+	  	! nombre et montant des factures générées en F2
 	  	let #P4_MntF2 =  #P4_MntF2 + &ZZ80
 	  	let #P3_NbrFacF2 = #P3_NbrFacF2 + 1
 	  	break
@@ -771,8 +773,8 @@ FacAlg.NbrExp &NbrExp
 	 
 	!show &idtfac
 	!show &Z36
-                 
-from alg_fac_F3 FacAlg, ALG_CPTBNC, STR, LOTRTG, SOUSLOTRTG, RTG
+  !show '$_Whr' $_Whr
+from x7.alg_fac_F3 FacAlg, x7.ALG_CPTBNC, x7.STR, x7.LOTRTG, x7.SOUSLOTRTG, x7.RTG
  where FacAlg.IdtLotFac = $vIdtLotFac
 	and  FacAlg.IdtCntOpr = ALG_CPTBNC.IdtCntOpr
 	and  ALG_CPTBNC.IdtCntOpr  = STR.IdtCntOpr
@@ -788,12 +790,12 @@ end-select
 
 end-procedure !SelFac
 
-BEGIN-PROCEDURE Prev_fac(#idtfac, $pidtclt)
+begin-Procedure Prev_fac(#idtfac, $pidtclt)
 
- !on recherche la date de la derni?re facture
+ !on recherche la date de la dernière facture
  !alg_fac_F3.numfct
  !alg_fac_F3.Z14
-BEGIN-SELECT
+begin-select
 to_char(prev_fac.datclcprc,'DD/MM/YYYY') &_datclcprc
   let $_datclcprc = &_datclcprc
  !show '_datclcprc'   &_datclcprc
@@ -802,10 +804,10 @@ from
 from X7.fac where idtclt = $pidtclt and idttypfct = '1' and numfct <> '1') prev_fac
 where idtfac = #idtfac
 end-select
- ! s'il n'y a pas de derni?re facture on prend la 
+ ! s'il n'y a pas de dernière facture on prend la 
  ! date du dernier avenant
 if isnull ($_datclcprc) 
-BEGIN-SELECT
+begin-select
 to_char(datdbt,'DD/MM/YYYY') &datdbtavt
  let $_datclcprc = &datdbtavt
  !show 'datdbtavt:' &datdbtavt
@@ -826,13 +828,13 @@ end-procedure
 !-- Objectif : selection des factures hors lot HLT
 !-------------------------------------------------------------------------------
 
-BEGIN-PROCEDURE SelFacHlt(#IdtFac, #NbrFacF1, #MntF1, #NbrFacF2, #MntF2, #NbrExpLot)
+begin-procedure SelFacHlt(#IdtFac, #NbrFacF1, #MntF1, #NbrFacF2, #MntF2, #NbrExpLot)
 
   let $_Z27 = ''
 
-BEGIN-SELECT
+begin-select
 FACALG.IdtOpr &IdtOpr
-FacAlg.Z90 &Z90 			! ancienne r?f?rence du client
+FacAlg.Z90 &Z90 			! ancienne référence du client
 	let $_Z90 = &Z90
 	let $_ZZ32 = &Z90
 FacAlg.Z91 &Z91 ! nom et prenom du client destinataire
@@ -842,10 +844,10 @@ FacAlg.ZZ10 &ZZ10 !IdtCtgClt
 	let $_ZZ10 = &ZZ10
 FacAlg.ZZ11 &ZZ11		!libelle abrege de la categorie du client
 	let $_ZZ11 = &ZZ11
-ALG_CPTBNC.numcptbnc &numcptbnc !coordonn?s bancaire
+ALG_CPTBNC.numcptbnc &numcptbnc !coordonnés bancaire
   let $_Z113  = &numcptbnc
   let $_ZZ24 = &numcptbnc             	
-ALG_CPTBNC.numcptccp &numcptccp !coordonn?s ccp
+ALG_CPTBNC.numcptccp &numcptccp !coordonnés ccp
 	let $_Z111  = &numcptccp
 	let $_ZZ26 = &numcptccp
 ALG_CPTBNC.idtfscrglfct &idtfscrglfct !identifiant fiscal des regles de facturation
@@ -920,47 +922,47 @@ FacAlg.Z16 &Z16 !cycle de facturation
   let $_ZZ20 = &Z16
 FacAlg.ZZ36 &ZZ36 !idtcltdst
 	let $_ZZ36 = &ZZ36
-!FacCnsAlg.Z19 &Z19 ! num?ro de compteur
+!FacCnsAlg.Z19 &Z19 ! numéro de compteur
 !	let $_Z19 = &Z19
-!	let $_ZZ37 = 'Compteur N?:'||&Z19
-!FacCnsAlg.Z21 &Z21			! ancien index relev?
+!	let $_ZZ37 = 'Compteur N°:'||&Z19
+!FacCnsAlg.Z21 &Z21			! ancien index relevé
 !	let $_Z21 = ltrim(edit(&Z21,'999999999999'),' ')
 !	let $_ZZ39 = ltrim(edit(&Z21,'999999999999'),' ')
 FacAlg.lib &ZZ22 !cntopr.lib
 	let $_ZZ22 = &ZZ22
-!FacCnsAlg.Z23 &Z23 		! nouveau index relev?
+!FacCnsAlg.Z23 &Z23 		! nouveau index relevé
 !	let $_Z23 = ltrim(edit(&Z23,'999999999999'),' ')
 !	let $_ZZ41 = ltrim(edit(&Z23,'999999999999'),' ')
 !FacCnsAlg.Z25 &Z25 					! consommation en metre cube
 !	let $_Z25 = ltrim(edit(&Z25,'999999999999'),' ')
 FacAlg.Z27 &Z27 		! type d''abonnement
 	let $_Z27 = &Z27
-FacAlg.Z29 &Z29 ! nombre de m?nages par rapport au code type de contrat
+FacAlg.Z29 &Z29 ! nombre de ménages par rapport au code type de contrat
 	let $_Z29 = ltrim(edit(&Z29,'999999999999'),' ')
-FacAlg.Z12 &Z12 ! Num?ro de facture
+FacAlg.Z12 &Z12 ! Numéro de facture
 	let $_Z12 = &Z12
 	let $_ZZ18 = &Z12
-nvl(FacAlg.Z86,0) &Z86 ! montant sur valeur ajout?e MntTva de la facture
+nvl(FacAlg.Z86,0) &Z86 ! montant sur valeur ajoutée MntTva de la facture
 	let #_Z86 = &Z86
 	let $_Z86 = ltrim(edit(&Z86,'999999999999.99'),' ')
 nvl(FacAlg.Z97,0) &Z97 					! Montant de la facture
 	let $_Z97 = ltrim(edit(&Z97,'999999999999.99'),' ')
-FacAlg.Z99 &Z99 					! Solde Exigible Ant?rieur de la facture
+FacAlg.Z99 &Z99 					! Solde Exigible Antérieur de la facture
 	let $_Z99 = ltrim(edit(&Z99,'999999999999.99'),' ')
 	let $_ZZ84 = ltrim(edit(&Z99,'999999999999.99'),' ')
-FacAlg.ZZ80 &ZZ80	! montant ? payer pour le modele de facture F2 sans timbre fiscal
+FacAlg.ZZ80 &ZZ80	! montant à payer pour le modele de facture F2 sans timbre fiscal
 	let #_ZZ80 = &ZZ80
 	Do NBRTOSTR(&ZZ80)
 	let $_ZZ80 = ltrim(edit(&ZZ80,'999999999999.99'),' ') 
 FacAlg.Z101 &Z101 					! Montant hors taxe
 	let $_Z101 = ltrim(edit(&Z101,'999999999999.99'),' ')
-FacAlg.Z103 &Z103 ! calcul du timbre fiscal(payement en esp?ce)
+FacAlg.Z103 &Z103 ! calcul du timbre fiscal(payement en espèce)
 	let $_Z103 = ltrim(edit(&Z103,'999999999999.99'),' ')
-FacAlg.Z105 &Z105 ! montant ? payer pour le modele de facture F1                  
+FacAlg.Z105 &Z105 ! montant à payer pour le modele de facture F1                  
 	let $_Z105 = ltrim(edit(&Z105,'999999999999.99'),' ')
-FacAlg.IdtTrnTyp &IdtTrn ! identifiant de la tourn?e
+FacAlg.IdtTrnTyp &IdtTrn ! identifiant de la tournée
 	let $_Z121 = &IdtTrn
-FacAlg.Rng1 &rng1 ! identifiant du rang de la tourn?e
+FacAlg.Rng1 &rng1 ! identifiant du rang de la tournée
 	let $_Z122 = ltrim(edit(&rng1,'9999'),' ')
 FacAlg.IdtCntOpr||'-'||FacAlg.Lib &Z10 			! identifiant d
 	let $_Z10 = &Z10  
@@ -980,7 +982,7 @@ FacAlg.Z36 &Z36 !idtclt
 	 show 'Client: '      &Z36
 	 show 'Facture: '     &idtfac
 	 show 'HLT xxx-->'    $datclcprc
-FacAlg.Chp13 &chp13 !0 pour g?n?rer F1 et 1 pour g?n?rer F2
+FacAlg.Chp13 &chp13 !0 pour générer F1 et 1 pour générer F2
 
 to_char(FacAlg.DatLctPrc,'DD/MM/YYYY') &DatLctPrc    
   
@@ -1008,7 +1010,7 @@ FacAlg.NbrExp &NbrExp
 FacAlg.IdtPntLvr &IdtPntLvr	
 FacAlg.IdtPntCpg &IdtPntCpg	
 	DO DETCNS (&idtfac, &idtpntlvr, &idtpntcpg)
- !Insertion dans le fichier texte des zones retir?es de la BdD
+ !Insertion dans le fichier texte des zones retirées de la BdD
 	let #nb1 = 1               
 	Let #P5_NbrExpLot = #P5_NbrExpLot + &NbrExp
  !to_char(FacAlg.DatLctPrc,'DD/MM/YYYY') &DatLctPrc   
@@ -1018,13 +1020,13 @@ FacAlg.IdtPntCpg &IdtPntCpg
  evaluate &chp13 ! 0 pour F1 et 1 pour F2
 	  when = 0
 	    Do INSINTOFILEF1Hlt(#nb1, &NbrExp)
-	    ! nombre et montant des factures g?n?r?es en F1
+	    ! nombre et montant des factures générées en F1
 	    let #P2_MntF1 = #P2_MntF1 + &ZZ80
 	    let #P1_NbrFacF1 = #P1_NbrFacF1 + 1
 	    break
 	  when = 1
 	  	Do INSINTOFILEF2Hlt(#nb1, &NbrExp)
-	  	! nombre et montant des factures g?n?r?es en F2
+	  	! nombre et montant des factures générées en F2
 	  	let #P4_MntF2 =  #P4_MntF2 + &ZZ80
 	  	let #P3_NbrFacF2 = #P3_NbrFacF2 + 1
 	  	break
@@ -1041,11 +1043,11 @@ end-select
 
 end-procedure !SelFacHlt
 
-!r?cup?ration de la tva appliqu? a la facture
-BEGIN-PROCEDURE tax (:#teee)
+!récupération de la tva appliqué a la facture
+begin-procedure tax (:#teee)
 
-!selection de la tva appliqu?e sur la facture
-BEGIN-SELECT
+!selection de la tva appliquée sur la facture
+begin-select
 hsttax.tau &Z82
 	let #teee = &Z82
  from hsttax
@@ -1059,7 +1061,7 @@ end-procedure
 !-- Procedure : sellgnfac
 !-- Objectif : Selection des lignes de factures
 !--------------------------------------------------------------------------
-BEGIN-PROCEDURE sellgnfac (#idtfac,:#p2,:#p3,:#p4)
+begin-procedure sellgnfac (#idtfac,:#p2,:#p3,:#p4)
 
 do MSG_DefinirLocalisation ('{TRT}_SELLGNFAC')
 
@@ -1147,7 +1149,7 @@ do MSG_DefinirLocalisation ('{TRT}_SELLGNFAC')
 	let $_ZZZZ = ''
 	!-- fin initialisation
 	
-BEGIN-SELECT
+begin-select
 lgnfac.NumLgnFct &NumLgnFct
 lgnfac.idtrbq &idtrbq
 nvl(lgnfac.MntHt,0) &lgnfacmntht
@@ -1276,11 +1278,11 @@ end-procedure !sellgnfac
 
 !------------------------------------------------------------------------
 !-- Procedure : nbrdetlgn
-!-- Objectif : selection du nombre de d?tail de ligne 0 - 4
+!-- Objectif : selection du nombre de détail de ligne 0 - 4
 !------------------------------------------------------------------------
 
-BEGIN-PROCEDURE nbrdetlgn(#IdtFac, #NumLgnFct, :#P1_NbrDetLgnFac)
-BEGIN-SELECT
+begin-procedure nbrdetlgn(#IdtFac, #NumLgnFct, :#P1_NbrDetLgnFac)
+begin-select
 nbrdetlgnfac &nbrdetlgnfac
 	let #P1_NbrDetLgnFac = &nbrdetlgnfac
  from alg_nbrdetlgnfac n
@@ -1291,9 +1293,9 @@ end-procedure
 
 !--------------------------------------------------------------------------
 !-- Procedure : detlgneau
-!-- Objectif : Pour chaque facture du lot je selectionne le d?tail de ligne de facture si IdtRbq = 'EAU'
+!-- Objectif : Pour chaque facture du lot je selectionne le détail de ligne de facture si IdtRbq = 'EAU'
 !--------------------------------------------------------------------------
-BEGIN-PROCEDURE detlgneau(#idtfac,#numlgnfct,#NbrDetLgnFac)
+begin-procedure detlgneau(#idtfac,#numlgnfct,#NbrDetLgnFac)
 
 do MSG_DefinirLocalisation ('{TRT}_DETLGNEAU')
 
@@ -1312,7 +1314,7 @@ let $_Z50 = ''
 let $_Z54 = ''
 !fin initialisation
 
-BEGIN-SELECT
+begin-select
 nvl(detlgn.qtefct,0) &qtefct1
 nvl(detlgn.prxunt,0) &prxunt1
 nvl(detlgn.mntht,0) &mntht1
@@ -1354,9 +1356,9 @@ end-procedure !detlgneau
 
 !--------------------------------------------------------------------------
 !-- Procedure : DETLGNASS
-!-- Objectif : Pour chaque facture du lot je selectionne le d?tail de ligne de facture si IdtRbq = 'ASS'
+!-- Objectif : Pour chaque facture du lot je selectionne le détail de ligne de facture si IdtRbq = 'ASS'
 !--------------------------------------------------------------------------
-BEGIN-PROCEDURE detlgnass(#idtfac,#numlgnfct,#NbrDetLgnFac)
+begin-procedure detlgnass(#idtfac,#numlgnfct,#NbrDetLgnFac)
 
 do MSG_DefinirLocalisation ('{TRT}_DETLGNASS')
 
@@ -1371,7 +1373,7 @@ do MSG_DefinirLocalisation ('{TRT}_DETLGNASS')
 	let $_Z62 = ''
 !fin initialisation	
 
-BEGIN-SELECT
+begin-select
 nvl(detlgn.prxunt,0) &prxunt2
 nvl(detlgn.mntht,0) &mntht2
 detlgn.idtdetlgn &idtdetlgn
@@ -1409,7 +1411,7 @@ end-procedure !detlgnass
 !-- Procedure : init                                                              
 !-- Objectif : reinitialisation des variables          
 !--------------------------------------------------------------------------------
-BEGIN-PROCEDURE init
+begin-procedure init
 
 do MSG_DefinirLocalisation ('{TRT}_INIT')
 
@@ -1557,7 +1559,7 @@ end-procedure !Init
 !-- Procedure : insintofilef1
 !-- Objectif : procedure d'ecriture dans le fichier texte
 !----------------------------------------------------
-BEGIN-PROCEDURE InsIntoFileF1(#nb1,#nbrexp1)
+begin-procedure InsIntoFileF1(#nb1,#nbrexp1)
 
 do MSG_DefinirLocalisation ('{TRT}_INSINTOFILEF1')
 
@@ -1625,7 +1627,7 @@ end-procedure ! InsIntoFileF1
 !-- Procedure : insintofilef1Hlt
 !-- Objectif : procedure d'ecriture dans le fichier texte Hlt
 !----------------------------------------------------
-BEGIN-PROCEDURE InsIntoFileF1Hlt(#nb1,#nbrexp1)
+begin-procedure InsIntoFileF1Hlt(#nb1,#nbrexp1)
 
 do MSG_DefinirLocalisation ('{TRT}_INSINTOFILEF1')
 
@@ -1693,7 +1695,7 @@ end-procedure ! InsIntoFileF1Hlt
 !-- Procedure : NBRTOSTR
 !-- Objectif : conversion des montants de chiffres en lettres
 !--------------------------------------------------------------------------
-BEGIN-PROCEDURE NBRTOSTR(#_ZZ80)
+begin-procedure NBRTOSTR(#_ZZ80)
 
 do MSG_DefinirLocalisation ('{TRT}_NBRTOSTR')
 
@@ -1713,7 +1715,7 @@ end-procedure ! NbrToStr
 !-- Procedure : NBRTOSTRF3
 !-- Objectif : conversion des montants de chiffres en lettres
 !--------------------------------------------------------------------------
-BEGIN-PROCEDURE NBRTOSTRF3(#_Z97)
+begin-procedure NBRTOSTRF3(#_Z97)
 
 do MSG_DefinirLocalisation ('{TRT}_NBRTOSTRF3')
 
@@ -1729,10 +1731,29 @@ END-SQL
 end-procedure ! NbrToStr
 
 !----------------------------------------------------------------------------
-!-- Procedure : MSGPERSOF3
-!-- Objectif : message personalis?
+!-- Procedure : NBRTOSTRNETF3
+!-- Objectif : conversion des montants de chiffres en lettres
 !--------------------------------------------------------------------------
-BEGIN-PROCEDURE MSGPERSOF3(#IdtFac)
+begin-procedure NBRTOSTRNETF3(#_Z97)
+
+do MSG_DefinirLocalisation ('{TRT}_NBRTOSTRNETF3')
+
+BEGIN-SQL
+begin
+X7.Nbr2Str(#_Z97,$ZZ821, $str1, $ZZ822);;
+end;;
+END-SQL
+	let $ZZ823 = $ZZ821 || ' Dinars '
+	let $ZZ824 = $ZZ822 || ' Centimes.'
+	let $_Z1054 = $ZZ823 || $ZZ824
+
+end-procedure ! NbrToStr
+
+!----------------------------------------------------------------------------
+!-- Procedure : MSGPERSOF3
+!-- Objectif : message personalisé
+!--------------------------------------------------------------------------
+begin-procedure MSGPERSOF3(#IdtFac)
 
 do MSG_DefinirLocalisation ('{TRT}_MSGPERSOF3')
 
@@ -1759,7 +1780,7 @@ end-procedure ! MSGPERSOF3F3
 !-- Procedure : insintofilef2
 !-- Objectif : procedure d'ecriture dans le fichier txt des zones selectionnees
 !----------------------------------------------------
-BEGIN-PROCEDURE INSINTOFILEF2(#nb1,#nbrexp2)
+begin-procedure INSINTOFILEF2(#nb1,#nbrexp2)
 
 do MSG_DefinirLocalisation ('{TRT}_INSINTOFILEF2')
 
@@ -1831,7 +1852,7 @@ END-PROCEDURE !insintofilef2
 !-- Procedure : insintofilef2Hlt
 !-- Objectif : procedure d'ecriture dans le fichier txt des zones selectionnees Hlt
 !----------------------------------------------------
-BEGIN-PROCEDURE INSINTOFILEF2Hlt(#nb1,#nbrexp2)
+begin-procedure INSINTOFILEF2Hlt(#nb1,#nbrexp2)
 
 do MSG_DefinirLocalisation ('{TRT}_INSINTOFILEF2')
 
@@ -1901,8 +1922,8 @@ END-PROCEDURE !insintofilef2Hlt
 
 !-------------------------------------------------------------------------------
 !-- Procedure : RapGnr
-!-- Objectif : Rapport de g?n?ration contenant
-!-- le nombre de factures et montant total du lot de factures g?n?r?
+!-- Objectif : Rapport de génération contenant
+!-- le nombre de factures et montant total du lot de factures généré
 !-------------------------------------------------------------------------------
 
 BEGIN-PROCEDURE RapGnr ($file_namef1,$file_namef2,#NbrFacF1,#MntF1,#NbrFacF2,#MntF2,#NbrExpLot,$IdtCntOpr,$lib,$datdbtprd,$datfinprd)
@@ -1921,7 +1942,7 @@ BEGIN-PROCEDURE RapGnr ($file_namef1,$file_namef2,#NbrFacF1,#MntF1,#NbrFacF2,#Mn
   PRINT 'FICHIERS X7 - EDITIQUE' (5,1) bold center underline
 
   alter-printer font=4 point-size=13
-  let $txt = 'Export r?alis? le : '
+  let $txt = 'Export réalisé le : '
   let $date = edit (Datenow(), 'DD/MM/YYYY')
   let $txt = $txt || $date
   Print $txt (+2,5) bold
@@ -1930,17 +1951,17 @@ BEGIN-PROCEDURE RapGnr ($file_namef1,$file_namef2,#NbrFacF1,#MntF1,#NbrFacF2,#Mn
   print 'Lot de facturation :' (+3,5) Bold
   print $_vIdtLotFac (,26)
   
-  Print 'Centre op?rationnel :'(+1,5) Bold
+  Print 'Centre opérationnel :'(+1,5) Bold
   let $txt  = $IdtCntOpr || ' - ' || $lib
   Print $txt (,26) 
 
-  Print 'P?riode de facturation :' (+1,5) Bold
+  Print 'Période de facturation :' (+1,5) Bold
   let $txt = edit($datdbtprd,'DD/MM/YYYY') ||  '  -  ' || edit($datfinprd,'DD/MM/YYYY')
   Print $txt (,26)
 
-  Print 'Fichiers Export?s' (+4,5) Bold Underline
+  Print 'Fichiers Exportés' (+4,5) Bold Underline
    let $txt1 = 'Nombre de factures'
-   let $txt2 = 'Montant export? (DA)'
+   let $txt2 = 'Montant exporté (DA)'
   
   Print $file_namef1 (+2,7) Bold
    Print $txt1 (+1,9)
@@ -1954,10 +1975,10 @@ BEGIN-PROCEDURE RapGnr ($file_namef1,$file_namef2,#NbrFacF1,#MntF1,#NbrFacF2,#Mn
    Print $txt2 (+1,9)
    print #mntF2 (,55) edit B999,999,999.99nu
 
-  Print 'Nombre total de factures export?es'  (+4,5) bold
+  Print 'Nombre total de factures exportées'  (+4,5) bold
   let #NbrFac = #nbrFacF1 + #NbrFacF2
   print #NbrFac (,40) edit 9999999nu
-  Print 'Montant total export?' (+1,5) Bold
+  Print 'Montant total exporté' (+1,5) Bold
   let #MntExp = #MntF1 + #MntF2
   print #MntExp (,55) edit B999,999,999.99nu
   
@@ -1979,35 +2000,15 @@ END-PROCEDURE	 !RapGnr
 !-- Objectif : impression d'une facture manuelle
 !---------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------
-BEGIN-PROCEDURE mainfacEau
-  let $pg='facman'
-  DO selfacEau
-  DO vrt_eau
-  DO titles_eau
-  DO seldetfacEau
-END-procedure  !mainfacman
 
-
-
-BEGIN-PROCEDURE mainfacman
+BEGIN-procedure mainfacman
 	let $pg='facman'
-  DO selfacMan
+  DO selfacman
   DO vrt
   DO titles
   DO seldetfac
 END-procedure  !mainfacman
 
-BEGIN-PROCEDURE vrt_eau 
-  LET #line = 22
-  graphic (#line,1,70) horz-line 5
-  graphic (25,1,70) horz-line 5
-  graphic (#line,38,5) vert-line 5
-  graphic (,1,5) vert-line 5    
-  graphic (,7,5) vert-line 5
-  graphic (,49,5) vert-line 5
-  graphic (,58,5) vert-line 5
-  graphic (,71,5) vert-line 5
-END-PROCEDURE 
 
 ! A quoi sert cette procedure ??
 BEGIN-PROCEDURE vrt 
@@ -2022,115 +2023,27 @@ BEGIN-PROCEDURE vrt
   graphic (,71,1) vert-line 5
 END-PROCEDURE    ! vrt 
 
-BEGIN-PROCEDURE titles_eau
-  ! impression du logo 
-  let $img_pathnom=getenv('SQT_DIR') || '\logo_seaal.bmp'
-  ! TEMP-FNE: let $img_pathnom=getenv('SQT_DIR') || '\logo_seaal.bmp'
-  show 'image=' $img_pathnom
-  print-image (1,1)
-     type = BMP-file
-     source = $img_pathnom
-     image-size= (7,4)
 
-  ! impression du nom de la soci?t? en bleu
-  let $txt = 'Société des Eaux et de l''Assainissement d''Alger'
-  Alter-Printer font=4 Point-Size=9
-  set-color print-text-foreground =('blue')
-  print $txt (1,9) bold
-  set-color print-text-foreground =('black')
-  
-  ! impression de l'adresse
-  let $txt = '97 Parc Ben Omar - 16050 Kouba - Alger'
-  alter-printer point-size=8
-  print $txt (+1,9)
-
-  ! impression des informations l?gales
-  let $txt = 'SPA au capital de 1 741 000 000 DA'
-  set-color print-text-foreground =('gray')
-  print $txt (+1,9)
-  let $txt = 'R.C. : 06 B 0973312'
-  print $txt (+1,9)
-  set-color print-text-foreground =('black')
-
-  IF &prm3 = 'D' and &AcvFac = 'C1'    ! on imprime un duplicata
-    Alter-Printer Font=4 Point-Size=24
-    set-color print-text-foreground =('gray')
-    show '$AcvFac:' &AcvFac
-    Print 'DUPLICATA'   (19,25) bold
-    set-color print-text-foreground =('dark')
-  END-IF  
-
-! impression des titres de colonnes
-  !Alter-Printer Font=4 Point-Size=12
-  !print 'Alger le, ' (7,50)
-  !let $date = edit ($current-date, 'DD/MM/YYYY')
-  !print $date (,57)
-  !print 'Agence ' (+1,5) bold underline
-
-  !let $libfacman = &libfacman || ' N? '
-  !print $libfacman (20,24) bold
-
-  Alter-Printer Font=4 Point-Size=9
-  !print 'Objet : ' (22,5) bold
-  print 'Item' (25,2) bold
-  
-  !TEMP-FNE:let $img_pathnom=getenv('SQT_DIR') || '\dsgfacar.BMP'
-  let $img_pathnom=getenv('SQT_DIR') || '\nmroar.BMP'
-  !show 'image=' $img_pathnom
-  print-image (24,2)
-     type = BMP-file
-     source = $img_pathnom !For-printer=(PD,GIF-FILE, $img_pathnom)
-     image-size= (4,1)
-  
-  let $img_pathnom=getenv('SQT_DIR') || '\dsgfacar.BMP'
-  !show 'image=' $img_pathnom
-  print-image (24,18)
-     type = BMP-file
-     source = $img_pathnom !For-printer=(PD,GIF-FILE, $img_pathnom)
-     image-size= (8,1)
-  
-  let $img_pathnom=getenv('SQT_DIR') || '\qtfctar.BMP'
-  !show 'image=' $img_pathnom
-  print-image (24,40)
-     type = BMP-file
-     source = $img_pathnom !For-printer=(PD,GIF-FILE, $img_pathnom)
-     image-size= (6,1)
-     
-let $img_pathnom=getenv('SQT_DIR') || '\prxunar.BMP'
-  !show 'image=' $img_pathnom
-  print-image (24,52)
-     type = BMP-file
-     source = $img_pathnom !For-printer=(PD,GIF-FILE, $img_pathnom)
-     image-size= (4,1)
-     
-  let $img_pathnom=getenv('SQT_DIR') || '\mnthtar1.BMP'
-  !show 'image=' $img_pathnom
-  print-image (24,60)
-     type = BMP-file
-     source = $img_pathnom !For-printer=(PD,GIF-FILE, $img_pathnom)
-     image-size= (8,1)
-  
-  !print '????' (25,2) bold
-  
-  print 'Désignation ' (,18) bold
-  print 'Quantité ' (,41) bold
-  print 'Prix Unitaire ' (,50) bold
-  print 'Montant HT (DA)' (,60) bold
-  
-  
-END-PROCEDURE  !titles_eau
 
 BEGIN-PROCEDURE titles
   ! impression du logo 
   let $img_pathnom=getenv('SQT_DIR') || '\logo_seaal.bmp'
-  ! TEMP-FNE: let $img_pathnom=getenv('SQT_DIR') || '\logo_seaal.bmp'
   show 'image=' $img_pathnom
   print-image (1,1)
      type = BMP-file
      source = $img_pathnom
      image-size= (7,4)
+  
+! il n'est pas possible d'imprimer une image en spf et pdf!
+  !let $img_pathnom=getenv('SQT_DIR') || '\logo_seaal.gif'
+  !show 'image=' $img_pathnom
+  !print-image (1,1)
+  !   type = GIF-file
+  !   source = $img_pathnom !For-printer=(PD,GIF-FILE, $img_pathnom)
+  !   image-size= (9,2)
 
-  ! impression du nom de la soci?t? en bleu
+
+  ! impression du nom de la société en bleu
   let $txt = 'Société des Eaux et de l''Assainissement d''Alger'
   Alter-Printer font=4 Point-Size=9
   set-color print-text-foreground =('blue')
@@ -2142,7 +2055,7 @@ BEGIN-PROCEDURE titles
   alter-printer point-size=8
   print $txt (+1,9)
 
-  ! impression des informations l?gales
+  ! impression des informations légales
   let $txt = 'SPA au capital de 1 741 000 000 DA'
   set-color print-text-foreground =('gray')
   print $txt (+1,9)
@@ -2153,145 +2066,37 @@ BEGIN-PROCEDURE titles
   IF &prm3 = 'D'   ! on imprime un duplicata
     Alter-Printer Font=4 Point-Size=24
     set-color print-text-foreground =('gray')
-    Print 'DUPLICATA'   (19,25) bold
+    Print 'DUPLICATA'   (19,20) bold
     set-color print-text-foreground =('dark')
   END-IF  
 
 ! impression des titres de colonnes
-  !Alter-Printer Font=4 Point-Size=12
-  !print 'Alger le, ' (7,50)
-  !let $date = edit ($current-date, 'DD/MM/YYYY')
-  !print $date (,57)
-  !print 'Agence ' (+1,5) bold underline
+  Alter-Printer Font=4 Point-Size=12
+  print 'Alger le, ' (7,50)
+  let $date = edit ($current-date, 'DD/MM/YYYY')
+  print $date (,57)
+  print 'Agence ' (+1,5) bold underline
 
-  !let $libfacman = &libfacman || ' N? '
-  !print $libfacman (20,24) bold
+  let $libfacman = &libfacman || ' N° '
+  print $libfacman (20,24) bold
 
   Alter-Printer Font=4 Point-Size=9
-  !print 'Objet : ' (22,5) bold
+  print 'Objet : ' (22,5) bold
   print 'Item' (25,2) bold
-  
-!  !TEMP-FNE:let $img_pathnom=getenv('SQT_DIR') || '\dsgfacar.BMP'
-!  let $img_pathnom=getenv('SQT_DIR') || '\dsgfacar.BMP'
-!  !show 'image=' $img_pathnom
-!  print-image (24,1)
-!     type = BMP-file
-!     source = $img_pathnom !For-printer=(PD,GIF-FILE, $img_pathnom)
-!     image-size= (6,1)
-!  
-!  let $img_pathnom=getenv('SQT_DIR') || '\dsgfacar.BMP'
-!  !show 'image=' $img_pathnom
-!  print-image (24,15)
-!     type = BMP-file
-!     source = $img_pathnom !For-printer=(PD,GIF-FILE, $img_pathnom)
-!     image-size= (8,1)
-  
-  
-  !print '????' (25,2) bold
-  
   print 'Désignation ' (,12) bold
   print 'Quantité ' (,41) bold
   print 'Prix Unitaire ' (,50) bold
   print 'Montant HT (DA)' (,60) bold
-  
-  
 END-PROCEDURE  !titles
 
 
-BEGIN-PROCEDURE selfacEau
- alter-printer font=4 point-size=8
-BEGIN-SELECT
-ALG_CPTBNC.numcptbnc &_numcptbnc_e !coordonn?s bancaire
-ALG_CPTBNC.numcptccp &_numcptccp_e !coordonn?s ccp
-clt.AdrStr10 &communeman_e 
-ALG_CPTBNC.idtfscrglfct &_idtfscrglfct_e !identifiant fiscal des regles de facturation
-ALG_ARTFSC(clt.AdrStr10, cntopr.IdtCntOpr) &_artfscrglfct_e
-  alter-printer font=4 point-size=12
-'Tél :'||STR.telrns &telrns_e (10,5) !numero de telephone de l'agence
-'Code:' || Clt.IdtClt &CodeClient 
- Print &CodeClient (9,42) 
-CLT.nom|| ' ' ||CLT.Prn &nom_e (10,42) bold
-Ltrim(rtrim(substr(CLT.AdrLbr,
-                         1,
-                         case
-                           when substr(clt.AdrStr10, 1, 2) = '16' then
-                            instr(upper(CLT.AdrLbr), 'ALGER', -1)
-                           when substr(clt.AdrStr10, 1, 2) = '42' then
-                            instr(upper(CLT.AdrLbr), 'TIPAZA', -1)
-                         end - 2))) || case
-        when substr(clt.AdrStr10, 1, 2) = '16' then
-         ' - ALGER'
-        when substr(clt.AdrStr10, 1, 2) = '42' then
-         ' - TIPAZA'
-      end &AdrLbr_e     
- let $Adresse = &AdrLbr_e
- Print $Adresse (12,42) wrap 100 4 on=<10> strip=<13> line-height=1
- 
-FAC.titfac &titfac_e (22,8) wrap 50 2 line-height=1
-FAC.mntht &mnt_e
-To_Char(FAC.datexg,'DD/MM/YYYY') &_datexg_e
-fac.mnttva &mnttva_e
-FAC.mntht + FAC.mnttva &mntttc_e
-LEAST(2500,greatest(5, ceil((FAC.mntht + FAC.mnttva)/100))) &MntTimFsc_e
-  let #_mntht1_e = &mnt_e
-  let #_mnttva1_e = &mnttva_e
-  let #_mntttc_e = &mntttc_e
-  let #_mnttimfsc_e = &MntTimFsc_e
-  let #_mntttc1_e = &MntTimFsc_e + &mntttc_e
-  !let $_datexg1_e = edit(&datexg_e,'DD/MM/YYYY')
-fac.numfct &numfct_e (20,35) bold
-(CASE ctrfac.idtcycfac
-                WHEN 'T01'
-                THEN
-                      SUBSTR (ctrfac.idtprdfac, 6, 1)
-                   || 'e Trimsetre / '
-                   || SUBSTR (ctrfac.idtprdfac, 0, 4)
-                WHEN 'M01'
-                THEN
-                      SUBSTR (ctrfac.idtprdfac, 5, 2)
-                   || 'e Mois / '
-                   || SUBSTR (ctrfac.idtprdfac, 0, 4)
-             END) &prdfac
-cntopr.libint &libabr_e (4,7) bold
-cntopr.IdtCntOpr||' - '||cntopr.lib &IdtCntOpr_e  (9,5) bold
- !ctr.idtpntcpg &idtpntcpg_e
-Avtctr.IdtAcv &AcvFac
-typfct.libfac &libfacman_e
- from fac, clt, cntopr, ALG_CPTBNC, STR, typfct, ctrfac, avtctr
-    where fac.idtfac = #IdtFac
-      and fac.idttypfct = typfct.idttypfct
-      and fac.idtclt = clt.idtclt
-      and clt.idtcntopr = cntopr.idtcntopr
-			!and clt.IdtClt = ctr.Idtcltdst(+)
-      and clt.IdtCntOpr = ALG_CPTBNC.IdtCntOpr
-      and ALG_CPTBNC.IdtCntOpr  = STR.IdtCntOpr
-      and fac.idtfac = ctrfac.idtfac
-      and ctrfac.numavn = AvtCtr.numavn
-      and Ctrfac.idtctr = AvtCtr.idtCtr
-END-SELECT
-
-let $libfacman_e = &libfacman_e || ' N° '
-  print $libfacman_e (20,22) bold
-
-
-  print &prdfac (21,30) 
-  
-let $img_pathnom=getenv('SQT_DIR') || '\facturar.BMP'
-  !show 'image=' $img_pathnom
-  print-image (20,45)
-     type = BMP-file
-     source = $img_pathnom !For-printer=(PD,GIF-FILE, $img_pathnom)
-     image-size= (8,1)  
-  
-  
-END-PROCEDURE !selfacEau
 
 
 BEGIN-PROCEDURE selfacman
 alter-printer font=4 point-size=8
-BEGIN-SELECT
-ALG_CPTBNC.numcptbnc &_numcptbnc !coordonn?s bancaire
-ALG_CPTBNC.numcptccp &_numcptccp !coordonn?s ccp
+begin-select
+ALG_CPTBNC.numcptbnc &_numcptbnc !coordonnés bancaire
+ALG_CPTBNC.numcptccp &_numcptccp !coordonnés ccp
 clt.AdrStr10 &communeman 	
 ALG_CPTBNC.idtfscrglfct &_idtfscrglfct !identifiant fiscal des regles de facturation
 !ALG_CPTBNC.artfscrglfct &_artfscrglfct !article fiscal des regles de facturation
@@ -2300,6 +2105,8 @@ ALG_ARTFSC(clt.AdrStr10, cntopr.IdtCntOpr) &_artfscrglfct
 'Tél :'||STR.telrns &telrns (10,5) !numero de telephone de l'agence
 CLT.IdtClt||' / '||substr(CLT.ancrfr,1,2)||' '||substr(CLT.ancrfr,3,8) &ancrfr (10,42)
 CLT.nom|| ' ' ||CLT.Prn &nom (11,42) bold
+    !test tipaza alger
+    
 Ltrim(rtrim(substr(CLT.AdrLbr,
                          1,
                          case
@@ -2340,143 +2147,17 @@ typfct.libfac &libfacman
 			and clt.IdtClt = ctr.Idtcltdst(+)
   		and clt.IdtCntOpr = ALG_CPTBNC.IdtCntOpr
   		and ALG_CPTBNC.IdtCntOpr  = STR.IdtCntOpr
-END-SELECT
+end-select
 
-let $libfacman = &libfacman || ' N° '
-  print $libfacman (20,22) bold
 END-PROCEDURE !selfacman
 
-BEGIN-PROCEDURE seldetfacEau
-  alter-printer font=4 point-size=8
-  let #current-position = #current-line
-BEGIN-SELECT
-lgnfac.idtfac &idtfac_de
-rbq.lib &lib_de
-lgnfac.numlgnfct &IdtRbq_de
-lgnfac.numlgnfct &NumLgnFct_de
-nvl(detlgn.qtefct, lgnfac.qtefct) &qteuntmsrfac_de
-case when lgnfac.untmsr='*' then 'DA'
-when lgnfac.untmsr= 'PRD' then null
-else lgnfac.untmsr end &untmsr_de
 
- !nvl(lgnfac.untmsr,'') &untmsr_de
-nvl(detlgn.prxunt, lgnfac.prxunt) &prxunt_de
-nvl(detlgn.mntht, lgnfac.mntht) &mntht_de
-HSTTax.Tau &TVA_de
-detlgn.lib &libdetlgn
-	
-    Let $lib_de = &lib_de
-    Let #lngrbq_de = length($lib_de)
-    If #lngrbq_de > 60
-  	  Let #lngwrp_de = ceil(#lngrbq_de/60)+1
-    Else
-  	  Let #lngwrp_de = ceil(#lngrbq_de/60)
-    End-If 
 
-    graphic (#current-position,1,#lngwrp_de) vert-line 5
-    graphic (,1,70) horz-line 5
-    graphic (,1,#lngwrp_de) vert-line 5		
-    graphic (,7,#lngwrp_de) vert-line 5		         
-    graphic (,38,#lngwrp_de) vert-line 5		
-    graphic (,49,#lngwrp_de) vert-line 5		
-    graphic (,58,#lngwrp_de) vert-line 5		
-    graphic (,71,#lngwrp_de) vert-line 5		
-
-    Print &IdtRbq_de (+1,2)
-    !Do SelDetLgnEau(&idtfac_de, &NumLgnFct_de)
-    print &libdetlgn (, 30)
-    Print &qteuntmsrfac_de (,38) edit B999,999,999.99nu
-    Print &untmsr_de (,47,2)
-    Print &prxunt_de (,48) edit B999,999,999.99nu
-    Print &mntht_de (,60)edit B999,999,999.99nu
-    Print $lib_de (,8) wrap 60 #lngwrp_de 
-
-    let #current-position = #current-position + #lngwrp_de
-
-from lgnfac, rbq, HSTTax, detlgn
-where lgnfac.idtfac = #IdtFac
-	and lgnfac.idtfac = detlgn.idtfac (+)
-	and lgnfac.numlgnfct = detlgn.numlgnfct (+)
-  and lgnfac.Idtrbq = rbq.Idtrbq
-  and lgnfac.IdtTax = HSTTax.IDTTax (+)
-  and lgnfac.DatDbtVld = HSTTax.DatDbtVld(+)
-  order by lgnfac.numlgnfct, detlgn.idtdetlgn
-end-select
-	
-    graphic (,1,70) horz-line 5
-    graphic (,49,5) vert-line 5
-    graphic (,58,5) vert-line 5
-    graphic (,71,5) vert-line 5
-
-    ! impression des sous-totaux
-    alter-printer font=4 point-size=10
-    print 'Total HT' (+1,50) bold
-	graphic (,49,22) horz-line 7
-	graphic (,49,1) vert-line 5
-	graphic (,58,1) vert-line 5
-	graphic (,71,1) vert-line 5
-    print #_mntht1_e (,56) bold Edit B999,999,999,999.99nu
-    alter-printer font=4 point-size=8
-    print 'Taxes '(+1,50) bold
-    print 'et redevances ' (+1,50) bold
-    alter-printer font=4 point-size=10
-    if #_facsrv = 0 
-      print &TVA (,54) bold   
-      print ' %' (,56) bold    
-    end-if
-    graphic (,49,22) horz-line 7
-    print #_mnttva1_e (,56) bold Edit B999,999,999,999.99nu
-    Position (+1)
-    graphic (,49,22) horz-line 7
-    graphic (,49,3) vert-line 5 
-    graphic (,58,3) vert-line 5 
-    graphic (,71,3) vert-line 5 
-    print 'Total TTC ' (,50) bold
-    print #_mntttc_e (,56) bold Edit B999,999,999,999.99nu                                  
-    print 'Timbre ' (+1,50) bold
-    print #_MntTimFsc_e (,56) bold edit B999,999,999,999.99nu
-		graphic (,49,22) horz-line 7
-		alter-printer font=4 point-size=9
-		print 'net à payer' (+1,50) bold
-		print 'avec Timbre ' (+1,50) bold
-		alter-printer font=4 point-size=10
-    print #_mntttc1_e (,56) bold edit B999,999,999,999.99nu
-    
-    graphic (,49,22) horz-line 7
-
-    Print 'Montant en lettres en cas de paiement en espèces: ' (+2,5) !bold
-    Alter-Printer Font=4 Point-Size=11
-
-    ! ?criture des nombres en lettre
-BEGIN-SQL
-begin
- !X7.Nbr2Str(&mntttc_e,$Z821_de, $str1_de, $Z822_de);;
-X7.Nbr2Str(#_mntttc1_e,$Z821_de, $str1_de, $Z822_de);;
- 
-end;;
-END-SQL
-
-    let $Z823_de = $Z821_de || ' Dinars '
-    let $Z824_de = $str1_de || ' centimes.' !FNE: correction
-    let $Z82_de = $Z823_de || $Z824_de
-
-    Print $Z82_de (+1,5) bold wrap 82 3 line-height=1
-
-    !alter-printer font=4 point-size=8
-    !Print 'En cas de paiement en espèces, vous ajouteriez la somme du timbre fiscal : ' (+2,5)
-    !alter-printer font=4 point-size=10
-    !print #_mnttimfsc_de (-1,56) bold edit B999,999,999,999.99nu
-    !alter-printer font=4 point-size=8
-    !Print 'Soit un net à payer de : '(+1,5)       
-    !alter-printer font=4 point-size=10
-    !print #_mntttc1_e (,56) bold edit B999,999,999,999.99nu
-
-END-PROCEDURE  !SelDetFacEau
 
 BEGIN-PROCEDURE seldetfac
   alter-printer font=4 point-size=8
   let #current-position = #current-line
-BEGIN-SELECT
+begin-select
 rbq.lib &liib
 lgnfac.IdtRbq &IdtRbq
 lgnfac.qtefct &qteuntmsrfac
@@ -2514,8 +2195,8 @@ HSTTax.Tau &TVA
 from lgnfac, rbq, HSTTax
 where lgnfac.idtfac = #IdtFac
   and lgnfac.Idtrbq = rbq.Idtrbq
-  and lgnfac.IdtTax = HSTTax.IDTTax (+)
-  and lgnfac.DatDbtVld = HSTTax.DatDbtVld(+)  
+  and lgnfac.IdtTax = HSTTax.IDTTax
+  and lgnfac.DatDbtVld = HSTTax.DatDbtVld
 end-select
 	
     graphic (,1,70) horz-line 5
@@ -2551,7 +2232,7 @@ end-select
     Print 'Montant en lettres : ' (+2,5) bold
     Alter-Printer Font=4 Point-Size=8
 
-    ! ?criture des nombres en lettre
+    ! écriture des nombres en lettre
 BEGIN-SQL
 begin
 X7.Nbr2Str(&mntttc,$Z821, $str1, $Z822);;
@@ -2579,73 +2260,47 @@ END-PROCEDURE  !SelDetFac
 !-- Procedure : pied de page
 !------------------------------------------------------------------
 
-Begin-Footing 10
-  IF $_pk <> 'rapgnr' ! ? ?crire dans un autre modele de document let $pk = 'rapgnr'
+Begin-Footing 9
+  IF $_pk <> 'rapgnr' ! à écrire dans un autre modele de document let $pk = 'rapgnr'
     Alter-Printer Font=4 Point-Size=10
 
-    !print 'Directeur agence' (1,40)
+    print 'Directeur agence' (1,40)
     
     print 'Payable au plus tard le ' (+2,5)
-    print &_datexg_e (,20)
     print &_datexg (,20)
     
     graphic (+4,5,68) horz-line 5
     
     alter-printer font=4 point-size=8
     
-    print 'Compte bancaire' 			 (+1,5)
-    print 'Compte CCP ' 						(,24)
-    print 'Identifiant fiscal' 			(,35)
-    print 'Article fiscal' 					(,48)
-    print 'Identifiant statistique' (,60)
+    print 'Compte bancaire' (+1,5)
+    print 'Compte CCP ' (,31)
+    print 'Identifiant fiscal' (,44)
+    print 'Article fiscal' (,60)
     
-!    Print &_numcptbnc (+1,5)
-!    Print &_numcptccp (,25)
-!    Print &_idtfscrglfct (,44)
-!    Print &_artfscrglfct (,60)
-
-    Print &_numcptbnc 						(,5)
-    Print &_numcptccp 						(,24)
-    Print &_idtfscrglfct 					(,35)
-    Print &_artfscrglfct 					(,48)
-    
-    Print &_numcptbnc_e 						(,5)
-    Print &_numcptccp_e 						(,24)
-    Print &_idtfscrglfct_e 					(,35)
-    Print &_artfscrglfct_e 					(,48)
-    Print '000616180482837'					(,60)
+    Print &_numcptbnc (+1,5)
+    Print &_numcptccp (,31)
+    Print &_idtfscrglfct (,44)
+    Print &_artfscrglfct (,60)
   END-IF
 
-!  IF $pg <> 'facman' 
-!    Graphic (8,5,68)   Horz-Line 10
-!    Alter-Printer Font=4 Point-Size=8
-!    Print $fileNam (9,5)
-!    Print 'Heure : ' (9,50)
-!    Let $DateHour = Edit(Datenow(), 'HH:MI')
-!    Print $datehour		(,55)
-!    Page-number      (,68)
-!    Print '/'		(,69)
-!    Last-Page		(,70)
-!  END-IF	 
-  
-  !IF $pg <> 'facman' 
-  ! FNE:
-!    Graphic (8,5,68)   Horz-Line 10
-!    Alter-Printer Font=4 Point-Size=8
-!    Print $fileNam (+2,5)
-!    Print 'Heure : ' (,50)
-!    Let $DateHour = Edit(Datenow(), 'HH:MI')
-!    Print $datehour		(,55)
-!    Page-number      (,68)
-!    Print '/'		(,69)
-!    Last-Page		(,70)
-  !END-IF	 
+  IF $pg <> 'facman' 
+    Graphic (8,5,68)   Horz-Line 10
+    Alter-Printer Font=4 Point-Size=8
+    Print $fileNam (9,5)
+    Print 'Heure : ' (9,50)
+    Let $DateHour = Edit(Datenow(), 'HH:MI')
+    Print $datehour		(,55)
+    Page-number      (,68)
+    Print '/'		(,69)
+    Last-Page		(,70)
+  END-IF	 
 
 End-Footing
 
 !-------------------------------------------------------------------------------
 !-- Procedure : Maj_SousLotRtg
-!-- Objectif : Mise ? jour de la date d'impression du sous lot de routage
+!-- Objectif : Mise à jour de la date d'impression du sous lot de routage
 !-------------------------------------------------------------------------------
 
 BEGIN-PROCEDURE Maj_SousLotRtg ($IdtLotRtg, $IdtSousLotRtg)
@@ -2662,7 +2317,7 @@ END-PROCEDURE
 
 !-------------------------------------------------------------------------------
 !-- Procedure : Maj_SousLotRtg
-!-- Objectif : Mise ? jour de la date d'impression du sous lot de routage
+!-- Objectif : Mise à jour de la date d'impression du sous lot de routage
 !-------------------------------------------------------------------------------
 
 BEGIN-PROCEDURE Maj_OPR (#IdtOpr)
@@ -2677,7 +2332,7 @@ END-PROCEDURE
 
 !-------------------------------------------------------------------------------
 !-- Procedure : Maj_Tche
-!-- Objectif : Mise ? jour de l'?tat de la t?che: $stt
+!-- Objectif : Mise à jour de l'état de la tâche: $stt
 !-------------------------------------------------------------------------------
 
 BEGIN-PROCEDURE Maj_Tche ($rowid, $stt, #NbrEnt)
@@ -2691,12 +2346,12 @@ END-PROCEDURE
 
 !-----------------------------------------------------------------------
 !-- Procedure : Rech_Num_Report 
-!-- Objectif : Recherche du dernier num?ro de rapport attribu?
+!-- Objectif : Recherche du dernier numéro de rapport attribué
 !-----------------------------------------------------------------------
 
-BEGIN-PROCEDURE Rech_Num_Report(:#P1_Num_rpt)
+Begin-procedure Rech_Num_Report(:#P1_Num_rpt)
 	do MSG_DefinirLocalisation ('{TRT}_RECHNUMREPORT')
-BEGIN-SELECT
+Begin-Select
 seq_rpt.nextval &num_rpt
  let #P1_Num_rpt = &num_rpt
 from dual
@@ -2705,7 +2360,7 @@ End-Procedure
 
 
 BEGIN-PROCEDURE DETCNS (#idtfac, #idtpntlvr, #idtpntcpg)
-! on r?cup?re d'abord la somme des consommations au cas o?
+! on récupère d'abord la somme des consommations au cas où
 ! il y aurait plus de 2 compteurs
 
 ! initialisation
@@ -2728,7 +2383,7 @@ let $_Z2 = ''
 ! fin initialisation
 
 
-BEGIN-SELECT
+begin-select
 sum(cns) &cns
 count(*) &nbcns
 count(distinct idtcpr) &nbidtcpr
@@ -2738,12 +2393,12 @@ from cns
 where cns.idtfac = #idtfac
 end-select
 
-! on r?cup?re les informations des 2 derniers compteurs
-! install?s sur le point de comptage, sans tenir compte
-! de la date de d?pose.
+! on récupère les informations des 2 derniers compteurs
+! installés sur le point de comptage, sans tenir compte
+! de la date de dépose.
 Evaluate &nbcns
   when = 1  ! il n'y a qu'une seule conso
-BEGIN-SELECT
+begin-select
 indanc.ind &indanc
 indnve.ind &indnve
 cns.cnsevl &cnsevl
@@ -2785,8 +2440,8 @@ end-select
   when-other
 
   evaluate &nbidtcpr
-    when = 1  ! un seul compteur. on prend l'index le  plus ancien et le plus r?cent
-BEGIN-SELECT                
+    when = 1  ! un seul compteur. on prend l'index le  plus ancien et le plus récent
+Begin-select                
 decode(nvl(codobs.estidx,0),1,cpr.numcpr||' / '|| CODOBS.CodObs,cpr.numcpr||' / MRC') &numcpr1
 cpr.idtcpr &cpr1
 indanc.ind &indanc1
@@ -2823,7 +2478,7 @@ end-select
     when-other   ! il y a plus d'un compteur
     let #i = 1
 
-BEGIN-SELECT 
+begin-select 
 decode(nvl(codobs.estidx,0),1,tab1.numcpr||' / '|| CODOBS.CodObs,tab1.numcpr||' / MRC') &zz19
 to_char(indnve.ind) &zz211
 to_char(indanc.ind) &zz212
@@ -2888,21 +2543,21 @@ end-procedure ! END PROCEDURE DETCNS
 !-- Procedure : selfacF3                                                                                        
 !-- Objectif : selection des factures du lot                                                                    
 !---------------------------------------------------------------------------------                              
-BEGIN-PROCEDURE selfacF3($vIdtLotFac,:#P1_NbrFacF1,:#P2_MntF1,:#P3_NbrFacF2,:#P4_MntF2,:#P5_NbrExpLot)          
+begin-procedure selfacF3($vIdtLotFac,:#P1_NbrFacF1,:#P2_MntF1,:#P3_NbrFacF2,:#P4_MntF2,:#P5_NbrExpLot)          
                                                                                                                 
 do MSG_DefinirLocalisation ('{TRT}_SELFAC')                                                                     
                                                                                                                 
  let $_Z27 = ''                                                                                                 
                                                                                                                 
-BEGIN-SELECT                                                                                                    
+begin-select                                                                                                    
 FACALG.IdtOpr &IdtOpr                                                                                           
-FacAlg.Z90 &Z90 			! ancienne r?f?rence du client                                                            
+FacAlg.Z90 &Z90 			! ancienne référence du client                                                            
 	let $_Z90 = &Z90                                                                                              
 	let $_ZZ32 = &Z90                                                                                            
 FacAlg.Z91 &Z91 ! nom et prenom du client destinataire                                                          
 	let $_Z91 = &Z91                                                                                              
 	let $_ZZ30 = &Z91 
-FacAlg.IDTCTR &IDTCTR ! num?ro du contrat                                                          
+FacAlg.IDTCTR &IDTCTR ! numéro du contrat                                                          
 	let $_idtctr = &IDTCTR  
 FacAlg.ADRCNTOPR &ADRCNTOPR ! adresse du centre operation                                                          
 	let $_ADRCNTOPR = &ADRCNTOPR	
@@ -2917,10 +2572,10 @@ FacAlg.ZZ11 &ZZ11		!libelle abrege de la categorie du client
 FacAlg.CFFMLP &CFFMLP		!coefission multiplicateur                                                   
 	let $_CFFMLP = &CFFMLP 
   let $_CFFMLP = ltrim(edit(&CFFMLP,'999999999999'),' ')	                                                                                           
-ALG_CPTBNC.numcptbnc &numcptbnc !coordonn?s bancaire                                                            
+ALG_CPTBNC.numcptbnc &numcptbnc !coordonnés bancaire                                                            
   let $_Z113  = &numcptbnc                                                                                      
   let $_ZZ24 = &numcptbnc             	                                                                        
-ALG_CPTBNC.numcptccp &numcptccp !coordonn?s ccp                                                                 
+ALG_CPTBNC.numcptccp &numcptccp !coordonnés ccp                                                                 
 	let $_Z111  = &numcptccp                                                                                      
 	let $_ZZ26 = &numcptccp                                                                                      
 ALG_CPTBNC.idtfscrglfct &idtfscrglfct !identifiant fiscal des regles de facturation                             
@@ -3007,35 +2662,35 @@ FacAlg.T1 &T1
   else 
     let $_orgp = '0' ! pour afficher le client suscrirteur
   end-if	                                                                                       
-!FacCnsAlg.Z19 &Z19 ! num?ro de compteur                                                                        
+!FacCnsAlg.Z19 &Z19 ! numéro de compteur                                                                        
 !	let $_Z19 = &Z19                                                                                              
-!	let $_ZZ37 = 'Compteur N?:'||&Z19                                                                             
-!FacCnsAlg.Z21 &Z21			! ancien index relev?                                                                   
+!	let $_ZZ37 = 'Compteur N°:'||&Z19                                                                             
+!FacCnsAlg.Z21 &Z21			! ancien index relevé                                                                   
 !	let $_Z21 = ltrim(edit(&Z21,'999999999999'),' ')                                                              
 !	let $_ZZ39 = ltrim(edit(&Z21,'999999999999'),' ')                                                             
 FacAlg.lib &ZZ22 !cntopr.lib                                                                                    
 	let $_ZZ22 = &ZZ22                                                                                            
-!FacCnsAlg.Z23 &Z23 		! nouveau index relev?                                                                  
+!FacCnsAlg.Z23 &Z23 		! nouveau index relevé                                                                  
 !	let $_Z23 = ltrim(edit(&Z23,'999999999999'),' ')                                                              
 !	let $_ZZ41 = ltrim(edit(&Z23,'999999999999'),' ')                                                             
 !FacCnsAlg.Z25 &Z25 					! consommation en metre cube                                                      
 !	let $_Z25 = ltrim(edit(&Z25,'999999999999'),' ')                                                              
 FacAlg.Z27 &Z27 		! type d''abonnement                                                                        
 	let $_Z27 = &Z27                                                                                              
-FacAlg.Z29 &Z29 ! nombre de m?nages par rapport au code type de contrat                                         
+FacAlg.Z29 &Z29 ! nombre de ménages par rapport au code type de contrat                                         
 	let $_Z29 = ltrim(edit(&Z29,'999999999999'),' ')                                                              
-FacAlg.Z12 &Z12 ! Num?ro de facture                                                                             
+FacAlg.Z12 &Z12 ! Numéro de facture                                                                             
 	let $_Z12 = &Z12                                                                                              
 	let $_ZZ18 = &Z12                                                                                            
-nvl(FacAlg.Z86,0) &Z86 ! montant sur valeur ajout?e MntTva de la facture                                        
+nvl(FacAlg.Z86,0) &Z86 ! montant sur valeur ajoutée MntTva de la facture                                        
 	let #_Z86 = &Z86                                                                                              
 	let $_Z86 = ltrim(edit(&Z86,'999999999999.99'),' ')                                                           
 nvl(FacAlg.Z97,0) &Z97 					! Montant de la facture                                                         
 	let $_Z97 = ltrim(edit(&Z97,'999999999999.99'),' ')                                                           
-FacAlg.z99 &Z99 					! Solde Exigible Ant?rieur de la facture                                              
+FacAlg.z99 &Z99 					! Solde Exigible Antérieur de la facture                                              
 	let $_Z99 = ltrim(edit(&Z99,'999999999999.99'),' ')                                                           
 	let $_ZZ84 = ltrim(edit(&Z99,'999999999999.99'),' ')                                                         
-FacAlg.ZZ80 &ZZ80	! montant ? payer pour le modele de facture F2 sans timbre fiscal                             
+FacAlg.ZZ80 &ZZ80	! montant à payer pour le modele de facture F2 sans timbre fiscal                             
 	let #_ZZ80 = &ZZ80                                                                                            
 	!Do NBRTOSTR(&ZZ80) 
 	Do NBRTOSTRF3(&Z97) 
@@ -3043,13 +2698,13 @@ FacAlg.ZZ80 &ZZ80	! montant ? payer pour le modele de facture F2 sans timbre fis
 	let $_ZZ80 = ltrim(edit(&ZZ80,'999999999999.99'),' ')                                                         
 FacAlg.Z101 &Z101 					! Montant hors taxe                                                                 
 	let $_Z101 = ltrim(edit(&Z101,'999999999999.99'),' ')                                                         
-FacAlg.Z103 &Z103 ! calcul du timbre fiscal(payement en esp?ce)                                                 
+FacAlg.Z103 &Z103 ! calcul du timbre fiscal(payement en espèce)                                                 
 	let $_Z103 = ltrim(edit(&Z103,'999999999999.99'),' ') 
 	let $_netplustimbre = ltrim(edit(&Z101+&Z103,'999999999999.99'),' ')
 	let #_netplustimbre1 = $_netplustimbre!ltrim(edit(&Z101+&Z103,'999999999999.99'),' ')                                                       
-FacAlg.Z105 &Z105 ! montant ? payer pour le modele de facture F1                                                  
+FacAlg.Z105 &Z105 ! montant à payer pour le modele de facture F1                                                  
 	let $_Z105 = ltrim(edit(&Z105,'999999999999.99'),' ')  
-	
+	Do NBRTOSTRNETF3(#_netplustimbre1)
 	!modification e-paiment
 !FacAlg.datexg &datcal
 !to_char(FacAlg.datexg,'DD/MM/YYYY') &net 
@@ -3060,9 +2715,9 @@ GEN_CLE_CLT(FacAlg.Z90,FacAlg.Z101,FacAlg.DATVALCLE) &cleclient  !ltrim((&Z101+&
 !GEN_CLE_CLT(605201, 41531, 090913) &cleclient
  end-if
 	let $_cleclient  = &cleclient                                                       
-FacAlg.IdtTrnTyp &IdtTrn ! identifiant de la tourn?e                                                            
+FacAlg.IdtTrnTyp &IdtTrn ! identifiant de la tournée                                                            
 	let $_Z121 = &IdtTrn                                                                                          
-FacAlg.Rng1 &rng1 ! identifiant du rang de la tourn?e                                                           
+FacAlg.Rng1 &rng1 ! identifiant du rang de la tournée                                                           
 	let $_Z122 = ltrim(edit(&rng1,'9999'),' ')                                                                    
 FacAlg.IdtCntOpr &Z123                                                                                          
 	let $_Z123 = &Z123                                                                                            
@@ -3086,7 +2741,7 @@ FacAlg.IdtFac &idtfac
 	let $_Z6971 = ltrim(edit(#sum2+#sum3,'999999999999.99'),' ')                                                           
 FacAlg.IdtPntLvr &IdtPntLvr	                                                                                    
 FacAlg.IdtPntCpg &IdtPntCpg	 
-FacAlg.Chp13 &chp13 !0 pour g?n?rer F1 et 1 pour g?n?rer F2                                                                                   
+FacAlg.Chp13 &chp13 !0 pour générer F1 et 1 pour générer F2                                                                                   
 FacAlg.Z36 &Z36 !idtclt                                                                                         
 	!let $_Z36 = &Z36 	  
 	  DO DETCNSF3 (&idtfac, &idtpntlvr, &idtpntcpg)                                                                
@@ -3094,7 +2749,7 @@ FacAlg.Z36 &Z36 !idtclt
 	                                                                                                              
 	 !show  &idtfac ';' &Z36  ' -->'   &_datclcprc                                                                
                                                                                                              
-	!Insertion dans le fichier texte des zones retir?es de la BdD                                                                                                     
+	!Insertion dans le fichier texte des zones retirées de la BdD                                                                                                     
 to_char(FacAlg.DatLctPrc,'DD/MM/YYYY') &DatLctPrc                                                               
                                                                                                                 
   if not isnull (&DatLctPrc )                                                                                   
@@ -3117,26 +2772,26 @@ FacAlg.NbrExp &NbrExp
 	   when = 0   
 	    Do GrapheF3(&idtfac)                                                                                               
 	    Do INSINTOFILEF3(#nb1, &NbrExp)                                                                           
-	    ! nombre et montant des factures g?n?r?es en F1                                                           
-	    let #P2_MntF1 = #P2_MntF1 + &Z101                                                                         
+	    ! nombre et montant des factures générées en F1                                                           
+	    let #P2_MntF1 = #P2_MntF1 + &Z97 !&Z101   Correction FNE                                                                      
 	    let #P1_NbrFacF1 = #P1_NbrFacF1 + 1                                                                       
 	    break                                                                                                   
 	   when = 1 
 	     Do GrapheF3(&idtfac)                                                                                                 
 	  	 Do INSINTOFILEF3exF2(#nb1, &NbrExp)                                                                         
-	  	! nombre et montant des factures g?n?r?es en F2                                                           
-	  	 let #P4_MntF2 =  #P4_MntF2 + &Z101                                                                      
+	  	! nombre et montant des factures générées en F2                                                           
+	  	 let #P4_MntF2 =  #P4_MntF2 + &Z97 !&Z101   Correction FNE                                                                      
 	  	 let #P3_NbrFacF2 = #P3_NbrFacF2 + 1                                                                     
 	  	 break                                                                                                   
 	end-evaluate                                                                                                 
                                                                                                                 
 	! Mise a jour de la date d'impression sur l'operation                                                         
 	do Maj_OPR(&IdtOpr)  
-	!do SendSMS(#idtfac)                                                                                         
+	do SendSMS(#idtfac)                                                                                         
 	!show &idtfac                                                                                                 
 	!show &Z36                                                                                                    
-                                                                                                             
-from alg_fac_F3 FacAlg, ALG_CPTBNC, STR, LOTRTG, SOUSLOTRTG, RTG                                                   
+  !show '$_Whr SELFACF3' $_Whr                                                                                                           
+from x7.alg_fac_F3 FacAlg, x7.ALG_CPTBNC, x7.STR, x7.LOTRTG, x7.SOUSLOTRTG, x7.RTG                                                   
  where FacAlg.IdtLotFac = $vIdtLotFac                                                                           
 	and  FacAlg.IdtCntOpr = ALG_CPTBNC.IdtCntOpr                                                                  
 	and  ALG_CPTBNC.IdtCntOpr  = STR.IdtCntOpr                                                                    
@@ -3156,7 +2811,7 @@ end-procedure !SelFacF3
 
 
 BEGIN-PROCEDURE DETCNSF3 (#idtfac, #idtpntlvr, #idtpntcpg)
-! on r?cup?re d'abord la somme des consommations au cas o?
+! on récupère d'abord la somme des consommations au cas où
 ! il y aurait plus de 2 compteurs
 
 ! initialisation
@@ -3202,7 +2857,7 @@ let $_Z427 = ''
 let $_Z428 = ''
 ! fin initialisation
 
-BEGIN-SELECT
+begin-select
 sum(cns) &cns
 count(*) &nbcns
 count(distinct idtcpr) &nbidtcpr
@@ -3212,14 +2867,14 @@ from cns
 where cns.idtfac = #idtfac
 end-select
 
-! on r?cup?re les informations des 2 derniers compteurs
-! install?s sur le point de comptage, sans tenir compte
-! de la date de d?pose.
+! on récupère les informations des 2 derniers compteurs
+! installés sur le point de comptage, sans tenir compte
+! de la date de dépose.
  Evaluate &nbcns
   when = 1  ! il n'y a qu'une seule conso
  let #i = 1
 
-BEGIN-SELECT 
+begin-select 
 to_char(indanc.datlctind,'DD/MM/YYYY') &dindanc11
 to_char(indanc.idtcodorg) &codorganc11
 to_char(indanc.idtcodrlv) &codrlvanc11
@@ -3244,7 +2899,7 @@ and cns.idtcpr = cpr.idtcpr
 order by indanc.datlctind
 
 end-select
-BEGIN-SELECT
+begin-select
 indanc.ind &indanc
 to_char(indanc.datlctind,'DD/MM/YYYY') &datindanc
 indnve.ind &indnve
@@ -3299,8 +2954,8 @@ end-select
   when-other
 
   evaluate &nbidtcpr
-    when = 1  ! un seul compteur. on prend l'index le  plus ancien et le plus r?cent
-BEGIN-SELECT                
+    when = 1  ! un seul compteur. on prend l'index le  plus ancien et le plus récent
+Begin-select                
 decode(nvl(codobs.estidx,0),1,cpr.numcpr||' / '|| CODOBS.CodObs,cpr.numcpr) &numcpr1
 cpr.idtcpr &cpr1
 indanc.ind &indanc1
@@ -3352,7 +3007,7 @@ end-select
 
 let #i = 1
 
-BEGIN-SELECT 
+begin-select 
 to_char(indanc.datlctind,'DD/MM/YYYY') &dindanc1
 to_char(indanc.idtcodorg) &codorganc1
 to_char(indanc.idtcodrlv) &codrlvanc1
@@ -3382,7 +3037,7 @@ end-select
     when-other   ! il y a plus d'un compteur
     let #i = 1
 
-BEGIN-SELECT 
+begin-select 
 cpr.numcpr &zz19
 to_char(indnve.ind) &zz211
 to_char(indnve.datlctind,'DD/MM/YYYY') &dindnve
@@ -3553,7 +3208,7 @@ end-procedure ! END PROCEDURE DETCNSF3
 !-- Procedure : sellgnfacF3
 !-- Objectif : Selection des lignes de factures F3
 !--------------------------------------------------------------------------
-BEGIN-PROCEDURE sellgnfacF3 (#idtfac,:#p2,:#p3,:#p4)
+begin-procedure sellgnfacF3 (#idtfac,:#p2,:#p3,:#p4)
 
 do MSG_DefinirLocalisation ('{TRT}_SELLGNFAC')
 
@@ -3641,7 +3296,7 @@ do MSG_DefinirLocalisation ('{TRT}_SELLGNFAC')
 	let $_ZZZZ = ''
 	!-- fin initialisation
 	
-BEGIN-SELECT
+begin-select
 lgnfac.NumLgnFct &NumLgnFct
 lgnfac.idtrbq &idtrbq
 nvl(lgnfac.MntHt,0) &lgnfacmntht
@@ -3776,7 +3431,7 @@ end-procedure ! END PROCEDURE sellgnfacF3
 !-- Procedure : insintofilef3
 !-- Objectif : procedure d'ecriture dans le fichier texte
 !----------------------------------------------------
-BEGIN-PROCEDURE InsIntoFileF3(#nb1,#nbrexp1)
+begin-procedure InsIntoFileF3(#nb1,#nbrexp1)
 
 do MSG_DefinirLocalisation ('{TRT}_INSINTOFILEF3')
 
@@ -3820,8 +3475,8 @@ let $nbrexp1 = ltrim(edit(#nbrexp1,'999'),' ')
  			write 1 from $v:01 $line2:04  $v:01 $p:01 $v:01 $_Z21  $v:01 $p:01 $v:01 $_Z14 $v:01 $p:01 $v:01 $_idtctr $v:01 $p:01 $v:01 $_ADRCNTOPR $v:01 $p:01 $v:01 $_Z1435 $v:01
  			write 1 from $v:01 $line3:04  $v:01 $p:01 $v:01 $_Z23  $v:01 $p:01 $v:01 $_Z16 $v:01 $p:01 $v:01 $_Z10 $v:01 $p:01 $v:01 $_DatLctPrc $v:01 $p:01 $v:01 $_DatLctDrn $v:01 
  			write 1 from $v:01 $line4:04  $v:01 $p:01 $v:01 $_Z25  $v:01 $p:01 $v:01 $_CFFMLP  $v:01 $p:01 $v:01 $_ZZcodmsg  $v:01 $p:01 $v:01 $_ZZdatemsg $v:01 
- 			write 1 from $v:01 $line5:04  $v:01 $p:01 $v:01 $_Z29  $v:01 $p:01 $v:01 $_Z27 $v:01 $p:01 $v:01 $_Z1053 $v:01 
- 			write 1 from $v:01 $line6:04  $v:01 $p:01 $v:01 $_Z59  $v:01 $p:01 $v:01 $_Z55 $v:01 $p:01 $v:01 $_Z51 $v:01 $p:01 $v:01 $_Z47   $v:01 $p:01 $v:01 $_Z43  $v:01
+ 			write 1 from $v:01 $line5:04  $v:01 $p:01 $v:01 $_Z29  $v:01 $p:01 $v:01 $_Z27 $v:01 $p:01 $v:01 $_Z1054 $v:01 
+ 			write 1 from $v:01 $line6:04  $v:01 $p:01 $v:01 $_Z59  $v:01 $p:01 $v:01 $_Z55 $v:01 $p:01 $v:01 $_Z51 $v:01 $p:01 $v:01 $_Z47   $v:01 $p:01 $v:01 $_Z43  $v:01 $p:01 $v:01 $_Z1053 $v:01
  			write 1 from $v:01 $line7:04  $v:01 $p:01 $v:01 $_Z60  $v:01 $p:01 $v:01 $_Z56 $v:01 $p:01 $v:01 $_Z52 $v:01 $p:01 $v:01 $_Z48   $v:01 $p:01 $v:01 $_Z44  $v:01
  			write 1 from $v:01 $line8:04  $v:01 $p:01 $v:01 $_Z83  $v:01 $p:01 $v:01 $_Z79 $v:01 $p:01 $v:01 $_Z61 $v:01 $p:01 $v:01 $_Z57   $v:01 $p:01 $v:01 $_Z53  $v:01 $p:01 $v:01 $_Z49 $v:01 $p:01 $v:01 $_Z45  $v:01
  			write 1 from $v:01 $line9:04  $v:01 $p:01 $v:01 $_Z84  $v:01 $p:01 $v:01 $_Z80 $v:01 $p:01 $v:01 $_Z62 $v:01 $p:01 $v:01 $_Z58   $v:01 $p:01 $v:01 $_Z54  $v:01 $p:01 $v:01 $_Z50 $v:01 $p:01 $v:01 $_Z46  $v:01
@@ -3851,7 +3506,7 @@ end-procedure ! InsIntoFileF3
 !-- Procedure : INSINTOFILEF3exF2
 !-- Objectif : procedure d'ecriture dans le fichier texte
 !----------------------------------------------------
-BEGIN-PROCEDURE INSINTOFILEF3exF2(#nb1,#nbrexp1)
+begin-procedure INSINTOFILEF3exF2(#nb1,#nbrexp1)
 
 do MSG_DefinirLocalisation ('{TRT}_INSINTOFILEF3exF2')
 
@@ -3894,8 +3549,8 @@ let $nbrexp1 = ltrim(edit(#nbrexp1,'999'),' ')
  			write 2 from $v:01 $line2:04  $v:01 $p:01 $v:01 $_Z21  $v:01 $p:01 $v:01 $_Z14 $v:01 $p:01 $v:01 $_idtctr $v:01 $p:01 $v:01 $_ADRCNTOPR $v:01 $p:01 $v:01 $_Z1435 $v:01
  			write 2 from $v:01 $line3:04  $v:01 $p:01 $v:01 $_Z23  $v:01 $p:01 $v:01 $_Z16 $v:01 $p:01 $v:01 $_Z10 $v:01 $p:01 $v:01 $_DatLctPrc $v:01 $p:01 $v:01 $_DatLctDrn $v:01 
  			write 2 from $v:01 $line4:04  $v:01 $p:01 $v:01 $_Z25  $v:01 $p:01 $v:01 $_CFFMLP  $v:01 $p:01 $v:01 $_ZZcodmsg  $v:01 $p:01 $v:01 $_ZZdatemsg $v:01 
- 			write 2 from $v:01 $line5:04  $v:01 $p:01 $v:01 $_Z29  $v:01 $p:01 $v:01 $_Z27 $v:01 $p:01 $v:01 $_Z1053 $v:01 
- 			write 2 from $v:01 $line6:04  $v:01 $p:01 $v:01 $_Z59  $v:01 $p:01 $v:01 $_Z55 $v:01 $p:01 $v:01 $_Z51 $v:01 $p:01 $v:01 $_Z47   $v:01 $p:01 $v:01 $_Z43  $v:01
+ 			write 2 from $v:01 $line5:04  $v:01 $p:01 $v:01 $_Z29  $v:01 $p:01 $v:01 $_Z27 $v:01 $p:01 $v:01 $_Z1054 $v:01 
+ 			write 2 from $v:01 $line6:04  $v:01 $p:01 $v:01 $_Z59  $v:01 $p:01 $v:01 $_Z55 $v:01 $p:01 $v:01 $_Z51 $v:01 $p:01 $v:01 $_Z47   $v:01 $p:01 $v:01 $_Z43  $v:01 $p:01 $v:01 $_Z1053 $v:01
  			write 2 from $v:01 $line7:04  $v:01 $p:01 $v:01 $_Z60  $v:01 $p:01 $v:01 $_Z56 $v:01 $p:01 $v:01 $_Z52 $v:01 $p:01 $v:01 $_Z48   $v:01 $p:01 $v:01 $_Z44  $v:01
  			write 2 from $v:01 $line8:04  $v:01 $p:01 $v:01 $_Z83  $v:01 $p:01 $v:01 $_Z79 $v:01 $p:01 $v:01 $_Z61 $v:01 $p:01 $v:01 $_Z57   $v:01 $p:01 $v:01 $_Z53  $v:01 $p:01 $v:01 $_Z49 $v:01 $p:01 $v:01 $_Z45  $v:01
  			write 2 from $v:01 $line9:04  $v:01 $p:01 $v:01 $_Z84  $v:01 $p:01 $v:01 $_Z80 $v:01 $p:01 $v:01 $_Z62 $v:01 $p:01 $v:01 $_Z58   $v:01 $p:01 $v:01 $_Z54  $v:01 $p:01 $v:01 $_Z50 $v:01 $p:01 $v:01 $_Z46  $v:01
@@ -3925,7 +3580,7 @@ end-procedure ! INSINTOFILEF3exF2
 !-- Procedure : insintofilef3Hlt
 !-- Objectif : procedure d'ecriture dans le fichier texte Hlt
 !----------------------------------------------------
-BEGIN-PROCEDURE InsIntoFileF3Hlt(#nb1,#nbrexp1)
+begin-procedure InsIntoFileF3Hlt(#nb1,#nbrexp1)
 
 do MSG_DefinirLocalisation ('{TRT}_INSINTOFILEF3')
 
@@ -3969,8 +3624,8 @@ let $nbrexp1 = ltrim(edit(#nbrexp1,'999'),' ')
  	   write 3 from $v:01 $line2:04  $v:01 $p:01 $v:01 $_Z21  $v:01 $p:01 $v:01 $_Z14  $v:01 $p:01 $v:01 $_idtctr $v:01 $p:01 $v:01 $_ADRCNTOPR $v:01 $p:01 $v:01 $_Z1435 $v:01
  	   write 3 from $v:01 $line3:04  $v:01 $p:01 $v:01 $_Z23  $v:01 $p:01 $v:01 $_Z16  $v:01 $p:01 $v:01 $_Z10 $v:01 $p:01 $v:01 $_DatLctPrc $v:01 $p:01 $v:01 $_DatLctDrn $v:01 
  	   write 3 from $v:01 $line4:04  $v:01 $p:01 $v:01 $_Z25  $v:01 $p:01 $v:01 $_CFFMLP  $v:01 $p:01 $v:01 $_ZZcodmsg  $v:01 $p:01 $v:01 $_ZZdatemsg $v:01                    
- 	   write 3 from $v:01 $line5:04  $v:01 $p:01 $v:01 $_Z29  $v:01 $p:01 $v:01 $_Z27  $v:01 $p:01 $v:01 $_Z1053 $v:01 
- 	   write 3 from $v:01 $line6:04  $v:01 $p:01 $v:01 $_Z59  $v:01 $p:01 $v:01 $_Z55  $v:01 $p:01 $v:01 $_Z51 $v:01 $p:01 $v:01 $_Z47   $v:01 $p:01 $v:01 $_Z43  $v:01
+ 	   write 3 from $v:01 $line5:04  $v:01 $p:01 $v:01 $_Z29  $v:01 $p:01 $v:01 $_Z27  $v:01 $p:01 $v:01 $_Z1054 $v:01 
+ 	   write 3 from $v:01 $line6:04  $v:01 $p:01 $v:01 $_Z59  $v:01 $p:01 $v:01 $_Z55  $v:01 $p:01 $v:01 $_Z51 $v:01 $p:01 $v:01 $_Z47   $v:01 $p:01 $v:01 $_Z43  $v:01 $p:01 $v:01 $_Z1053 $v:01
  	   write 3 from $v:01 $line7:04  $v:01 $p:01 $v:01 $_Z60  $v:01 $p:01 $v:01 $_Z56  $v:01 $p:01 $v:01 $_Z52 $v:01 $p:01 $v:01 $_Z48   $v:01 $p:01 $v:01 $_Z44  $v:01
  	   write 3 from $v:01 $line8:04  $v:01 $p:01 $v:01 $_Z83  $v:01 $p:01 $v:01 $_Z79  $v:01 $p:01 $v:01 $_Z61 $v:01 $p:01 $v:01 $_Z57   $v:01 $p:01 $v:01 $_Z53  $v:01 $p:01 $v:01 $_Z49 $v:01 $p:01 $v:01 $_Z45  $v:01
  	   write 3 from $v:01 $line9:04  $v:01 $p:01 $v:01 $_Z84  $v:01 $p:01 $v:01 $_Z80  $v:01 $p:01 $v:01 $_Z62 $v:01 $p:01 $v:01 $_Z58   $v:01 $p:01 $v:01 $_Z54  $v:01 $p:01 $v:01 $_Z50 $v:01 $p:01 $v:01 $_Z46  $v:01
@@ -3999,7 +3654,7 @@ end-procedure ! InsIntoFileF3Hlt
 !-- Procedure : InsIntoFileF3EXF2Hlt
 !-- Objectif : procedure d'ecriture dans le fichier texte Hlt
 !----------------------------------------------------
-BEGIN-PROCEDURE InsIntoFileF3EXF2Hlt(#nb1,#nbrexp1)
+begin-procedure InsIntoFileF3EXF2Hlt(#nb1,#nbrexp1)
 
 do MSG_DefinirLocalisation ('{TRT}_InsIntoFileF3EXF2Hlt')
 
@@ -4042,8 +3697,8 @@ let $nbrexp1 = ltrim(edit(#nbrexp1,'999'),' ')
  	   write 3 from $v:01 $line2:04  $v:01 $p:01 $v:01 $_Z21  $v:01 $p:01 $v:01 $_Z14  $v:01 $p:01 $v:01 $_idtctr $v:01 $p:01 $v:01 $_ADRCNTOPR $v:01 $p:01 $v:01 $_Z1435 $v:01
  	   write 3 from $v:01 $line3:04  $v:01 $p:01 $v:01 $_Z23  $v:01 $p:01 $v:01 $_Z16  $v:01 $p:01 $v:01 $_Z10 $v:01 $p:01 $v:01 $_DatLctPrc $v:01 $p:01 $v:01 $_DatLctDrn $v:01 
  	   write 3 from $v:01 $line4:04  $v:01 $p:01 $v:01 $_Z25  $v:01 $p:01 $v:01 $_CFFMLP  $v:01 $p:01 $v:01 $_ZZcodmsg  $v:01 $p:01 $v:01 $_ZZdatemsg $v:01                    
- 	   write 3 from $v:01 $line5:04  $v:01 $p:01 $v:01 $_Z29  $v:01 $p:01 $v:01 $_Z27  $v:01 $p:01 $v:01 $_Z1053 $v:01 
- 	   write 3 from $v:01 $line6:04  $v:01 $p:01 $v:01 $_Z59  $v:01 $p:01 $v:01 $_Z55  $v:01 $p:01 $v:01 $_Z51 $v:01 $p:01 $v:01 $_Z47   $v:01 $p:01 $v:01 $_Z43  $v:01
+ 	   write 3 from $v:01 $line5:04  $v:01 $p:01 $v:01 $_Z29  $v:01 $p:01 $v:01 $_Z27  $v:01 $p:01 $v:01 $_Z1054 $v:01 
+ 	   write 3 from $v:01 $line6:04  $v:01 $p:01 $v:01 $_Z59  $v:01 $p:01 $v:01 $_Z55  $v:01 $p:01 $v:01 $_Z51 $v:01 $p:01 $v:01 $_Z47   $v:01 $p:01 $v:01 $_Z43  $v:01 $p:01 $v:01 $_Z1053 $v:01
  	   write 3 from $v:01 $line7:04  $v:01 $p:01 $v:01 $_Z60  $v:01 $p:01 $v:01 $_Z56  $v:01 $p:01 $v:01 $_Z52 $v:01 $p:01 $v:01 $_Z48   $v:01 $p:01 $v:01 $_Z44  $v:01
  	   write 3 from $v:01 $line8:04  $v:01 $p:01 $v:01 $_Z83  $v:01 $p:01 $v:01 $_Z79  $v:01 $p:01 $v:01 $_Z61 $v:01 $p:01 $v:01 $_Z57   $v:01 $p:01 $v:01 $_Z53  $v:01 $p:01 $v:01 $_Z49 $v:01 $p:01 $v:01 $_Z45  $v:01
  	   write 3 from $v:01 $line9:04  $v:01 $p:01 $v:01 $_Z84  $v:01 $p:01 $v:01 $_Z80  $v:01 $p:01 $v:01 $_Z62 $v:01 $p:01 $v:01 $_Z58   $v:01 $p:01 $v:01 $_Z54  $v:01 $p:01 $v:01 $_Z50 $v:01 $p:01 $v:01 $_Z46  $v:01
@@ -4074,19 +3729,19 @@ end-procedure ! InsIntoFileF3EXF2Hlt
 !-- Objectif : selection des factures hors lot HLT
 !-------------------------------------------------------------------------------
 
-BEGIN-PROCEDURE SelFacHltF3(#IdtFac, #NbrFacF3, #MntF3, #NbrFacF2, #MntF2, #NbrExpLot)
+begin-procedure SelFacHltF3(#IdtFac, #NbrFacF3, #MntF3, #NbrFacF2, #MntF2, #NbrExpLot)
 
   let $_Z27 = ''
 
-BEGIN-SELECT
+begin-select
 FACALG.IdtOpr &IdtOpr
-FacAlg.Z90 &Z90 			! ancienne r?f?rence du client
+FacAlg.Z90 &Z90 			! ancienne référence du client
 	let $_Z90 = &Z90
 	let $_ZZ32 = &Z90
 FacAlg.Z91 &Z91 ! nom et prenom du client destinataire
 	let $_Z91 = &Z91
 	let $_ZZ30 = &Z91
-FacAlg.IDTCTR &IDTCTR ! num?ro du contrat                                                          
+FacAlg.IDTCTR &IDTCTR ! numéro du contrat                                                          
 	let $_idtctr = &IDTCTR  
 FacAlg.ADRCNTOPR &ADRCNTOPR ! adresse du centre operation                                                          
 	let $_ADRCNTOPR = &ADRCNTOPR	
@@ -4101,10 +3756,10 @@ FacAlg.ZZ11 &ZZ11		!libelle abrege de la categorie du client
 FacAlg.CFFMLP &CFFMLP		!coefission multiplicateur                                                   
 	let $_CFFMLP = &CFFMLP
   let $_CFFMLP = ltrim(edit(&CFFMLP,'999999999999'),' ')	
-ALG_CPTBNC.numcptbnc &numcptbnc !coordonn?s bancaire
+ALG_CPTBNC.numcptbnc &numcptbnc !coordonnés bancaire
   let $_Z113  = &numcptbnc
   let $_ZZ24 = &numcptbnc             	
-ALG_CPTBNC.numcptccp &numcptccp !coordonn?s ccp
+ALG_CPTBNC.numcptccp &numcptccp !coordonnés ccp
 	let $_Z111  = &numcptccp
 	let $_ZZ26 = &numcptccp
 ALG_CPTBNC.idtfscrglfct &idtfscrglfct !identifiant fiscal des regles de facturation
@@ -4192,35 +3847,35 @@ FacAlg.T1 &T1
   else 
     let $_orgp = '0' ! pour afficher le client suscrirteur
   end-if	
-!FacCnsAlg.Z19 &Z19 ! num?ro de compteur
+!FacCnsAlg.Z19 &Z19 ! numéro de compteur
 !	let $_Z19 = &Z19
-!	let $_ZZ37 = 'Compteur N?:'||&Z19
-!FacCnsAlg.Z21 &Z21			! ancien index relev?
+!	let $_ZZ37 = 'Compteur N°:'||&Z19
+!FacCnsAlg.Z21 &Z21			! ancien index relevé
 !	let $_Z21 = ltrim(edit(&Z21,'999999999999'),' ')
 !	let $_ZZ39 = ltrim(edit(&Z21,'999999999999'),' ')
 FacAlg.lib &ZZ22 !cntopr.lib
 	let $_ZZ22 = &ZZ22
-!FacCnsAlg.Z23 &Z23 		! nouveau index relev?
+!FacCnsAlg.Z23 &Z23 		! nouveau index relevé
 !	let $_Z23 = ltrim(edit(&Z23,'999999999999'),' ')
 !	let $_ZZ41 = ltrim(edit(&Z23,'999999999999'),' ')
 !FacCnsAlg.Z25 &Z25 					! consommation en metre cube
 !	let $_Z25 = ltrim(edit(&Z25,'999999999999'),' ')
 FacAlg.Z27 &Z27 		! type d''abonnement
 	let $_Z27 = &Z27
-FacAlg.Z29 &Z29 ! nombre de m?nages par rapport au code type de contrat
+FacAlg.Z29 &Z29 ! nombre de ménages par rapport au code type de contrat
 	let $_Z29 = ltrim(edit(&Z29,'999999999999'),' ')
-FacAlg.Z12 &Z12 ! Num?ro de facture
+FacAlg.Z12 &Z12 ! Numéro de facture
 	let $_Z12 = &Z12
 	let $_ZZ18 = &Z12
-nvl(FacAlg.Z86,0) &Z86 ! montant sur valeur ajout?e MntTva de la facture
+nvl(FacAlg.Z86,0) &Z86 ! montant sur valeur ajoutée MntTva de la facture
 	let #_Z86 = &Z86
 	let $_Z86 = ltrim(edit(&Z86,'999999999999.99'),' ')
 nvl(FacAlg.Z97,0) &Z97 					! Montant de la facture
 	let $_Z97 = ltrim(edit(&Z97,'999999999999.99'),' ')
-FacAlg.z99 &Z99 					! Solde Exigible Ant?rieur de la facture
+FacAlg.z99 &Z99 					! Solde Exigible Antérieur de la facture
 	let $_Z99 = ltrim(edit(&Z99,'999999999999.99'),' ')
 	let $_ZZ84 = ltrim(edit(&Z99,'999999999999.99'),' ')
-FacAlg.ZZ80 &ZZ80	! montant ? payer pour le modele de facture F2 sans timbre fiscal
+FacAlg.ZZ80 &ZZ80	! montant à payer pour le modele de facture F2 sans timbre fiscal
 	let #_ZZ80 = &ZZ80
 	!Do NBRTOSTR(&ZZ80)
 	Do NBRTOSTRF3(&Z97)
@@ -4228,15 +3883,16 @@ FacAlg.ZZ80 &ZZ80	! montant ? payer pour le modele de facture F2 sans timbre fis
 	let $_ZZ80 = ltrim(edit(&ZZ80,'999999999999.99'),' ') 
 FacAlg.Z101 &Z101 					! Montant hors taxe
 	let $_Z101 = ltrim(edit(&Z101,'999999999999.99'),' ')
-FacAlg.Z103 &Z103 ! calcul du timbre fiscal(payement en esp?ce)
+FacAlg.Z103 &Z103 ! calcul du timbre fiscal(payement en espèce)
 	let $_Z103 = ltrim(edit(&Z103,'999999999999.99'),' ')
 	let $_netplustimbre = ltrim(edit(&Z101+&Z103,'999999999999.99'),' ')
 	
-FacAlg.Z105 &Z105 ! montant ? payer pour le modele de facture F1                  
+FacAlg.Z105 &Z105 ! montant à payer pour le modele de facture F1                  
 	let $_Z105 = ltrim(edit(&Z105,'999999999999.99'),' ')
-FacAlg.IdtTrnTyp &IdtTrn ! identifiant de la tourn?e
+	Do NBRTOSTRNETF3(#_netplustimbre1)
+FacAlg.IdtTrnTyp &IdtTrn ! identifiant de la tournée
 	let $_Z121 = &IdtTrn
-FacAlg.Rng1 &rng1 ! identifiant du rang de la tourn?e
+FacAlg.Rng1 &rng1 ! identifiant du rang de la tournée
 	let $_Z122 = ltrim(edit(&rng1,'9999'),' ')
 FacAlg.Lib &Z10 			! identifiant d
 	let $_Z10 = &Z10  
@@ -4257,7 +3913,7 @@ FacAlg.Z36 &Z36 !idtclt
 	 show 'Client: '      &Z36
 	 show 'Facture: '     &idtfac
 	 show 'HLT xxx-->'    $datclcprc
-FacAlg.Chp13 &chp13 !0 pour g?n?rer F1 et 1 pour g?n?rer F2
+FacAlg.Chp13 &chp13 !0 pour générer F1 et 1 pour générer F2
 
 to_char(FacAlg.DatLctPrc,'DD/MM/YYYY') &DatLctPrc    
   
@@ -4287,7 +3943,7 @@ FacAlg.NbrExp &NbrExp
 FacAlg.IdtPntLvr &IdtPntLvr	
 FacAlg.IdtPntCpg &IdtPntCpg		  
 	  DO DETCNSF3 (&idtfac, &idtpntlvr, &idtpntcpg)
- !Insertion dans le fichier texte des zones retir?es de la BdD
+ !Insertion dans le fichier texte des zones retirées de la BdD
 	let #nb1 = 1               
 	Let #P5_NbrExpLot = #P5_NbrExpLot + &NbrExp
  !to_char(FacAlg.DatLctPrc,'DD/MM/YYYY') &DatLctPrc   
@@ -4298,21 +3954,21 @@ FacAlg.IdtPntCpg &IdtPntCpg
 	    when = 0
 	     Do GrapheF3(&idtfac)
 	     Do INSINTOFILEF3Hlt(#nb1, &NbrExp)
-	     ! nombre et montant des factures g?n?r?es en F1
+	     ! nombre et montant des factures générées en F1
 	     let #P2_MntF1 = #P2_MntF1 + &ZZ80
 	     let #P1_NbrFacF1 = #P1_NbrFacF1 + 1
 	      break
 	    when = 1
 	  	 Do GrapheF3(&idtfac)
 	     Do INSINTOFILEF3EXF2Hlt(#nb1, &NbrExp)
-	  	 !nombre et montant des factures g?n?r?es en F2
+	  	 !nombre et montant des factures générées en F2
 	  	 let #P4_MntF2 =  #P4_MntF2 + &ZZ80
 	  	 let #P3_NbrFacF2 = #P3_NbrFacF2 + 1
 	  	  break
 	  end-evaluate
 	! Mise a jour de la date d'impression sur l'operation
 	do Maj_OPR(&IdtOpr)
-	!do SendSMS(#idtfac)
+	do SendSMS(#idtfac)
 
 from alg_fac_F3 FacAlg, ALG_CPTBNC, STR
  where FacAlg.IdtFac = #IdtFac
@@ -4324,7 +3980,7 @@ end-select
 end-procedure !SelFacHltF3
 !DF
 BEGIN-PROCEDURE SendSms(#idtfac)
-BEGIN-SQL
+begin-SQL
 declare
 result varchar2 (100);;
 begin
@@ -4333,15 +3989,15 @@ $v :=ALG_KTSMS.SendSMS_HTTP(#idtfac, 2);;
 when others then
 null;;
 end;;
-END-SQL   
+end-SQL   
 commit 
 End-procedure
 
 
 !-------------------------------------------------------------------------------
 !-- Procedure : RapGnr F3
-!-- Objectif : Rapport de g?n?ration contenant
-!-- le nombre de factures et montant total du lot de factures g?n?r?
+!-- Objectif : Rapport de génération contenant
+!-- le nombre de factures et montant total du lot de factures généré
 !-------------------------------------------------------------------------------
 
 BEGIN-PROCEDURE RapGnrF3 ($file_namef3,$file_namef2,#NbrFacF3,#MntF3,#NbrFacF2,#MntF2,#NbrExpLot,$IdtCntOpr,$lib,$datdbtprd,$datfinprd)
@@ -4360,7 +4016,7 @@ BEGIN-PROCEDURE RapGnrF3 ($file_namef3,$file_namef2,#NbrFacF3,#MntF3,#NbrFacF2,#
   PRINT 'FICHIERS X7 - EDITIQUE' (5,1) bold center underline
 
   alter-printer font=4 point-size=13
-  let $txt = 'Export r?alis? le : '
+  let $txt = 'Export réalisé le : '
   let $date = edit (Datenow(), 'DD/MM/YYYY')
   let $txt = $txt || $date
   Print $txt (+2,5) bold
@@ -4369,17 +4025,17 @@ BEGIN-PROCEDURE RapGnrF3 ($file_namef3,$file_namef2,#NbrFacF3,#MntF3,#NbrFacF2,#
   print 'Lot de facturation :' (+3,5) Bold
   print $_vIdtLotFac (,26)
   
-  Print 'Centre op?rationnel :'(+1,5) Bold
+  Print 'Centre opérationnel :'(+1,5) Bold
   let $txt  = $IdtCntOpr || ' - ' || $lib
   Print $txt (,26) 
 
-  Print 'P?riode de facturation :' (+1,5) Bold
+  Print 'Période de facturation :' (+1,5) Bold
   let $txt = edit($datdbtprd,'DD/MM/YYYY') ||  '  -  ' || edit($datfinprd,'DD/MM/YYYY')
   Print $txt (,26)
 
-  Print 'Fichiers Export?s' (+4,5) Bold Underline
+  Print 'Fichiers Exportés' (+4,5) Bold Underline
    let $txt1 = 'Nombre de factures'
-   let $txt2 = 'Montant export? (DA)'
+   let $txt2 = 'Montant exporté (DA)'
   
   Print $file_namef3 (+2,7) Bold
    Print $txt1 (+1,9)
@@ -4393,10 +4049,10 @@ BEGIN-PROCEDURE RapGnrF3 ($file_namef3,$file_namef2,#NbrFacF3,#MntF3,#NbrFacF2,#
    Print $txt2 (+1,9)
    print #mntF2 (,55) edit B999,999,999.99nu
 
-  Print 'Nombre total de factures export?es'  (+4,5) bold
+  Print 'Nombre total de factures exportées'  (+4,5) bold
   let #NbrFac = #nbrFacF3 + #NbrFacF2
   print #NbrFac (,40) edit 9999999nu
-  Print 'Montant total export?' (+1,5) Bold
+  Print 'Montant total exporté' (+1,5) Bold
   let #MntExp = #MntF3  + #MntF2
   print #MntExp (,55) edit B999,999,999.99nu
   
@@ -4409,14 +4065,14 @@ END-PROCEDURE	 !RapGnrF3
 
 
 !---------------------------------------------------------------------------------
-!-- generation des informations  du graphe
+!--  generation des informations  du graphe
 !-- Procedure : GrapheF3
 !-- Objectif : selection des consommation et date de facture
 !---------------------------------------------------------------------------------
 
 BEGIN-PROCEDURE GrapheF3(#idtfac)
 let $_graph = ''
-BEGIN-SELECT
+begin-select
 min(to_char(z.datclc,'DD/MM/YY')) &gdatclc
  let $_graph = ';"' ||&gdatclc ||'"'|| $_graph  
 sum(nvl(cns.cns, z.qtefct)) &gcns
@@ -4474,5 +4130,5 @@ where a.rn <= 10
 where z.idtfac = cns.idtfac (+)
 group by z.idtfac, z.datclc
 order by z.datclc desc, z.idtfac
-END-SELECT
-END-PROCEDURE !GrapheF3
+end-select
+end-procedure !GrapheF3

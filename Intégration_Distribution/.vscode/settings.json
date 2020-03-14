@@ -1,7 +1,7 @@
 {
     "plsql-language.connections": [
         {
-            "ID": 5,
+            "ID": 2,
             "active": true,
             "database": "X7ALGTST",
             "password": "X7",
@@ -11,7 +11,7 @@
             "name": "X7@X7ALGTST"
         },
         {
-            "ID": 6,
+            "ID": 3,
             "active": false,
             "database": "vM-ALGER",
             "hidden": false,
@@ -20,7 +20,7 @@
             "name": "X7@vM-ALGER"
         },
         {
-            "ID": 7,
+            "ID": 4,
             "active": false,
             "database": "X7ALGTST",
             "hidden": false,

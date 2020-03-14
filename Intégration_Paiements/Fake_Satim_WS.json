@@ -1,0 +1,419 @@
+{
+  "errorCode": 0,
+  "orderStatuses": [
+    {
+      "errorCode": "0",
+      "orderNumber": "202022113512103",
+      "orderStatus": 6,
+      "actionCode": -1,
+      "actionCodeDescription": "Your transaction was rejected, please  contact your bank. Error code : 1",
+      "amount": 555555,
+      "currency": "012",
+      "date": 1583145313863,
+      "orderDescription": "null",
+      "ip": "0:0:0:0:0:0:0:1",
+      "merchantOrderParams": [
+        {
+          "name": "udf1",
+          "value": "9999999"
+        },
+        {
+          "name": "udf1",
+          "value": "9999999"
+        },
+        {
+          "name": "respCode",
+          "value": "AD"
+        },
+        {
+          "name": "force_terminal_id",
+          "value": "E005006650"
+        },
+        {
+          "name": "transaction_type",
+          "value": "balance_inquiry"
+        },
+        {
+          "name": "feTransType",
+          "value": "698"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "mdOrder",
+          "value": "dQoBkCf2aYjkTMAAAWYN"
+        }
+      ],
+      "cardAuthInfo": {
+        "expiration": "202012",
+        "cardholderName": "REKAB AISSA",
+        "pan": "628056**0013"
+      },
+      "terminalId": "E005006650",
+      "authRefNum": "000004589253",
+      "paymentAmountInfo": {
+        "paymentState": "DECLINED",
+        "approvedAmount": 0,
+        "depositedAmount": 0,
+        "refundedAmount": 0
+      },
+      "bankInfo": {
+        "bankCountryCode": "UNKNOWN",
+        "bankCountryName": "<Unknown>"
+      }
+    },
+    {
+      "errorCode": "0",
+      "orderNumber": "20202291446173",
+      "orderStatus": 6,
+      "actionCode": -2006,
+      "actionCodeDescription": "your transaction was rejected, You canceled your operation or you entered 3 times password errone for this your card is now blocked for online payment service, Error code: 2006",
+      "amount": 555555,
+      "currency": "012",
+      "date": 1583145157565,
+      "orderDescription": "null",
+      "ip": "0:0:0:0:0:0:0:1",
+      "merchantOrderParams": [
+        {
+          "name": "transaction_type",
+          "value": "balance_inquiry"
+        },
+        {
+          "name": "udf1",
+          "value": "9999999"
+        },
+        {
+          "name": "feTransType",
+          "value": "698"
+        },
+        {
+          "name": "force_terminal_id",
+          "value": "E005006650"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "mdOrder",
+          "value": "gYOHe4QmFiuyF4AAAWYM"
+        }
+      ],
+      "cardAuthInfo": {
+        "expiration": "202012",
+        "cardholderName": "REKAB AISSA",
+        "pan": "628056**0013"
+      },
+      "terminalId": "E005006650",
+      "paymentAmountInfo": {
+        "paymentState": "DECLINED",
+        "approvedAmount": 0,
+        "depositedAmount": 0,
+        "refundedAmount": 0
+      },
+      "bankInfo": {
+        "bankCountryCode": "UNKNOWN",
+        "bankCountryName": "<Unknown>"
+      }
+    },
+    {
+      "errorCode": "0",
+      "orderNumber": "2020229232823",
+      "orderStatus": 2,
+      "actionCode": 0,
+      "actionCodeDescription": "Your payment was accepted",
+      "amount": 555555,
+      "currency": "012",
+      "date": 1583136168058,
+      "orderDescription": "null",
+      "ip": "0:0:0:0:0:0:0:1",
+      "merchantOrderParams": [
+        {
+          "name": "respCode",
+          "value": "00"
+        },
+        {
+          "name": "feTransType",
+          "value": "698"
+        },
+        {
+          "name": "udf1",
+          "value": "9999999"
+        },
+        {
+          "name": "force_terminal_id",
+          "value": "E005006650"
+        },
+        {
+          "name": "transaction_type",
+          "value": "balance_inquiry"
+        },
+        {
+          "name": "udf1",
+          "value": "9999999"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "mdOrder",
+          "value": "yHTc2izbUAodMUAAAWYL"
+        }
+      ],
+      "cardAuthInfo": {
+        "expiration": "202104",
+        "cardholderName": "REKAB AISSA",
+        "approvalCode": "588622",
+        "pan": "628056**0013"
+      },
+      "authDateTime": 1583136195490,
+      "terminalId": "E005006650",
+      "authRefNum": "000004588622",
+      "paymentAmountInfo": {
+        "paymentState": "DEPOSITED",
+        "approvedAmount": 555555,
+        "depositedAmount": 555555,
+        "refundedAmount": 0
+      },
+      "bankInfo": {
+        "bankCountryCode": "UNKNOWN",
+        "bankCountryName": "<Unknown>"
+      }
+    },
+    {
+      "errorCode": "0",
+      "orderNumber": "2020228584584",
+      "orderStatus": 2,
+      "actionCode": 0,
+      "actionCodeDescription": "Your payment was accepted",
+      "amount": 3333,
+      "currency": "012",
+      "date": 1583135946210,
+      "orderDescription": "null",
+      "ip": "0:0:0:0:0:0:0:1",
+      "merchantOrderParams": [
+        {
+          "name": "force_terminal_id",
+          "value": "E005006650"
+        },
+        {
+          "name": "transaction_type",
+          "value": "balance_inquiry"
+        },
+        {
+          "name": "udf1",
+          "value": "44444444"
+        },
+        {
+          "name": "udf1",
+          "value": "44444444"
+        },
+        {
+          "name": "respCode",
+          "value": "00"
+        },
+        {
+          "name": "feTransType",
+          "value": "698"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "mdOrder",
+          "value": "JzLC0cj990D6KIAAAWYK"
+        }
+      ],
+      "cardAuthInfo": {
+        "expiration": "202104",
+        "cardholderName": "REKAB AISSA",
+        "approvalCode": "588606",
+        "pan": "628056**0013"
+      },
+      "authDateTime": 1583135975089,
+      "terminalId": "E005006650",
+      "authRefNum": "000004588606",
+      "paymentAmountInfo": {
+        "paymentState": "DEPOSITED",
+        "approvedAmount": 3333,
+        "depositedAmount": 3333,
+        "refundedAmount": 0
+      },
+      "bankInfo": {
+        "bankCountryCode": "UNKNOWN",
+        "bankCountryName": "<Unknown>"
+      }
+    },
+    {
+      "errorCode": "0",
+      "orderNumber": "20202285214544",
+      "orderStatus": 2,
+      "actionCode": 0,
+      "actionCodeDescription": "Your payment was accepted",
+      "amount": 20000,
+      "currency": "012",
+      "date": 1583135552297,
+      "orderDescription": "null",
+      "ip": "0:0:0:0:0:0:0:1",
+      "merchantOrderParams": [
+        {
+          "name": "transaction_type",
+          "value": "balance_inquiry"
+        },
+        {
+          "name": "force_terminal_id",
+          "value": "E005006650"
+        },
+        {
+          "name": "udf1",
+          "value": "1254AZEDSE"
+        },
+        {
+          "name": "udf1",
+          "value": "1254AZEDSE"
+        },
+        {
+          "name": "feTransType",
+          "value": "698"
+        },
+        {
+          "name": "respCode",
+          "value": "00"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "mdOrder",
+          "value": "P2RLxja2wxrZGMAAAWYJ"
+        }
+      ],
+      "cardAuthInfo": {
+        "expiration": "202104",
+        "cardholderName": "REKAB AISSA",
+        "approvalCode": "588579",
+        "pan": "628056**0013"
+      },
+      "authDateTime": 1583135578011,
+      "terminalId": "E005006650",
+      "authRefNum": "000004588579",
+      "paymentAmountInfo": {
+        "paymentState": "DEPOSITED",
+        "approvedAmount": 20000,
+        "depositedAmount": 20000,
+        "refundedAmount": 0
+      },
+      "bankInfo": {
+        "bankCountryCode": "UNKNOWN",
+        "bankCountryName": "<Unknown>"
+      }
+    },
+    {
+      "errorCode": "0",
+      "orderNumber": "20201311515770",
+      "orderStatus": 2,
+      "actionCode": 0,
+      "actionCodeDescription": "Your payment was accepted",
+      "amount": 20000,
+      "currency": "012",
+      "date": 1580724314883,
+      "orderDescription": "null",
+      "ip": "105.235.133.24",
+      "merchantOrderParams": [
+        {
+          "name": "transaction_type",
+          "value": "balance_inquiry"
+        },
+        {
+          "name": "force_terminal_id",
+          "value": "E005006650"
+        },
+        {
+          "name": "udf1",
+          "value": "1254AZEDSE"
+        },
+        {
+          "name": "respCode",
+          "value": "00"
+        },
+        {
+          "name": "udf1",
+          "value": "1254AZEDSE"
+        },
+        {
+          "name": "feTransType",
+          "value": "698"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "mdOrder",
+          "value": "2kTb2X3410naIEAAAWTJ"
+        }
+      ],
+      "cardAuthInfo": {
+        "expiration": "202104",
+        "cardholderName": "REKAB AISSA",
+        "approvalCode": "406675",
+        "pan": "628056**0013"
+      },
+      "authDateTime": 1580724352307,
+      "terminalId": "E005006650",
+      "authRefNum": "000004406675",
+      "paymentAmountInfo": {
+        "paymentState": "DEPOSITED",
+        "approvedAmount": 20000,
+        "depositedAmount": 20000,
+        "refundedAmount": 0
+      },
+      "bankInfo": {
+        "bankCountryCode": "UNKNOWN",
+        "bankCountryName": "<Unknown>"
+      }
+    },
+    {
+      "errorCode": "0",
+      "orderNumber": "20201311116841",
+      "orderStatus": 6,
+      "actionCode": -2007,
+      "actionCodeDescription": "Your transaction was rejected, Treatment time was exceeded, please try later. Error code: 2007",
+      "amount": 20000,
+      "currency": "012",
+      "date": 1580724101225,
+      "orderDescription": "null",
+      "merchantOrderParams": [
+        {
+          "name": "transaction_type",
+          "value": "balance_inquiry"
+        },
+        {
+          "name": "force_terminal_id",
+          "value": "E005006650"
+        },
+        {
+          "name": "udf1",
+          "value": "1254AZEDSE"
+        },
+        {
+          "name": "feTransType",
+          "value": "698"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "mdOrder",
+          "value": "31XtMXLSPUs2UUAAAWTI"
+        }
+      ],
+      "terminalId": "E005006650",
+      "paymentAmountInfo": {
+        "paymentState": "DECLINED",
+        "approvedAmount": 0,
+        "depositedAmount": 0,
+        "refundedAmount": 0
+      },
+      "bankInfo": {
+        "bankCountryCode": "UNKNOWN",
+        "bankCountryName": "<Unknown>"
+      }
+    }
+  ],
+  "totalCount": 7,
+  "page": 1,
+  "pageSize": 7
+}
