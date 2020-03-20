@@ -1,5 +1,5 @@
-Create or replace package body ALG_TRTEPAY is
-  Err_IdtPck    VARCHAR2(40)     := 'ALG_TRTEPAY';
+Create or replace package body ALG_SATIM is
+  Err_IdtPck    VARCHAR2(40)     := 'ALG_SATIM';
   Err_IdtTrt    varchar2(40)     := NULL;
   Err_Msg       VARCHAR2(255)    := NULL;
   Err_IdtClt    CLT.IdtClt%TYPE  := NULL;
@@ -15,16 +15,16 @@ Create or replace package body ALG_TRTEPAY is
   vModaffpmt NUMBER;
   vExistFct  NUMBER := 0;
 
-  type rLstEnc is record( RowidOpr   rowid,
-                            RowScn     varchar2(200),
-                            Rfr        opr.rfr%type,
-                            IdtTypOpr  opr.IdtTypOpr%type,
-                            Mnt        opr.mnt%type,
-                            Sld        opr.sld%type,
-                            MntAff     opr.mnt%type
-    );
-    type ttLstEnc is table of rLstEnc index by binary_integer;
-    tLstEnc ttLstEnc;
+  -- type rLstEnc is record( RowidOpr   rowid,
+  --                           RowScn     varchar2(200),
+  --                           Rfr        opr.rfr%type,
+  --                           IdtTypOpr  opr.IdtTypOpr%type,
+  --                           Mnt        opr.mnt%type,
+  --                           Sld        opr.sld%type,
+  --                           MntAff     opr.mnt%type
+  --   );
+  --   type ttLstEnc is table of rLstEnc index by binary_integer;
+  --   tLstEnc ttLstEnc;
 
   Procedure import (  idTraitement in number, 
                       nbLignesIntegrees out number,
@@ -35,6 +35,7 @@ Create or replace package body ALG_TRTEPAY is
   vIdtModRgl ModRgl.IdtModRgl%type := 109;
   begin
   /* intégration dans CSSCNGXXX*/
+
   -- Recherche SqcCng
   Select Nvl(SqcCng, 1) into vSqcCng
   from Css where IdtCss=vIdtCss;
@@ -58,18 +59,19 @@ Create or replace package body ALG_TRTEPAY is
                       vSqcCng,
                       'BATCH',
                       sysdate,
-                      sum(Transaction_Montant),
+                      sum(Mnt),
                       Count(*),
                       to_date(null),
-                      to_date(null),
+                      0,
                       to_date(null),
                       vIdtDvs,
                       to_char(idTraitement), -- RFRFIC
                       null,
                       sysdate,
                       idTraitement
-                      from Alg_Epay_Dtl 
-                      where IdtTrt = idTraitement;
+                      from Alg_SATIM_Dtl 
+                      where IdtTrt = idTraitement
+                      ;
   -- insertion CngLgnCss
   INSERT INTO CNGLGNCSS
         (IDTCSS, 
@@ -98,10 +100,10 @@ Create or replace package body ALG_TRTEPAY is
         vSqcCng,
         rownum,
         null,--lpad(#Line,5,' '),
-        Epayment_Code_Client,
+        IdtClt,
         1,
-        '$NumFct',
-        Transaction_Montant,
+        '',
+        Mnt,
         0,
         vIdtModRgl, 
         null, 
@@ -115,8 +117,8 @@ Create or replace package body ALG_TRTEPAY is
         1, 
         null, 
         null,
-        Transaction_date_payment
-        from Alg_Epay_Dtl
+        DatVlr
+        from Alg_SATIM_Dtl
         where IdtTrt = idTraitement;
   -- insertion CngTtx
   INSERT INTO CNGTTX (IDTCSS,
@@ -138,7 +140,7 @@ Create or replace package body ALG_TRTEPAY is
 
   /*Controle*/
   Select count(*) into nbLignesIntegrees 
-  from Alg_Epay_Dtl
+  from Alg_SATIM_Dtl
   where IdtTrt=idTraitement;
 
   vSqcCng := vSqcCng + 1;
@@ -659,131 +661,91 @@ end Import;
   -- N° 13. Si le mode de règlement est prélèvement, le nom du tireur, le code banque,
   --    le numéro de compte bancaire, la clé RIB et le code guichet sont obligatoires
   -- *********************************
-  -- PROCEDURE CtrlModRgltChq( pIdtCss CNGENT.IdtCss%TYPE,
-  --                         pIdtCng CNGENT.IdtCng%TYPE, 
-  --                         nErr out number)
-  -- IS
-  --   vSwControl NUMBER(1);
-  --   CURSOR cWork IS SELECT IDTCSS, IDTCNG, NUMFCT, IDTLGNCSSCNG
-  --     FROM CNGLGNCSS
-  --       WHERE IDTCSS = pIdtCss
-  --       AND IDTCNG = pIdtCng
-  --       AND IDTMODRGL = 3
-  --       AND (NUMCPTBNC IS NULL
-  --       OR  IDTGCH IS NULL
-  --       OR  IDTBNQ IS NULL
-  --       --OR  CLERIB IS NULL
-  --       );
-  -- BEGIN
-  --   TrtMsg01.InsertItem(Err_TableName,'CTRLMODRGLTCHQ');
-  --   nErr := 0;
-  --   SELECT Utl
-  --     INTO vSwControl
-  --     FROM CNGCTRL
-  --     WHERE IdtCtrl = 13;
-  --   IF vSwControl = 1 THEN
-  --     FOR cCng IN cWork LOOP
-  --       -- Message d'erreur pour la consignation
-  --       INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
-  --       VALUES (cCng.IDTCSS, cCng.IDTCNG, 13, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0013', NULL);
-  --       vcptano := 1;
-  --       nErr := nErr + 1 ;
-  --     END LOOP;
-  --   END IF;
-  --   TrtMsg01.DeleteItem(Err_TableName);
-  --   END CtrlModRgltChq;
+  PROCEDURE CtrlModRgltChq( pIdtCss CNGENT.IdtCss%TYPE,
+                          pIdtCng CNGENT.IdtCng%TYPE, 
+                          nErr out number)
+  IS
+    vSwControl NUMBER(1);
+    CURSOR cWork IS SELECT IDTCSS, IDTCNG, NUMFCT, IDTLGNCSSCNG
+      FROM CNGLGNCSS
+        WHERE IDTCSS = pIdtCss
+        AND IDTCNG = pIdtCng
+        AND IDTMODRGL = 3
+        AND (NUMCPTBNC IS NULL
+        OR  IDTGCH IS NULL
+        OR  IDTBNQ IS NULL
+        --OR  CLERIB IS NULL
+        );
+  BEGIN
+    TrtMsg01.InsertItem(Err_TableName,'CTRLMODRGLTCHQ');
+    nErr := 0;
+    SELECT Utl
+      INTO vSwControl
+      FROM CNGCTRL
+      WHERE IdtCtrl = 13;
+    IF vSwControl = 1 THEN
+      FOR cCng IN cWork LOOP
+        -- Message d'erreur pour la consignation
+        INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
+        VALUES (cCng.IDTCSS, cCng.IDTCNG, 13, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0013', NULL);
+        vcptano := 1;
+        nErr := nErr + 1 ;
+      END LOOP;
+    END IF;
+    TrtMsg01.DeleteItem(Err_TableName);
+    END CtrlModRgltChq;
   
   
   -- *********************************
   -- N° 31. Paiement date is valid (SEAAL)
   -- *********************************
-  -- PROCEDURE CtrlDatRglVld_SEAAL(  pIdtCss CNGENT.IdtCss%TYPE,
-  --                                 pIdtCng CNGENT.IdtCng%TYPE, 
-  --                                 nErr out number)
-  -- IS
-  --   vSwControl NUMBER(1);
-  --   vNbrJouDec number := 2; -- Jours de decalage avec la semaine en algerie, la semaine demarre le samedi, pas le lundi
-  --   CURSOR cWork IS
-  --     SELECT CNGENT.IDTCSS, CNGENT.IDTCNG, nvl(CNGLGNCSS.DatRgl,CNGENT.DatRgl),
-  --             CNGLGNCSS.IDTLGNCSSCNG, CNGLGNCSS.NUMFCT
-  --       FROM CNGLGNCSS, CNGENT, SSS
-  --       WHERE CNGENT.IdtCss        = pIdtCss
-  --         AND CNGENT.IdtCng    = pIdtCng
-  --         AND CNGLGNCSS.IDTCSS = pIdtCss
-  --         AND CNGLGNCSS.IDTCNG = pIdtCng
-  --         and (   trunc(nvl(CNGLGNCSS.DatRgl,CNGENT.DatRgl)) < trunc(SSS.SSS_DatJou+vNbrJouDec,'IW')-vNbrJouDec-2 -- Avec -2 on obtient le jeudi de la semaine precedente selon la semaine algerienne
-  --               or to_char(nvl(CNGLGNCSS.DatRgl,CNGENT.DatRgl),'DY','NLS_DATE_LANGUAGE = American') = 'FRI'); -- Pas de règlements le vendredi
-  -- --         and ((        to_number(to_char(SSS.SSS_DatJou + vNbrJouDec, 'IW','NLS_DATE_LANGUAGE = American')) <> to_number(to_char(nvl(CNGLGNCSS.DatRgl,CNGENT.DatRgl) + vNbrJouDec, 'IW','NLS_DATE_LANGUAGE = American'))
-  -- --                   and to_char(SSS.SSS_DatJou, 'DY','NLS_DATE_LANGUAGE = American') in ('WED','THU'))
-  -- --                or
-  -- --              (        to_number(to_char(SSS.SSS_DatJou + vNbrJouDec, 'IW','NLS_DATE_LANGUAGE = American')) -1 <> to_number(to_char(nvl(CNGLGNCSS.DatRgl,CNGENT.DatRgl) + vNbrJouDec, 'IW','NLS_DATE_LANGUAGE = American'))
-  -- --                   and to_char(SSS.SSS_DatJou, 'DY','NLS_DATE_LANGUAGE = American') not in ('WED','THU'))
-  -- --             );
-  --   nLigne NUMBER;
-  -- BEGIN
-  --   TrtMsg01.InsertItem(Err_TableName,'CtrlDatRglVld_SEAAL');
-  --   nErr := 0;
-  --   SELECT Utl
-  --     INTO vSwControl
-  --     FROM CNGCTRL
-  --     WHERE IdtCtrl = 31;
-  --   IF vSwControl = 1 THEN
-  --     FOR cCng IN cWork LOOP
-  --       -- Message d'erreur pour la consignation
-  --       INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
-  --       VALUES (cCng.IDTCSS, cCng.IDTCNG, 31, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0031', null);
-  --       vCptAno := 1;
-  --       nErr := nErr + 1 ;
-  --     END LOOP;
-  --   END IF;
-  --   TrtMsg01.DeleteItem(Err_TableName);
-  -- END CtrlDatRglVld_SEAAL;
+  PROCEDURE CtrlDatRglVld_SEAAL(  pIdtCss CNGENT.IdtCss%TYPE,
+                                  pIdtCng CNGENT.IdtCng%TYPE, 
+                                  nErr out number)
+  IS
+    vSwControl NUMBER(1);
+    vNbrJouDec number := 2; -- Jours de decalage avec la semaine en algerie, la semaine demarre le samedi, pas le lundi
+    CURSOR cWork IS
+      SELECT CNGENT.IDTCSS, CNGENT.IDTCNG, nvl(CNGLGNCSS.DatRgl,CNGENT.DatRgl),
+              CNGLGNCSS.IDTLGNCSSCNG, CNGLGNCSS.NUMFCT
+        FROM CNGLGNCSS, CNGENT, SSS
+        WHERE CNGENT.IdtCss        = pIdtCss
+          AND CNGENT.IdtCng    = pIdtCng
+          AND CNGLGNCSS.IDTCSS = pIdtCss
+          AND CNGLGNCSS.IDTCNG = pIdtCng
+          and (   trunc(nvl(CNGLGNCSS.DatRgl,CNGENT.DatRgl)) < trunc(SSS.SSS_DatJou+vNbrJouDec,'IW')-vNbrJouDec-2 -- Avec -2 on obtient le jeudi de la semaine precedente selon la semaine algerienne
+                or to_char(nvl(CNGLGNCSS.DatRgl,CNGENT.DatRgl),'DY','NLS_DATE_LANGUAGE = American') = 'FRI'); -- Pas de règlements le vendredi
+  --         and ((        to_number(to_char(SSS.SSS_DatJou + vNbrJouDec, 'IW','NLS_DATE_LANGUAGE = American')) <> to_number(to_char(nvl(CNGLGNCSS.DatRgl,CNGENT.DatRgl) + vNbrJouDec, 'IW','NLS_DATE_LANGUAGE = American'))
+  --                   and to_char(SSS.SSS_DatJou, 'DY','NLS_DATE_LANGUAGE = American') in ('WED','THU'))
+  --                or
+  --              (        to_number(to_char(SSS.SSS_DatJou + vNbrJouDec, 'IW','NLS_DATE_LANGUAGE = American')) -1 <> to_number(to_char(nvl(CNGLGNCSS.DatRgl,CNGENT.DatRgl) + vNbrJouDec, 'IW','NLS_DATE_LANGUAGE = American'))
+  --                   and to_char(SSS.SSS_DatJou, 'DY','NLS_DATE_LANGUAGE = American') not in ('WED','THU'))
+  --             );
+    nLigne NUMBER;
+  BEGIN
+    TrtMsg01.InsertItem(Err_TableName,'CtrlDatRglVld_SEAAL');
+    nErr := 0;
+    SELECT Utl
+      INTO vSwControl
+      FROM CNGCTRL
+      WHERE IdtCtrl = 31;
+    IF vSwControl = 1 THEN
+      FOR cCng IN cWork LOOP
+        -- Message d'erreur pour la consignation
+        INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
+        VALUES (cCng.IDTCSS, cCng.IDTCNG, 31, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0031', null);
+        vCptAno := 1;
+        nErr := nErr + 1 ;
+      END LOOP;
+    END IF;
+    TrtMsg01.DeleteItem(Err_TableName);
+  END CtrlDatRglVld_SEAAL;
   -- *********************************
   -- N° 32. Le client a ete exporte (SEAAL)
   -- *********************************
-  -- PROCEDURE CltUneFois_SEAAL( pIdtCss CNGENT.IdtCss%TYPE,
-  --                             pIdtCng CNGENT.IdtCng%TYPE, 
-  --                             nErr out number)
-  -- IS
-  --   vSwControl NUMBER(1);
-  --   CURSOR cWork IS
-  --     SELECT CNGENT.IDTCSS, CNGENT.IDTCNG, nvl(CNGLGNCSS.DatRgl,CNGENT.DatRgl),
-  --             CNGLGNCSS.IDTLGNCSSCNG, CNGLGNCSS.NUMFCT
-  --       FROM CNGLGNCSS, CNGENT, SSS
-  --       WHERE CNGENT.IdtCss        = pIdtCss
-  --         AND CNGENT.IdtCng    = pIdtCng
-  --         AND CNGLGNCSS.IDTCSS = pIdtCss
-  --         AND CNGLGNCSS.IDTCNG = pIdtCng
-  --         and NOT EXISTS (select b.IdtClt
-  --                           from ALG_EAP_VIEW1 b
-  --                           where b.IdtClt = CNGLGNCSS.IdtClt
-  --                             and  trunc(CNGLGNCSS.DatRgl) between nvl(trunc(b.DatTrt),CNGLGNCSS.DatRgl-1) and nvl(trunc(b.DatTrtSvn),sysdate+1));
-
-  --   nLigne NUMBER;
-  -- BEGIN
-  --   TrtMsg01.InsertItem(Err_TableName,'CltUneFois_SEAAL');
-  --   nErr := 0;
-  --   SELECT Utl
-  --     INTO vSwControl
-  --     FROM CNGCTRL
-  --     WHERE IdtCtrl = 32;
-  --   IF vSwControl = 1 THEN
-  --     FOR cCng IN cWork LOOP
-  --       -- Message d'erreur pour la consignation
-  --       INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
-  --       VALUES (cCng.IDTCSS, cCng.IDTCNG, 32, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0032', null);
-  --       vCptAno := 1;
-  --       nErr := nErr + 1 ;
-  --     END LOOP;
-  --   END IF;
-  --   TrtMsg01.DeleteItem(Err_TableName);
-  -- END CltUneFois_SEAAL;
-  -- *********************************
-  -- N° 33. Date de reglement inferieure a la date du jour (SEAAL)
-  -- *********************************
-  PROCEDURE DatRglFut_SEAAL( pIdtCss CNGENT.IdtCss%TYPE,
-                          pIdtCng CNGENT.IdtCng%TYPE, 
-                          nErr out number)
+  PROCEDURE CltUneFois_SEAAL( pIdtCss CNGENT.IdtCss%TYPE,
+                              pIdtCng CNGENT.IdtCng%TYPE, 
+                              nErr out number)
   IS
     vSwControl NUMBER(1);
     CURSOR cWork IS
@@ -794,26 +756,66 @@ end Import;
           AND CNGENT.IdtCng    = pIdtCng
           AND CNGLGNCSS.IDTCSS = pIdtCss
           AND CNGLGNCSS.IDTCNG = pIdtCng
-          and trunc(CNGLGNCSS.DatRgl) >= trunc(Sysdate);
+          and NOT EXISTS (select b.IdtClt
+                            from ALG_EAP_VIEW1 b
+                            where b.IdtClt = CNGLGNCSS.IdtClt
+                              and  trunc(CNGLGNCSS.DatRgl) between nvl(trunc(b.DatTrt),CNGLGNCSS.DatRgl-1) and nvl(trunc(b.DatTrtSvn),sysdate+1));
+
     nLigne NUMBER;
   BEGIN
-    TrtMsg01.InsertItem(Err_TableName,'DatRglFut_SEAAL');
+    TrtMsg01.InsertItem(Err_TableName,'CltUneFois_SEAAL');
     nErr := 0;
     SELECT Utl
       INTO vSwControl
       FROM CNGCTRL
-      WHERE IdtCtrl = 33;
+      WHERE IdtCtrl = 32;
     IF vSwControl = 1 THEN
       FOR cCng IN cWork LOOP
         -- Message d'erreur pour la consignation
         INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
-        VALUES (cCng.IDTCSS, cCng.IDTCNG, 33, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0008', null);
+        VALUES (cCng.IDTCSS, cCng.IDTCNG, 32, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0032', null);
         vCptAno := 1;
         nErr := nErr + 1 ;
       END LOOP;
     END IF;
     TrtMsg01.DeleteItem(Err_TableName);
-  END DatRglFut_SEAAL;
+  END CltUneFois_SEAAL;
+  -- *********************************
+  -- N° 33. Date de reglement inferieure a la date du jour (SEAAL)
+  -- *********************************
+  -- PROCEDURE DatRglFut_SEAAL( pIdtCss CNGENT.IdtCss%TYPE,
+  --                         pIdtCng CNGENT.IdtCng%TYPE, 
+  --                         nErr out number)
+  -- IS
+  --   vSwControl NUMBER(1);
+  --   CURSOR cWork IS
+  --     SELECT CNGENT.IDTCSS, CNGENT.IDTCNG, nvl(CNGLGNCSS.DatRgl,CNGENT.DatRgl),
+  --             CNGLGNCSS.IDTLGNCSSCNG, CNGLGNCSS.NUMFCT
+  --       FROM CNGLGNCSS, CNGENT, SSS
+  --       WHERE CNGENT.IdtCss        = pIdtCss
+  --         AND CNGENT.IdtCng    = pIdtCng
+  --         AND CNGLGNCSS.IDTCSS = pIdtCss
+  --         AND CNGLGNCSS.IDTCNG = pIdtCng
+  --         and trunc(CNGLGNCSS.DatRgl) >= trunc(SSS.sss_DatJou);
+  --   nLigne NUMBER;
+  -- BEGIN
+  --   TrtMsg01.InsertItem(Err_TableName,'DatRglFut_SEAAL');
+  --   nErr := 0;
+  --   SELECT Utl
+  --     INTO vSwControl
+  --     FROM CNGCTRL
+  --     WHERE IdtCtrl = 33;
+  --   IF vSwControl = 1 THEN
+  --     FOR cCng IN cWork LOOP
+  --       -- Message d'erreur pour la consignation
+  --       INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
+  --       VALUES (cCng.IDTCSS, cCng.IDTCNG, 33, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0008', null);
+  --       vCptAno := 1;
+  --       nErr := nErr + 1 ;
+  --     END LOOP;
+  --   END IF;
+  --   TrtMsg01.DeleteItem(Err_TableName);
+  -- END DatRglFut_SEAAL;
   -- *********************************
   -- N° 34. Le client n'a pas deja ete importe dans un autre fichier (SEAAL)
   -- *********************************
@@ -858,57 +860,53 @@ end Import;
   -- *********************************
   -- N° 35. L'encaissement n'a pas deja ete INTEGRE auparavant
   -- *********************************
-  -- PROCEDURE RglInt_SEAAL( pIdtCss CNGENT.IdtCss%TYPE,
-  --                         pIdtCng CNGENT.IdtCng%TYPE, 
-  --                         nErr out number)
-  -- IS
-  --   vSwControl NUMBER(1);
-  -- -- FBE: 10 06 2010   CURSOR cWork IS
-  -- -- FBE: 10 06 2010     SELECT distinct CNGENT.IDTCSS, CNGENT.IDTCNG, nvl(CNGLGNCSS.DatRgl,CNGENT.DatRgl),
-  -- -- FBE: 10 06 2010            CNGLGNCSS.IDTLGNCSSCNG, CNGLGNCSS.NUMFCT
-  -- -- FBE: 10 06 2010       FROM CNGLGNCSS, CNGENT, SSS, ALG_EAP_VIEW1
-  -- -- FBE: 10 06 2010       WHERE CNGENT.IdtCss        = pIdtCss
-  -- -- FBE: 10 06 2010         AND CNGENT.IdtCng    = pIdtCng
-  -- -- FBE: 10 06 2010         AND CNGLGNCSS.IDTCSS = pIdtCss
-  -- -- FBE: 10 06 2010         AND CNGLGNCSS.IDTCNG = pIdtCng
-  -- -- FBE: 10 06 2010         and ALG_EAP_VIEW1.IdtClt = CNGLGNCSS.IdtClt
-  -- -- FBE: 10 06 2010         and trunc(CNGLGNCSS.DatRgl) between nvl(trunc(ALG_EAP_VIEW1.DatTrt),CNGLGNCSS.DatRgl-1) and nvl(trunc(ALG_EAP_VIEW1.DatTrtSvn),sysdate+1)
-  -- -- FBE: 10 06 2010         and ALG_EAP_VIEW1.Ett = 1
-  --   CURSOR cWork IS
-  --     SELECT distinct CNGENT.IDTCSS, CNGENT.IDTCNG, nvl(CNGLGNCSS.DatRgl,CNGENT.DatRgl),
-  --           CNGLGNCSS.IDTLGNCSSCNG, CNGLGNCSS.NUMFCT
-  --       FROM CNGLGNCSS, CNGENT, SSS, OPR
-  --       WHERE CNGENT.IdtCss        = pIdtCss
-  --         AND CNGENT.IdtCng    = pIdtCng
-  --         AND CNGLGNCSS.IDTCSS = pIdtCss
-  --         AND CNGLGNCSS.IDTCNG = pIdtCng
-  --         and OPR.IdtClt(+) = CNGLGNCSS.IdtClt
-  --         and trunc(OPR.DatVlr(+)) = trunc(CNGLGNCSS.DatRgl)
-  --         and OPR.IdtOpr is not null
-  --         and OPR.IdtTypOpr = 2;
-  --   nLigne NUMBER;
-  -- BEGIN
-  --   -- TrtMsg01.InsertItem(Err_TableName,'RglInt_SEAAL');
-  --   -- nErr := 0;
-  --   SELECT Utl
-  --     INTO vSwControl
-  --     FROM CNGCTRL
-  --     WHERE IdtCtrl = 35;
-  --   IF vSwControl = 1 THEN
-  --     FOR cCng IN cWork LOOP
-  --       -- Message d'erreur pour la consignation
-  --       INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
-  --       VALUES (cCng.IDTCSS, cCng.IDTCNG, 35, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0035', null);
-  --       vCptAno := 1;
-  --       nErr := nErr + 1 ;
-  --     END LOOP;
-  --   END IF;
-  --   TrtMsg01.DeleteItem(Err_TableName);
-  -- END RglInt_SEAAL;
-
-  --------------------------------------------------------------------------------
-  --------------------------------------------------------------------------------
-  --------------------------------------------------------------------------------
+  PROCEDURE RglInt_SEAAL( pIdtCss CNGENT.IdtCss%TYPE,
+                          pIdtCng CNGENT.IdtCng%TYPE, 
+                          nErr out number)
+  IS
+    vSwControl NUMBER(1);
+  -- FBE: 10 06 2010   CURSOR cWork IS
+  -- FBE: 10 06 2010     SELECT distinct CNGENT.IDTCSS, CNGENT.IDTCNG, nvl(CNGLGNCSS.DatRgl,CNGENT.DatRgl),
+  -- FBE: 10 06 2010            CNGLGNCSS.IDTLGNCSSCNG, CNGLGNCSS.NUMFCT
+  -- FBE: 10 06 2010       FROM CNGLGNCSS, CNGENT, SSS, ALG_EAP_VIEW1
+  -- FBE: 10 06 2010       WHERE CNGENT.IdtCss        = pIdtCss
+  -- FBE: 10 06 2010         AND CNGENT.IdtCng    = pIdtCng
+  -- FBE: 10 06 2010         AND CNGLGNCSS.IDTCSS = pIdtCss
+  -- FBE: 10 06 2010         AND CNGLGNCSS.IDTCNG = pIdtCng
+  -- FBE: 10 06 2010         and ALG_EAP_VIEW1.IdtClt = CNGLGNCSS.IdtClt
+  -- FBE: 10 06 2010         and trunc(CNGLGNCSS.DatRgl) between nvl(trunc(ALG_EAP_VIEW1.DatTrt),CNGLGNCSS.DatRgl-1) and nvl(trunc(ALG_EAP_VIEW1.DatTrtSvn),sysdate+1)
+  -- FBE: 10 06 2010         and ALG_EAP_VIEW1.Ett = 1
+    CURSOR cWork IS
+      SELECT distinct CNGENT.IDTCSS, CNGENT.IDTCNG, nvl(CNGLGNCSS.DatRgl,CNGENT.DatRgl),
+            CNGLGNCSS.IDTLGNCSSCNG, CNGLGNCSS.NUMFCT
+        FROM CNGLGNCSS, CNGENT, SSS, OPR
+        WHERE CNGENT.IdtCss        = pIdtCss
+          AND CNGENT.IdtCng    = pIdtCng
+          AND CNGLGNCSS.IDTCSS = pIdtCss
+          AND CNGLGNCSS.IDTCNG = pIdtCng
+          and OPR.IdtClt(+) = CNGLGNCSS.IdtClt
+          and trunc(OPR.DatVlr(+)) = trunc(CNGLGNCSS.DatRgl)
+          and OPR.IdtOpr is not null
+          and OPR.IdtTypOpr = 2;
+    nLigne NUMBER;
+  BEGIN
+    -- TrtMsg01.InsertItem(Err_TableName,'RglInt_SEAAL');
+    -- nErr := 0;
+    SELECT Utl
+      INTO vSwControl
+      FROM CNGCTRL
+      WHERE IdtCtrl = 35;
+    IF vSwControl = 1 THEN
+      FOR cCng IN cWork LOOP
+        -- Message d'erreur pour la consignation
+        INSERT INTO CNGANO (IDTCSS, IDTCNG, IDTCTRL, IDTLGNCSSCNG, MSG_CODE, INFCMP)
+        VALUES (cCng.IDTCSS, cCng.IDTCNG, 35, cCng.IDTLGNCSSCNG, 'MSGCNG_ERR0035', null);
+        vCptAno := 1;
+        nErr := nErr + 1 ;
+      END LOOP;
+    END IF;
+    TrtMsg01.DeleteItem(Err_TableName);
+  END RglInt_SEAAL;
 PROCEDURE Controles(  idTraitement in number, 
                       nbLignesIntegrees out number,
                       pErr out NUMBER)
@@ -958,40 +956,21 @@ BEGIN
   -- Cliente existe
   CtrlExistClt (pIdtCss, pIdtCng, nbAno)  ;
   nbLignesIntegrees := nbLignesIntegrees + nbAno;
-    -- Pas deux fois le même numéro de client dans une même consignation
-    CtrlPasDeuxNbCltCng (pIdtCss, pIdtCng, nbAno)  ;
-  nbLignesIntegrees := nbLignesIntegrees + nbAno;
-    -- Pas deux fois le même numéro de facture dans une même consignation
-  --   end if;
-  -- Control un solo pago por cliente en la consignaci?n
-  CtrlCltDeuxRglCng (pIdtCss, pIdtCng, nbAno)  ;
-  nbLignesIntegrees := nbLignesIntegrees + nbAno;
-  -- Control un solo cliente por consignaci?n con el mismo valor
+  
   CtrlCltMntDeuxRglCng (pIdtCss, pIdtCng, nbAno)  ;
   nbLignesIntegrees := nbLignesIntegrees + nbAno;
-  -- Si le mode de règlement est chèques, le nom du tireur, le numéro de chèque, le code banque
-  --     et le code guichet sont obligatoires
-  CtrlModRgltChq (pIdtCss, pIdtCng, nbAno)  ;
-  nbLignesIntegrees := nbLignesIntegrees + nbAno;
-  --------------------------------------------------------------
-  -- Control de coherencia entre el valor reportado en el c?digo
-  -- de barras y el valor del pago, para el caso que es introducido
-  -- el valor (Interfase COMFAUNION). Este control aplica solamente
-  -- cuando el c?digo de barras est? completo.
-  --------------------------------------------------------------
-  -- CtrlCodBrrMntPmt (pIdtCss, pIdtCng);
-  -- CtrlUneCngFicDatRgl(pIdtCss, pIdtCng);
-  -- CtrlUneCltOprxFic_SEAAL(pIdtCss, pIdtCng);
+
   CtrlDatRglVld_SEAAL(pIdtCss, pIdtCng, nbAno)  ;
   nbLignesIntegrees := nbLignesIntegrees + nbAno;
-  -- CltUneFois_SEAAL(pIdtCss,pIdtCng, nbAno)  ;
-  -- nbLignesIntegrees := nbLignesIntegrees + nbAno;
-  DatRglFut_SEAAL(pIdtCss,pIdtCng, nbAno)  ;
-  nbLignesIntegrees := nbLignesIntegrees + nbAno;
-  CltImp_SEAAL(pIdtCss,pIdtCng, nbAno)  ;
-  nbLignesIntegrees := nbLignesIntegrees + nbAno;
-  -- RglInt_SEAAL(pIdtCss,pIdtCng, nbAno)  ;
-  -- nbLignesIntegrees := nbLignesIntegrees + nbAno;
+
+  
+  -- Maj des lignes valides
+  if nbLignesIntegrees=0 then
+    MajCngValid (pIdtCss, pIdtCng);
+  else
+    MajCngNonValid (pIdtCss, pIdtCng);
+  end if;
+
   TrtMsg01.DeleteItem(Err_TableName);
   -- return;
   pErr := nbLignesIntegrees;
@@ -1160,9 +1139,9 @@ IS
 BEGIN
   TrtMsg01.InsertItem(Err_TableName,'INTEGRATION');
   -- Pour chaque lot de consignation à traiter
-  SELECT IdtTabSeq, trunc(sysdate)
+  SELECT IdtTabSeq, sss_Datjou
     INTO vIdtTabSeq, vsss_DatJou
-    FROM TYPMVM
+    FROM TYPMVM, SSS
     WHERE IdtTypMvm = 5;
   CSSCNG01_SPC.TrtCng(pIdtCss,pIdtCng);
   FOR cCng IN cWork LOOP
@@ -1281,55 +1260,54 @@ BEGIN
         IF cLgnCng.Pmt = 1 THEN
           vNbrPmtInt := vNbrPmtInt + 1;
           -- Si le mode d'affectation des paiements est sur une facture
-          IF vModaffpmt = 1 THEN
-            if nvl(rCngLgnCss.MntPmt,0) > 0 then
-              -- Insertion d'une ligne de caisse
-              SELECT idttypopr INTO v1idttypopr
-                FROM OPR
-                WHERE rfr =  cLgnCng.NUMFCT
-                 AND  idttypopr IN (1,7);
-              Err_Msg := '2eme insert LGNCSS';
-              INSERT INTO LGNCSS (IdtTypMvm           , IdtLgnCss            ,
-                                  IdtAgt              , IdtCss               ,
-                                  IdtModRgl           , IdtDvs               ,
-                                  MntDvs              , MtnDvsTot            ,
-                                  Mnt                 , SldOpr               ,
-                                  MntRnd              , DatCrt               ,
-                                  IdtClt              , IdtCptClt            ,
-                                  IdtTypOpr           , Rfr                  ,
-                                  CLERIB              , NUMCPTBNC            ,
-                                  IdtBnq              , IdtGch               ,
-                                  NomTrr              , NumChq               ,
-                                  IDTCNG              , IDTLGNCSSCNG         ,
-                                  REFADDCNG           , DATMAJ               ,
-                                  REFADDLGNCSSCNG     , IdtNatRgl)
-              VALUES (            5                   ,   vLgnCss             ,
-                                  cCng.IDTAGT         , pIdtCss             ,
-                                  cLgnCng.IDTMODRGL   , cCng.IDTDVS         ,
-                                  cLgnCng.MNTPMT      , vTotPmtxLgn         ,
-                                  cLgnCng.MNTPMT      , NULL                ,
-                                  0                   ,   cLgnCng.DatRgl      ,
-                                  cLgnCng.IDTCLT      , cLgnCng.IDTCPTCLT   ,
-                                  v1idttypopr         , cLgnCng.NUMFCT      ,
-                                  cLgnCng.CLERIB      , cLgnCng.NUMCPTBNC   ,
-                                  cLgnCng.IDTBNQ      , cLgnCng.IDTGCH      ,
-                                  cLgnCng.NOMTRR      , cLgnCng.NUMCHQ      ,
-                                  pIdtCng             , cLgnCng.IDTLGNCSSCNG,
-                                  cCng.REFADDCNG      , TRUNC(SYSDATE)      ,
-                                  cLgnCng.REFADDLGNCSSCNG, 1);
-            END IF; --nvl(cLgnCng.MNTPMT,0) <> 0
-          END IF; --vModaffpmt = 1
+          -- IF vModaffpmt = 1 THEN
+          --   if nvl(rCngLgnCss.MntPmt,0) > 0 then
+          --     -- Insertion d'une ligne de caisse
+          --     SELECT idttypopr INTO v1idttypopr
+          --       FROM OPR
+          --       WHERE rfr =  cLgnCng.NUMFCT
+          --        AND  idttypopr IN (1,7);
+          --     Err_Msg := '2eme insert LGNCSS';
+          --     INSERT INTO LGNCSS (IdtTypMvm           , IdtLgnCss            ,
+          --                         IdtAgt              , IdtCss               ,
+          --                         IdtModRgl           , IdtDvs               ,
+          --                         MntDvs              , MtnDvsTot            ,
+          --                         Mnt                 , SldOpr               ,
+          --                         MntRnd              , DatCrt               ,
+          --                         IdtClt              , IdtCptClt            ,
+          --                         IdtTypOpr           , Rfr                  ,
+          --                         CLERIB              , NUMCPTBNC            ,
+          --                         IdtBnq              , IdtGch               ,
+          --                         NomTrr              , NumChq               ,
+          --                         IDTCNG              , IDTLGNCSSCNG         ,
+          --                         REFADDCNG           , DATMAJ               ,
+          --                         REFADDLGNCSSCNG     , IdtNatRgl)
+          --     VALUES (            5                   ,   vLgnCss             ,
+          --                         cCng.IDTAGT         , pIdtCss             ,
+          --                         cLgnCng.IDTMODRGL   , cCng.IDTDVS         ,
+          --                         cLgnCng.MNTPMT      , vTotPmtxLgn         ,
+          --                         cLgnCng.MNTPMT      , NULL                ,
+          --                         0                   ,   cLgnCng.DatRgl      ,
+          --                         cLgnCng.IDTCLT      , cLgnCng.IDTCPTCLT   ,
+          --                         v1idttypopr         , cLgnCng.NUMFCT      ,
+          --                         cLgnCng.CLERIB      , cLgnCng.NUMCPTBNC   ,
+          --                         cLgnCng.IDTBNQ      , cLgnCng.IDTGCH      ,
+          --                         cLgnCng.NOMTRR      , cLgnCng.NUMCHQ      ,
+          --                         pIdtCng             , cLgnCng.IDTLGNCSSCNG,
+          --                         cCng.REFADDCNG      , TRUNC(SYSDATE)      ,
+          --                         cLgnCng.REFADDLGNCSSCNG, 1);
+          --   END IF; --nvl(cLgnCng.MNTPMT,0) <> 0
+          -- END IF; --vModaffpmt = 1
           -- Mise à jour du compte client
           vOprRfr := null;
           vMsgOpr := null;
           if vTotPmtxLgn > 0 then
             if (vSwUneLgnxClt = 1 and cLgnCng.NbrLgnxClt = cLgnCng.LgnxClt) or (vSwUneLgnxClt = 0) then
-----            IF cLgnCng.MntPmt > 0 THEN  --pourquoi cette condition ?
               CltBtc01.X7_crtopr(pIdtTypOpr => 2,
-                                 pIdtAgt => cCng.IDTAGT, --SJ 02 mars 2015 traitement de la fiche 12439
-                                 pRfr => vOprRfr,
+                                 pIdtAgt    => cCng.IDTAGT, --SJ 02 mars 2015 traitement de la fiche 12439
+                                 pRfr       => vOprRfr,
                                  pIdtLgnCss => vLgncss,
-                                 pMsg => vMsgOpr);
+                                 pMsg       => vMsgOpr);
               if vMsgOpr is not null then
                 rollback;
                 Err_Msg := 'Consignement ===> ' || pIdtCss || ' - ' || pIdtCng ||
@@ -1353,7 +1331,20 @@ BEGIN
   END LOOP; --cursor cWork
   TrtMsg01.DeleteItem(Err_TableName);
 END Integration;
-end ALG_TRTEPAY;
+
+Procedure integration ( idTraitement in number, 
+                        nbLignesIntegrees out number,
+                        pErr out Varchar2) is
+pIdtCss CngEnt.IdtCss%type;
+pIdtCng CngEnt.IdtCng%type;
+nbAno number := 0;
+begin
+  /*Recherche de : pIdtCss et pIdtCng depui IdTraitement*/
+  Select IdtCss, IdtCng into pIdtCss, pIdtCng from CngEnt where RefAddCng=idTraitement;
+  integration(pIdtCss, pIdtCng);
+end;
+
+end ALG_SATIM;
 /
 -- alter package ALG_TRTEPAY compile debug;
 -- /

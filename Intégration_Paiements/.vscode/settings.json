@@ -2,7 +2,7 @@
     "plsql-language.connections": [
         {
             "ID": 2,
-            "active": true,
+            "active": false,
             "database": "X7ALGTST",
             "password": "X7",
             "schema": "X7",
@@ -12,7 +12,7 @@
         },
         {
             "ID": 3,
-            "active": false,
+            "active": true,
             "database": "vM-ALGER",
             "hidden": false,
             "password": "X7",
@@ -20,5 +20,5 @@
             "name": "X7@vM-ALGER"
         }
     ],
-    "plsql-language.connection.activeInfos": "X7/X7@X7ALGTST"
+    "plsql-language.connection.activeInfos": "X7/X7@vM-ALGER"
 }

@@ -15,11 +15,11 @@
       "merchantOrderParams": [
         {
           "name": "udf1",
-          "value": "1254"
+          "value": "9999999"
         },
         {
           "name": "udf1",
-          "value": "1254"
+          "value": "9999999"
         },
         {
           "name": "respCode",
@@ -80,7 +80,7 @@
         },
         {
           "name": "udf1",
-          "value": "1255"
+          "value": "9999999"
         },
         {
           "name": "feTransType",
@@ -136,7 +136,7 @@
         },
         {
           "name": "udf1",
-          "value": "1256"
+          "value": "9999999"
         },
         {
           "name": "force_terminal_id",
@@ -148,7 +148,7 @@
         },
         {
           "name": "udf1",
-          "value": "1256"
+          "value": "9999999"
         }
       ],
       "attributes": [
@@ -199,11 +199,11 @@
         },
         {
           "name": "udf1",
-          "value": "1257"
+          "value": "44444444"
         },
         {
           "name": "udf1",
-          "value": "1257"
+          "value": "44444444"
         },
         {
           "name": "respCode",
@@ -262,11 +262,11 @@
         },
         {
           "name": "udf1",
-          "value": "1258"
+          "value": "1254AZEDSE"
         },
         {
           "name": "udf1",
-          "value": "1258"
+          "value": "1254AZEDSE"
         },
         {
           "name": "feTransType",
@@ -325,7 +325,7 @@
         },
         {
           "name": "udf1",
-          "value": "1259"
+          "value": "1254AZEDSE"
         },
         {
           "name": "respCode",
@@ -333,7 +333,7 @@
         },
         {
           "name": "udf1",
-          "value": "1259"
+          "value": "1254AZEDSE"
         },
         {
           "name": "feTransType",
@@ -387,7 +387,7 @@
         },
         {
           "name": "udf1",
-          "value": "1260"
+          "value": "1254AZEDSE"
         },
         {
           "name": "feTransType",
