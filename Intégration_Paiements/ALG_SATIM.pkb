@@ -1260,54 +1260,56 @@ BEGIN
         IF cLgnCng.Pmt = 1 THEN
           vNbrPmtInt := vNbrPmtInt + 1;
           -- Si le mode d'affectation des paiements est sur une facture
-          -- IF vModaffpmt = 1 THEN
+          IF vModaffpmt = 1 THEN
           --   if nvl(rCngLgnCss.MntPmt,0) > 0 then
           --     -- Insertion d'une ligne de caisse
           --     SELECT idttypopr INTO v1idttypopr
           --       FROM OPR
           --       WHERE rfr =  cLgnCng.NUMFCT
           --        AND  idttypopr IN (1,7);
-          --     Err_Msg := '2eme insert LGNCSS';
-          --     INSERT INTO LGNCSS (IdtTypMvm           , IdtLgnCss            ,
-          --                         IdtAgt              , IdtCss               ,
-          --                         IdtModRgl           , IdtDvs               ,
-          --                         MntDvs              , MtnDvsTot            ,
-          --                         Mnt                 , SldOpr               ,
-          --                         MntRnd              , DatCrt               ,
-          --                         IdtClt              , IdtCptClt            ,
-          --                         IdtTypOpr           , Rfr                  ,
-          --                         CLERIB              , NUMCPTBNC            ,
-          --                         IdtBnq              , IdtGch               ,
-          --                         NomTrr              , NumChq               ,
-          --                         IDTCNG              , IDTLGNCSSCNG         ,
-          --                         REFADDCNG           , DATMAJ               ,
-          --                         REFADDLGNCSSCNG     , IdtNatRgl)
-          --     VALUES (            5                   ,   vLgnCss             ,
-          --                         cCng.IDTAGT         , pIdtCss             ,
-          --                         cLgnCng.IDTMODRGL   , cCng.IDTDVS         ,
-          --                         cLgnCng.MNTPMT      , vTotPmtxLgn         ,
-          --                         cLgnCng.MNTPMT      , NULL                ,
-          --                         0                   ,   cLgnCng.DatRgl      ,
-          --                         cLgnCng.IDTCLT      , cLgnCng.IDTCPTCLT   ,
-          --                         v1idttypopr         , cLgnCng.NUMFCT      ,
-          --                         cLgnCng.CLERIB      , cLgnCng.NUMCPTBNC   ,
-          --                         cLgnCng.IDTBNQ      , cLgnCng.IDTGCH      ,
-          --                         cLgnCng.NOMTRR      , cLgnCng.NUMCHQ      ,
-          --                         pIdtCng             , cLgnCng.IDTLGNCSSCNG,
-          --                         cCng.REFADDCNG      , TRUNC(SYSDATE)      ,
-          --                         cLgnCng.REFADDLGNCSSCNG, 1);
-          --   END IF; --nvl(cLgnCng.MNTPMT,0) <> 0
-          -- END IF; --vModaffpmt = 1
+              Err_Msg := '2eme insert LGNCSS';
+              INSERT INTO LGNCSS (IdtTypMvm           , IdtLgnCss            ,
+                                  IdtAgt              , IdtCss               ,
+                                  IdtModRgl           , IdtDvs               ,
+                                  MntDvs              , MtnDvsTot            ,
+                                  Mnt                 , SldOpr               ,
+                                  MntRnd              , DatCrt               ,
+                                  IdtClt              , IdtCptClt            ,
+                                  IdtTypOpr           , Rfr                  ,
+                                  CLERIB              , NUMCPTBNC            ,
+                                  IdtBnq              , IdtGch               ,
+                                  NomTrr              , NumChq               ,
+                                  IDTCNG              , IDTLGNCSSCNG         ,
+                                  REFADDCNG           , DATMAJ               ,
+                                  REFADDLGNCSSCNG     , IdtNatRgl)
+              VALUES (            5                   , vLgnCss             ,
+                                  cCng.IDTAGT         , pIdtCss             ,
+                                  cLgnCng.IDTMODRGL   , cCng.IDTDVS         ,
+                                  cLgnCng.MNTPMT      , vTotPmtxLgn         ,
+                                  cLgnCng.MNTPMT      , NULL                ,
+                                  0                   , cLgnCng.DatRgl      ,
+                                  cLgnCng.IDTCLT      , cLgnCng.IDTCPTCLT   ,
+                                  v1idttypopr         , vLgnCss             ,--cLgnCng.NUMFCT      ,
+                                  cLgnCng.CLERIB      , cLgnCng.NUMCPTBNC   ,
+                                  cLgnCng.IDTBNQ      , cLgnCng.IDTGCH      ,
+                                  cLgnCng.NOMTRR      , cLgnCng.NUMCHQ      ,
+                                  pIdtCng             , cLgnCng.IDTLGNCSSCNG,
+                                  cCng.REFADDCNG      , TRUNC(SYSDATE)      ,
+                                  cLgnCng.REFADDLGNCSSCNG, 1);
+            -- END IF; --nvl(cLgnCng.MNTPMT,0) <> 0
+          END IF; --vModaffpmt = 1
           -- Mise à jour du compte client
           vOprRfr := null;
           vMsgOpr := null;
           if vTotPmtxLgn > 0 then
             if (vSwUneLgnxClt = 1 and cLgnCng.NbrLgnxClt = cLgnCng.LgnxClt) or (vSwUneLgnxClt = 0) then
-              CltBtc01.X7_crtopr(pIdtTypOpr => 2,
-                                 pIdtAgt    => cCng.IDTAGT, --SJ 02 mars 2015 traitement de la fiche 12439
-                                 pRfr       => vOprRfr,
-                                 pIdtLgnCss => vLgncss,
-                                 pMsg       => vMsgOpr);
+              CltBtc01.X7_crtopr(pIdtTypOpr     => 2,
+                                 pIdtAgt        => cCng.IDTAGT, --SJ 02 mars 2015 traitement de la fiche 12439
+                                 pIdtCltOrg     => cLgnCng.IDTCLT, 
+                                 pIdtCptCltOrg  => cLgnCng.IDTCPTCLT,
+                                 pRfr           => vLgncss,--vOprRfr,
+                                 pIdtLgnCss     => vLgncss,
+                                 pMsg           => vMsgOpr);
               if vMsgOpr is not null then
                 rollback;
                 Err_Msg := 'Consignement ===> ' || pIdtCss || ' - ' || pIdtCng ||
@@ -1346,5 +1348,6 @@ end;
 
 end ALG_SATIM;
 /
--- alter package ALG_TRTEPAY compile debug;
--- /
+
+alter package ALG_SATIM compile debug;
+ /
