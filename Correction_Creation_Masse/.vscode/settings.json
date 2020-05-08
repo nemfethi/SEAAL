@@ -1,7 +1,7 @@
 {
     "plsql-language.connections": [
         {
-            "ID": 2,
+            "ID": 9,
             "active": false,
             "database": "X7ALGTST",
             "password": "X7",
@@ -11,7 +11,7 @@
             "name": "X7@X7ALGTST"
         },
         {
-            "ID": 3,
+            "ID": 10,
             "active": false,
             "database": "vM-ALGER",
             "hidden": false,
@@ -20,15 +20,24 @@
             "name": "X7@vM-ALGER"
         },
         {
-            "ID": 4,
-            "active": true,
+            "ID": 11,
+            "active": false,
             "database": "X7ALGTST",
             "hidden": false,
             "password": "IMPCLT",
             "schema": "IMPCLT",
             "username": "IMPCLT",
             "name": "IMPCLT@X7ALGTST"
+        },
+        {
+            "ID": 12,
+            "active": true,
+            "database": "VM-ALGER",
+            "hidden": false,
+            "password": "IMPCLT",
+            "username": "IMPCLT",
+            "name": "IMPCLT@VM-ALGER"
         }
     ],
-    "plsql-language.connection.activeInfos": "IMPCLT/IMPCLT@X7ALGTST"
+    "plsql-language.connection.activeInfos": "IMPCLT/IMPCLT@VM-ALGER"
 }

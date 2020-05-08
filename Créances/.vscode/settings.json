@@ -1,6 +1,7 @@
 {
-    "plsql-language.connections": [{
-            "ID": 6,
+    "plsql-language.connections": [
+        {
+            "ID": 2,
             "active": true,
             "database": "X7ALGTST",
             "password": "X7",

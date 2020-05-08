@@ -9,3 +9,9 @@ Reprint/~$Référentiel Détail facture V2.xlsx
 Reprint/Référentiel Détail facture V2.xlsx
 .gitignore
 Facture_en_local/*.sqt
+Controle_PntCpg/.vscode/settings.json
+Controle_PntCpg/.vscode/tasks.json
+Créances/.vscode/settings.json
+Optimisation_ExtCréance/.vscode/settings.json
+Optimisation_ExtCréance/.vscode/tasks.json
+Créances/.vscode/settings.json

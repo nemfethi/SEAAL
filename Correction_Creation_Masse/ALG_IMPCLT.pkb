@@ -674,7 +674,7 @@ CREATE OR REPLACE PACKAGE BODY IMPCLT.ALG_IMPCLT is
     MIGRATION.CHGPRM;
     open cMIGR_CLT;
     loop
-      fetch cMIGR_CLT bulk collect
+      fetch cMIGR_CLT bulk collect Save Exceptions
         into tcur_MIGR_CLT limit 1000;
       ---------------------------------------------------------------------
       MIGRATION.Err_Msg := 'Startup of client Creation';
