@@ -1,0 +1,48 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Sql*Plus",
+            "command": "D:\\instantclient-basic-nt-11.2.0.2.0\\run_sqlplus.bat",
+            "args": [
+                "${config:plsql-language.connection.activeInfos}",
+                "@${file}"
+            ],
+            "problemMatcher": [],
+            "type": "shell",
+            "group": "build"
+        },
+        {
+            "label": "Compile SQR",
+            "command": "D:\\Tools\\Brio810\\SQR\\ORA\\BINW\\sqrw.exe",
+            "args": [
+                "${file}",
+                "${config:plsql-language.connection.activeInfos}",
+                "-RS"
+            ],
+            "problemMatcher": [],
+            "type": "shell",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Execute SQR",
+            "command": "D:\\Tools\\Brio810\\SQR\\ORA\\BINW\\sqrw.exe",
+            "args": [
+                "${file}",
+                "${config:plsql-language.connection.activeInfos}",
+                " -ziv -KEEP -s -o"
+            ],
+            "problemMatcher": [],
+            "type": "shell",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="Document">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="LotFac">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="Infos">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="Lot_Type">
+                                            <xs:complexType>
+                                                <xs:attribute name="IdtLotTyp" type="xs:string" use="required" />
+                                                <xs:attribute name="Adresse_Agence" type="xs:string" use="required" />
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element name="factures">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="Facture">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="ID">
+                                                        <xs:complexType>
+                                                            <xs:attribute name="NumFct" type="xs:string" use="required" />
+                                                            <xs:attribute name="DateFac" type="xs:date" use="required" />
+                                                            <xs:attribute name="Clé" type="xs:string" use="required" />
+                                                            <xs:attribute name="Prd" type="xs:string" use="required" />
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="Dates">
+                                                        <xs:complexType>
+                                                            <xs:attribute name="Rlv" type="xs:string" use="required" />
+                                                            <xs:attribute name="PrcRlv" type="xs:date" use="required" />
+                                                            <xs:attribute name="Fac" type="xs:string" use="required" />
+                                                            <xs:attribute name="PrcFac" type="xs:string" use="required" />
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="Client">
+                                                        <xs:complexType>
+                                                            <xs:attribute name="IdtClt" type="xs:string" use="required" />
+                                                            <xs:attribute name="Nom_Prn" type="xs:string" use="required" />
+                                                            <xs:attribute name="Adresse_Client" type="xs:string" use="required" />
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="Contrat">
+                                                        <xs:complexType>
+                                                            <xs:attribute name="ID" type="xs:unsignedLong" use="required" />
+                                                            <xs:attribute name="Usage" type="xs:string" use="required" />
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="PC">
+                                                        <xs:complexType>
+                                                            <xs:attribute name="Adresse_PC" type="xs:string" use="required" />
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="Compteur">
+                                                        <xs:complexType>
+                                                            <xs:attribute name="NumCpr" type="xs:string" use="required" />
+                                                            <xs:attribute name="Dmt" type="xs:unsignedInt" use="required" />
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="Info_Facture">
+                                                        <xs:complexType>
+                                                            <xs:sequence>
+                                                                <xs:element name="Montants">
+                                                                    <xs:complexType>
+                                                                        <xs:attribute name="MontantHT" type="xs:float" use="required" />
+                                                                        <xs:attribute name="MontantTVA" type="xs:float" use="required" />
+                                                                        <xs:attribute name="MontantTTC" type="xs:float" use="required" />
+                                                                        <xs:attribute name="MontantDusAnt" type="xs:float" use="required" />
+                                                                        <xs:attribute name="MontantNetApayer" type="xs:float" use="required" />
+                                                                        <xs:attribute name="MontantTimbre" type="xs:float" use="required" />
+                                                                    </xs:complexType>
+                                                                </xs:element>
+                                                                <xs:element name="Lignes">
+                                                                    <xs:complexType>
+                                                                        <xs:sequence>
+                                                                            <xs:element maxOccurs="unbounded" name="Rbq">
+                                                                                <xs:complexType>
+                                                                                    <xs:sequence>
+                                                                                        <xs:element name="montants">
+                                                                                            <xs:complexType>
+                                                                                                <xs:attribute name="MntHt" type="xs:float" use="required" />
+                                                                                                <xs:attribute name="MntTva" type="xs:float" use="required" />
+                                                                                                <xs:attribute name="MntTtc" type="xs:float" use="required" />
+                                                                                            </xs:complexType>
+                                                                                        </xs:element>
+                                                                                        <xs:element minOccurs="0" name="Dtls">
+                                                                                            <xs:complexType>
+                                                                                                <xs:sequence>
+                                                                                                    <xs:element name="T1">
+                                                                                                        <xs:complexType>
+                                                                                                            <xs:attribute name="mnt" type="xs:float" use="required" />
+                                                                                                        </xs:complexType>
+                                                                                                    </xs:element>
+                                                                                                    <xs:element name="T2">
+                                                                                                        <xs:complexType>
+                                                                                                            <xs:attribute name="mnt" type="xs:float" use="required" />
+                                                                                                        </xs:complexType>
+                                                                                                    </xs:element>
+                                                                                                    <xs:element name="T3">
+                                                                                                        <xs:complexType>
+                                                                                                            <xs:attribute name="mnt" type="xs:float" use="required" />
+                                                                                                        </xs:complexType>
+                                                                                                    </xs:element>
+                                                                                                    <xs:element name="T4">
+                                                                                                        <xs:complexType>
+                                                                                                            <xs:attribute name="mnt" type="xs:float" use="required" />
+                                                                                                        </xs:complexType>
+                                                                                                    </xs:element>
+                                                                                                </xs:sequence>
+                                                                                            </xs:complexType>
+                                                                                        </xs:element>
+                                                                                    </xs:sequence>
+                                                                                    <xs:attribute name="Lbl" type="xs:string" use="required" />
+                                                                                    <xs:attribute name="Qté" type="xs:unsignedInt" use="optional" />
+                                                                                    <xs:attribute name="PrxUnt" type="xs:float" use="optional" />
+                                                                                    <xs:attribute name="TauxTva" type="xs:string" use="optional" />
+                                                                                </xs:complexType>
+                                                                            </xs:element>
+                                                                        </xs:sequence>
+                                                                    </xs:complexType>
+                                                                </xs:element>
+                                                            </xs:sequence>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="IdtLotfac" type="xs:unsignedInt" use="required" />
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

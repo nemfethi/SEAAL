@@ -1,0 +1,120 @@
+<?xml version="1.1" ?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="Document">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="GrpHdr" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element type="xs:string" name="Id" />
+                            <xs:element type="xs:dateTime" name="DatEmi" />
+                            <xs:element name="NbOfFct">
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:positiveInteger">
+                                        <xs:minInclusive value="1" />
+                                    </xs:restriction>
+                                </xs:simpleType>
+                            </xs:element>
+                            <xs:element type="xs:float" name="CtrlSum" />
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="Fct" maxOccurs="unbounded" minOccurs="0">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="FctHdr" minOccurs="1">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="NumFct" minOccurs="1" nillable="false">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:minLength value="1" />
+                                                    <xs:maxLength value="10" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element type="xs:date" name="DatEmi" minOccurs="1" nillable="false" />
+                                        <xs:element type="xs:string" name="NumClt" minOccurs="1" nillable="false" />
+                                        <xs:element type="xs:date" name="DatEli" minOccurs="1" nillable="false" />
+                                        <xs:element name="FctMntHTA" minOccurs="1" nillable="false">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:float">
+                                                    <xs:minExclusive value="0" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="FctMntTax" minOccurs="1" nillable="false">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:float">
+                                                    <xs:minExclusive value="0" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element type="xs:short" name="NumCtr" minOccurs="0" nillable="true" />
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element name="LgnFctInf" minOccurs="1">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="NbOfLgn">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:integer">
+                                                    <xs:minExclusive value="0" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element name="LgnFct" maxOccurs="unbounded" minOccurs="0">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element type="xs:string" name="CdeRbq" />
+                                        <xs:element name="Qte">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:float">
+                                                    <xs:minExclusive value="0" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element type="xs:string" name="UntQte" />
+                                        <xs:element name="PrxUni">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:float">
+                                                    <xs:minExclusive value="0" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="LgnMntHTA">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:float">
+                                                    <xs:minExclusive value="0" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="LgnMntTax">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:float">
+                                                    <xs:minInclusive value="0" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="LgnTva">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:float">
+                                                    <xs:minInclusive value="0" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element type="xs:date" name="LgnDat" />
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

@@ -1,0 +1,62 @@
+<?xml version="1.1" ?>
+<Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="F3.xsd">
+    <LotFac IdtLotfac="44444">
+        <Infos>
+            <Lot_Type IdtLotTyp="1000" Adresse_Agence="Château d'eau Signa
+                             Réghaia                
+                             Alger" />
+        </Infos>
+        <factures>
+            <Facture>
+                <ID NumFct="F022320438" DateFac="2002-09-24" Clé="123454323432343234323432" Prd="3ème Trim 2020" />
+                <Dates Rlv="2002-09-24" PrcRlv="2002-09-24" Fac="2002-09-24" PrcFac="2002-09-24" />
+                <Client IdtClt="1200" Nom_Prn="Mohamed ben Ali" Adresse_Client="94 Cité de la GARE
+            LES IRIS
+            1643 REGHAIA - ALGER"></Client>
+                <Contrat ID="1222234" Usage="Particulier"></Contrat>
+                <PC Adresse_PC="94 Cité de la GARE
+            LES IRIS
+            1643 REGHAIA - ALGER" />
+                <Compteur NumCpr="110PA020729" Dmt="15" />
+                <Info_Facture>
+                    <Montants MontantHT="1200" MontantTVA="122" MontantTTC="1333" MontantDusAnt="1222" MontantNetApayer="122" MontantTimbre="111" />
+                    <Lignes>
+                        <Rbq Lbl="EAU" Qté="12" PrxUnt="122" TauxTva="9%">
+                            <montants MntHt="111" MntTva="111" MntTtc="111"></montants>
+                            <Dtls>
+                                <T1 mnt="1" />
+                                <T2 mnt="1" />
+                                <T3 mnt="1" />
+                                <T4 mnt="1" />
+                            </Dtls>
+                        </Rbq>
+                        <Rbq Lbl="ASS" Qté="12" PrxUnt="122" TauxTva="9%">
+                            <montants MntHt="111" MntTva="111" MntTtc="111"></montants>
+                            <Dtls>
+                                <T1 mnt="1" />
+                                <T2 mnt="1" />
+                                <T3 mnt="1" />
+                                <T4 mnt="1" />
+                            </Dtls>
+                        </Rbq>
+                        <Rbq Lbl="RFETRM" Qté="12" PrxUnt="122" TauxTva="9%">
+                            <montants MntHt="111" MntTva="111" MntTtc="111"></montants>
+                        </Rbq>
+                        <Rbq Lbl="RFATRM">
+                            <montants MntHt="111" MntTva="111" MntTtc="111"></montants>
+                        </Rbq>
+                        <Rbq Lbl="REE">
+                            <montants MntHt="111" MntTva="111" MntTtc="111"></montants>
+                        </Rbq>
+                        <Rbq Lbl="RQE">
+                            <montants MntHt="111" MntTva="111" MntTtc="111"></montants>
+                        </Rbq>
+                        <Rbq Lbl="RDG">
+                            <montants MntHt="111" MntTva="111" MntTtc="111"></montants>
+                        </Rbq>
+                    </Lignes>
+                </Info_Facture>
+            </Facture>
+        </factures>
+    </LotFac>
+</Document>

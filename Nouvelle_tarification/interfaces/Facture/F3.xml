@@ -1,0 +1,2210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="F3.xsd">
+  <LotFac>
+    <Infos>
+      <Lot_Type IdtLotTyp="AAAA"/>
+    </Infos>
+    <factures>
+      <Facture>
+        <ID DateFac="27-07-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="684.9950790427195"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="02-10-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="2763.7384785182217"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="04-01-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="2659.7072781808397"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="01-07-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="3892.4214779157896"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="18-03-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="384.9953588398058"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="19-06-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="2171.533067033247"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="30-10-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="4583.484226837755"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="15-12-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="5626.438789154625"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="07-09-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="6656.517277945859"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="11-06-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="9856.977302915817"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="25-11-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="8895.020374439844"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="04-05-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="4406.46937938601"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="16-12-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="5418.599358265287"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="30-11-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="9691.878839764602"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="02-11-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="7358.802039613962"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="09-05-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="1687.8122220102664"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="28-12-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="734.1192429212684"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="28-06-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="2894.9387744131004"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="05-11-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="5708.430306539012"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="09-12-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="9773.794280340811"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="06-06-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="1481.2506902844136"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="28-12-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="8787.835344794705"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="06-09-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="1927.2708764288182"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="04-11-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="5474.989373436108"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="20-12-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="3284.320529115895"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="26-08-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="3554.844549895534"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="30-07-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="6683.033513411696"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="31-03-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="3979.0093947845794"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="14-12-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="5118.126229060108"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="04-03-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="7045.066513729009"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="16-10-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="6580.345259441099"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="28-05-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="4219.930391409514"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="11-04-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="2499.780291404505"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="05-01-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="156.316170717985"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="26-03-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="3395.378947915665"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="14-09-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="9536.412024900315"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="02-03-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="1682.1393576268251"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="17-06-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="7839.739420320404"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="06-12-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="4956.600371079169"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="24-01-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="9907.57836086092"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="29-11-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="1762.8843151531637"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="13-10-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="5264.221896451937"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="26-08-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="5835.695556372896"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="03-04-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="4555.7188808108285"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="30-01-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="4123.310266422604"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="09-02-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="7179.649189861638"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="12-07-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="8512.740985270317"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="18-11-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="6204.873416198602"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="17-05-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="1110.893609257304"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="22-03-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="3018.081571194716"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="24-12-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="8179.680966481367"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="08-09-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="784.3635493477341"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="04-08-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="8379.693828035082"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="03-01-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="2771.907640833914"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="04-10-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="6846.171197260157"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="04-12-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="8866.332467361262"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="05-11-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="7802.6558280530735"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="10-09-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="1188.0366004923194"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="20-06-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="4911.8544383369"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="29-05-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="7626.3560373224345"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="25-07-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="369.8736163291527"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="27-08-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="317.1937961665261"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="07-05-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="869.1287518182222"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="27-01-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="4616.189398497749"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="15-05-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="986.8791495729412"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="10-11-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="2957.381537102951"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="06-08-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="2300.4710238270077"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="18-07-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="7137.706102932655"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="19-05-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="9587.016929055668"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="21-10-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="2030.5663386133344"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="11-03-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="3834.379872010385"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="07-09-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="3507.0999861049045"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="13-01-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="5471.968982674584"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="29-12-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="3431.6580951651345"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="19-05-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="223.99790297222611"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="18-06-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="4998.4061284735635"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="27-12-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="4294.491931528266"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="26-09-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="2388.8395748679945"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="20-09-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="5212.478239322627"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="22-03-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="9755.40639572292"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="02-03-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="9597.42683249081"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="14-06-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="5874.312710357491"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="07-01-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="9349.15535590652"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="04-09-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="2460.980761416671"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="08-07-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="3323.0484859902485"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="20-02-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="6104.521343796035"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="16-12-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="2420.585666444558"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="05-09-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="6052.967590181669"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="25-07-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="2206.8113987063075"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="01-04-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="2668.9147403237557"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="21-09-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="8660.517676630994"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="12-02-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="4275.595500746877"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="28-04-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="9469.560207979921"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="21-08-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="3326.3132413127983"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="13-06-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="5402.855431288147"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="10-12-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="6355.548571346521"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="29-08-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="3722.262577213495"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="13-10-2008"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="6007.938956147516"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="08-11-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="8341.67827537185"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+      <Facture>
+        <ID DateFac="11-10-2007"/>
+        <Dates/>
+        <Client Nom_Prn="yauTis"/>
+        <Contrat/>
+        <PC/>
+        <Compteur/>
+        <Info_Facture>
+          <Montants MontantHT="7591.7286244002125"/>
+          <Lignes>
+            <Rbq>
+              <montants/>
+              <Dtls>
+                <T1/>
+                <T2/>
+                <T3/>
+                <T4/>
+              </Dtls>
+            </Rbq>
+          </Lignes>
+        </Info_Facture>
+      </Facture>
+    </factures>
+  </LotFac>
+</Document>
