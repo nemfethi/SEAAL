@@ -1,53 +1,57 @@
 LotFac
     Infos
-        Lot_Type
+        Lot_Type: LotTyp.IdtLotTyp
         ...
     Facture
         Infos
-            Adresse_Agence
+            Adresse_Agence: Str.Adr du CO => ALG_F3_Utils.Adresse_Agence(pIdtCntOpr)
             ...
         Client
-            IdtClt
-            Nom_Prn / RaisonSociale
-            Adresse_Client
+            IdtClt:                     Fac_F3_V1.IdtClt
+            Nom_Prn / RaisonSociale:    Fac_F3_V1.Nom_Prn
+            Adresse_Client:             Fac_F3_V1.Adresse_Client
         Contrat
-            IdtCtr
-            Usage
-            Catégorie
+            IdtCtr:     Fac_F3_V1.IdtCtr
+            Usage:      Fac_F3_V1.Usage
+            Catégorie:  Fac_F3_V1.Categorie
         PC
-            Adresse_PC
-            Tournée
+            Adresse_PC:     Fac_F3_V1.Adresse_PC
+            Tournée:        Fac_F3_V1.IdtTrnTyp
         Compteur
-            Numero
+            Numero: (Dernier Compteur/compteurs )
             Changement
                 DateChangement
         Infos_Facture
             Identification
+                NumFct
+                Cle: Fac_F3_V1.CLE => ALG_F3_UTILS.Cle(IdtFac)
+                Prd: Fac_F3_V1.Prd => ALG_F3_UTILS.LblPrd(IdtFac)
             Montants
-                MontantHT
-                MontantTVA
-                MontantTTC
-                MontantDusAnt
-                MontantNetApayer
-                MontantTimbre
+                MontantHT:          ALG_F3_UTILS.MntHT(IdtFac)
+                MontantTVA:         ALG_F3_UTILS.MntTva(IdtFac)
+                MontantTTC:         ALG_F3_UTILS.MntTTC(IdtFac)
+                MontantDusAnt:      ALG_F3_UTILS.MntDusAnt(IdtFac)
+                MontantNetApayer:   ALG_F3_UTILS.MntApay(IdtFac)
+                MontantTimbre:      ALG_F3_UTILS.MntTmbFsc(IdtFac)
             Dates
-                Date_Relève
-                Date_Prochaine_relève
-                Date_Facturation
-                Date_Prochaine_Facturation
+                Date_Relève:                ALG_F3_UTILS.DatRlv(IdtFac)
+                Date_Prochaine_relève:      ALG_F3_UTILS.DatRlvPrc(IdtFac)
+                Date_Facturation:           ALG_F3_UTILS.DatFac(IdtFac)
+                Date_Prochaine_Facturation: ALG_F3_UTILS.DatFacPrc(IdtFac)
             Lignes
                 Ligne
-                    IdtRbq
-                    LibRbq
-                    Qté
-                    Prix
-                    MntHt
-                    TauxTva
-                    MntTva
-                    MantTtc
+                    IdtRbq:     LgnFac_F3_V1.IdtRbq
+                    LibRbq:     LgnFac_F3_V1.LibRbq
+                    Qté:        LgnFac_F3_V1.QteFct
+                    Prix:       LgnFac_F3_V1.PrxUnt
+                    MntHt:      LgnFac_F3_V1.MntHt
+                    TauxTva:    LgnFac_F3_V1.TauTva
+                    MntTva:     LgnFac_F3_V1.MntTva
+                    MantTtc:    LgnFac_F3_V1.MntTtc
                     Détail_de_ligne
-                        LibTranche
-                        Qté
-                        Prix
-                        MntHt
-                        MntTva
+                        LibTranche: DetLgnFac_F3_V1.LibTrn
+                        Qté         DetLgnFac_F3_V1.QteFct
+                        Prix        DetLgnFac_F3_V1.PrxUnt
+                        MntHt       DetLgnFac_F3_V1.MntHt
+                        MntTva      DetLgnFac_F3_V1.MntTva
+                        MntTtc      DetLgnFac_F3_V1.MntTtc

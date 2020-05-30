@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="F3.xsd">
-  <LotFac>
+  <LotFac IdtLotfac="">
     <Infos>
       <Lot_Type IdtLotTyp="AAAA"/>
     </Infos>

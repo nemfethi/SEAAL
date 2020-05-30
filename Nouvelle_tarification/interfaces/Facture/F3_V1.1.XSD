@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="Document">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="LotFac">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Infos">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Lot_Type">
+                      <xs:complexType>
+                        <xs:attribute name="IdtLotTyp" type="xs:string" use="required" />
+                        <xs:attribute name="Adresse_Agence" type="xs:string" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="factures">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Facture">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="ID">
+                            <xs:complexType>
+                              <xs:attribute name="NumFct" type="xs:string" use="required" />
+                              <xs:attribute name="Clé" type="xs:string" use="required" />
+                              <xs:attribute name="Prd" type="xs:string" use="required" />
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="Client">
+                            <xs:complexType>
+                              <xs:attribute name="IdtClt" type="xs:unsignedInt" use="required" />
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="Info_Facture">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="Montants">
+                                  <xs:complexType>
+                                    <xs:attribute name="MontantHT" type="xs:decimal" use="required" />
+                                    <xs:attribute name="MontantTVA" type="xs:decimal" use="required" />
+                                    <xs:attribute name="MontantTTC" type="xs:decimal" use="required" />
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="Lignes">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element maxOccurs="unbounded" name="Rbq">
+                                        <xs:complexType>
+                                          <xs:sequence>
+                                            <xs:element name="montants">
+                                              <xs:complexType>
+                                                <xs:attribute name="MntHt" type="xs:decimal" use="required" />
+                                                <xs:attribute name="MntTva" type="xs:decimal" use="required" />
+                                                <xs:attribute name="MntTtc" type="xs:decimal" use="required" />
+                                              </xs:complexType>
+                                            </xs:element>
+                                            <xs:element minOccurs="0" maxOccurs="unbounded" name="Dtls">
+                                              <xs:complexType>
+                                                <xs:sequence>
+                                                  <xs:element name="LibTrn" type="xs:string" />
+                                                  <xs:element name="NumTrn" type="xs:unsignedByte" />
+                                                  <xs:element name="QteFctTrn" type="xs:unsignedByte" />
+                                                  <xs:element name="PrxUntTrn" type="xs:decimal" />
+                                                  <xs:element name="MntHtTrn" type="xs:decimal" />
+                                                  <xs:element name="MntTvaTrn" type="xs:decimal" />
+                                                </xs:sequence>
+                                              </xs:complexType>
+                                            </xs:element>
+                                          </xs:sequence>
+                                          <xs:attribute name="Lbl" type="xs:string" use="required" />
+                                          <xs:attribute name="Qté" type="xs:unsignedShort" use="required" />
+                                          <xs:attribute name="PrxUnt" type="xs:decimal" use="required" />
+                                        </xs:complexType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="IdtLotfac" type="xs:unsignedShort" use="required" />
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

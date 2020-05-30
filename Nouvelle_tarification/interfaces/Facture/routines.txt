@@ -1,0 +1,5 @@
+(row2.FACMNTHT == null ? new BigDecimal(0) : row2.FACMNTHT).add(row2.FACMNTTVA ==null ? new BigDecimal(0) : row2.FACMNTTVA )
+(row3.MNTHT == null ? new BigDecimal(0) : row3.MNTHT).add(row3.MNTTVA ==null ? new BigDecimal(0) : row3.MNTTVA )
+(row4.MNTHT == null ? new BigDecimal(0) : row4.MNTHT).add(row4.MNTTVA ==null ? new BigDecimal(0) : row4.MNTTVA )
+
+row4.MNTHT == null ? null : row4.MNTHT.add(row4.MNTTVA)

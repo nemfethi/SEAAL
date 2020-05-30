@@ -136,7 +136,7 @@
                                 </xs:complexType>
                             </xs:element>
                         </xs:sequence>
-                        <xs:attribute name="IdtLotfac" type="xs:unsignedInt" use="required" />
+                        <xs:attribute name="IdtLotfac" type="xs:string" use="required" />
                     </xs:complexType>
                 </xs:element>
             </xs:sequence>
