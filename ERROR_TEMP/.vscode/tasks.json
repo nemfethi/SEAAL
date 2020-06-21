@@ -24,10 +24,7 @@
             ],
             "problemMatcher": [],
             "type": "shell",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "group":  "build"
         },
         {
             "label": "Execute SQR",
