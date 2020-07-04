@@ -1,0 +1,47 @@
+Fonction de Contrôle 
+- Controles
+    1. Controles Encaissement
+        La longueur du numéro de chèque est incorrecte
+        Numéro de chèque ne doit contenir que des chiffres    
+        Controle N° autorisation
+        si espèce: N° chèque, tireur, banque, guichet, info compl. doivent être vides
+        si CIB ou Eddhabia : Longueur N° Aut = 6, seulement des chiffres
+    2. Contrôles PC
+        alerte si PL en "Général" et PC en "Normal"
+        interdiction de saisir/modifier : Longitude, latitude, étage de distribution
+    3. Contrôle Facture Manuelle
+        Montant différent de 0
+    4. interdiction d'enregistrer un filtre par défaut sur plusieurs fenêtres
+    5. Contrôle motifs d'extraction d'un contrat Obligatoires
+    6. Contrôles d'accès aux caisses
+        autorisation d'ouvrir une caisse: règle par structure
+    7. Contrôles Actions
+        Agent affecté (Affaire) par type de plan
+        interdire ignorer/Terminer/Forcer/Abandonner sur action initié PRC par un agent non PRC
+        interdire ignorer/Terminer/Forcer/Abandonner sur action initié DAF par un agent non DAF
+    8. Contrôles Affaires
+        interdire ignorer/Terminer/Forcer/Abandonner sur Affaire initié PRC par un agent non PRC
+        interdire ignorer/Terminer/Forcer/Abandonner sur Affaire initié DAF par un agent non DAF
+        controle motifs d'abandon par plan d'action (règels complexes)
+    9. Contrôles Contacts
+        interdire de fermer un Contact initié PRC par un agent non PRC
+        interdire de fermer un Contact initié DAF par un agent non DAF
+        Contrôle N° tél Contact
+    10. Contrôles Client
+        Contrôles N° Tél bureau/Domicile
+        Contrôles N° Tél portable
+    11. Contrôles Simulation
+        Agent de simulation rempli et connu
+    12. Contrôles Intervention
+        Contrôle de l'agent affecté par type de plan
+        Contrôle "Reconnexion": motif incompatible avec nature Intervention
+    13. Contrôles CRI
+        Pose d'un seul Compteur par PC
+        année de fabrication du compteur > date de Pose (selon types de compteur)
+    14. Contrôle Facture intermédiaire
+        interdiction de facturer en avance
+    15. Contrôles Suivi des lots
+        interdiction de facturer en avance
+    16. Contrôles Compteur
+        Format du N° par type
+        année de fabrication du compteur > date de Pose (selon types de compteur)

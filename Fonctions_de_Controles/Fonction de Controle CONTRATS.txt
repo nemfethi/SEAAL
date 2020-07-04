@@ -1,0 +1,31 @@
+Fonction de Contrôle CONTRATS/AVENANTS
+- Controles
+    1. Contrôles Type d'employé
+        Usage => Employé SEAAL: Seul un usage C1 autorise de cocher "Employ" SEAAL"
+        un seul contrat C1 pour un employé SEAAL (même client)
+        correspondance avec un matricule RH + règles de conformité du matricule selon origine de l'employé
+        un contrat Employé SEAAL par matricule RH
+    2. Contrôle Type de ménage
+        nombre doit être égal à 1 pour usage différent de C1
+    3. Contrôle Coefficient multiplicateur
+        Type de contrat différent de MENCOL  => Coefficient doit être égal à 1
+    4. Contrôles Type de comptage
+        Type de contrat = REPEGL,REPPRR => Type de comptage différent de Normal
+        Type de comptage = Général => %Répartition entre 0% et 100%
+        Type de comptage = Divisionnaire => alerte:Le contrat n'est pas tenu en compte pour la répartition
+        Même type de contrat pour les PC Gen/Div
+    5. Contrôle Forfait
+        Facture Type = TRMFRF, Usage = C1, Coefficient = 1 => Alger 54, Tipaza 33    
+    6. Contrôles Facture Type (revoir les tests)
+        Régime compté sans compteur
+        Régime non compté avec compteur
+    7. Contrôles Usage/Tarif
+        Tarif=CAT01, usage = C1
+        Tarif=CAT02, usage = C2, C3
+        Tarif=CAT03, usage = C4
+        Correspondance usage => usage détaillé
+    8. Contrôles Remontée client
+        Remontée obligatoire
+        Une seule remontée uniquement
+        Remontée Classique interdite
+        Correspondance Remontée Client => Origine Client

@@ -1,4 +1,28 @@
 !--------------------------------------------------------------------------------
+!-- Filename: GenFac_F3.sqr
+!-- Crùe le 01/02/2008
+!-- Par Abderahim ABBAS
+!-- Cas : SEAAL ALGER
+!-- Fichier de gùnùration de fichiers textes de factures
+!-- EAU_LOT_IdtLotFac_Date_F1 ou F2_Sùquence.txt (paramùtre : IdtLotFac) pour les factures 
+!-- pùriodiques EAU_HLT_Date_F1 ou F2_Sùquence.txt (paramùtre : IdtFac) pour une facture non 
+!-- pùriodique FctMntUtl = 0
+!-- Facture manuelle (paramùtre : IdtFac) où FctMnlUtl = 1
+!--------------------------------------------------------------------------------
+!-- Modications :
+!--------------------------------------------------------------------------------
+!-- Maj     : 02/06/2010
+!-- Par     : FBE
+!-- Contenu : Prise en compte du routage des documents
+!--------------------------------------------------------------------------------
+!-- Maj     : 05/09/2010
+!-- Par     : LLA
+!-- Contenu : Ajout d'un logo et des informations lùgales pour la facture manuelle
+!-- ==========================================================================
+!--------------------------------------------------------------------------------
+!-- Maj     : 01/08/2012
+!-- Par     : R.TIHAL & B.CHAREF
+!-- Contenu : Gùnùration des factures F3
 !-- ==========================================================================
 #include 'msg.inc'
 #include 'sql.inc'
@@ -132,9 +156,11 @@ decode(TCHE.IdtTypTche,{IDTTYPTCHE_RTG_FAC},PRM2) &IdtSousLotRtg
   if &IdtTypTche = {IDTTYPTCHE_RTG_FAC}
     ! Cas d'impression du sous lot de routage
 
-    Let $Whr = ' AND SOUSLOTRTG.IdtLotRtg = ''' || &IdtLotRtg || ''' AND SOUSLOTRTG.IdtSousLotRtg = ''' || &IdtSousLotRtg || ''''
-  else
-    Let $Whr = ' AND SOUSLOTRTG.IdtLotRtg is null'
+    Let $_Whr = ' AND SOUSLOTRTG.IdtLotRtg = ''' || &IdtLotRtg || ''' AND SOUSLOTRTG.IdtSousLotRtg = ''' || &IdtSousLotRtg || ''''
+  	show '$_Whr 1' $Whr
+      else
+    Let $_Whr = ' AND SOUSLOTRTG.IdtLotRtg is null'
+    show '$_Whr 2' $Whr
   end-if
 
 
@@ -477,6 +503,7 @@ END-PROCEDURE
 !-- Procedure : FctMnt
 !-- Objectif : la facture est-elle imprimable en manuel ou pas !
 !---------------------------------------------------------------------------------
+
 begin-procedure FctMnl(#IdtFac,:#ValFctMnlUtl, :$ValChp13, :$IdtLot)
   do MSG_DefinirLocalisation ('{TRT}_FCTMNL')
 BEGIN-SELECT  
@@ -774,8 +801,8 @@ FacAlg.NbrExp &NbrExp
 	 
 	!show &idtfac
 	!show &Z36
-                 
-from alg_fac_F3 FacAlg, ALG_CPTBNC, STR, LOTRTG, SOUSLOTRTG, RTG
+ !show '$_Whr' $_Whr                 
+from x7.alg_fac_F3 FacAlg, x7.ALG_CPTBNC, x7.STR, x7.LOTRTG, x7.SOUSLOTRTG, x7.RTG
  where FacAlg.IdtLotFac = $vIdtLotFac
 	and  FacAlg.IdtCntOpr = ALG_CPTBNC.IdtCntOpr
 	and  ALG_CPTBNC.IdtCntOpr  = STR.IdtCntOpr
@@ -1732,6 +1759,25 @@ END-SQL
 end-procedure ! NbrToStr
 
 !----------------------------------------------------------------------------
+!-- Procedure : NBRTOSTRNETF3
+!-- Objectif : conversion des montants de chiffres en lettres
+!--------------------------------------------------------------------------
+begin-procedure NBRTOSTRNETF3(#_Z97)
+
+do MSG_DefinirLocalisation ('{TRT}_NBRTOSTRNETF3')
+
+BEGIN-SQL
+begin
+X7.Nbr2Str(#_Z97,$ZZ821, $str1, $ZZ822);;
+end;;
+END-SQL
+	let $ZZ823 = $ZZ821 || ' Dinars '
+	let $ZZ824 = $ZZ822 || ' Centimes.'
+	let $_Z1054 = $ZZ823 || $ZZ824
+
+end-procedure ! NbrToStr
+
+!----------------------------------------------------------------------------
 !-- Procedure : MSGPERSOF3
 !-- Objectif : message personalisù
 !--------------------------------------------------------------------------
@@ -2135,6 +2181,15 @@ BEGIN-PROCEDURE titles
      source = $img_pathnom
      image-size= (7,4)
 
+! il n'est pas possible d'imprimer une image en spf et pdf!
+  !let $img_pathnom=getenv('SQT_DIR') || '\logo_seaal.gif'
+  !show 'image=' $img_pathnom
+  !print-image (1,1)
+  !   type = GIF-file
+  !   source = $img_pathnom !For-printer=(PD,GIF-FILE, $img_pathnom)
+  !   image-size= (9,2)
+
+
   ! impression du nom de la sociùtù en bleu
   let $txt = 'SociÈtÈ des Eaux et de l''Assainissement d''Alger'
   Alter-Printer font=4 Point-Size=9
@@ -2232,7 +2287,7 @@ Ltrim(rtrim(substr(CLT.AdrLbr,
  
 FAC.titfac &titfac_e (22,8) wrap 50 2 line-height=1
 FAC.mntht &mnt_e
-To_Char(FAC.datexg,'DD/MM/YYYY') &_datexg
+To_Char(FAC.datexg,'DD/MM/YYYY') &_datexg_e
 fac.mnttva &mnttva_e
 FAC.mntht + FAC.mnttva &mntttc_e
 LEAST(2500,greatest(5, ceil((FAC.mntht + FAC.mnttva)/100))) &MntTimFsc_e
@@ -2299,10 +2354,13 @@ clt.AdrStr10 &communeman
 ALG_CPTBNC.idtfscrglfct &_idtfscrglfct !identifiant fiscal des regles de facturation
 !ALG_CPTBNC.artfscrglfct &_artfscrglfct !article fiscal des regles de facturation
 ALG_ARTFSC(clt.AdrStr10, cntopr.IdtCntOpr) &_artfscrglfct
+
 	alter-printer font=4 point-size=12
 'TÈl :'||STR.telrns &telrns (10,5) !numero de telephone de l'agence
 CLT.IdtClt||' / '||substr(CLT.ancrfr,1,2)||' '||substr(CLT.ancrfr,3,8) &ancrfr (10,42)
 CLT.nom|| ' ' ||CLT.Prn &nom (11,42) bold
+!test tipaza alger
+
 Ltrim(rtrim(substr(CLT.AdrLbr,
                          1,
                          case
@@ -2318,6 +2376,7 @@ Ltrim(rtrim(substr(CLT.AdrLbr,
       end &AdrLbr	     
  let $Adresse = &AdrLbr
  Print $Adresse (12,42) wrap 100 4 on=<10> strip=<13> line-height=1
+
 FAC.titfac &titfac (22,8) wrap 50 2 line-height=1
 FAC.mntht &mnt
 To_Char(FAC.datexg,'DD/MM/YYYY') &_datexg
@@ -2454,7 +2513,7 @@ end-select
     Print 'Montant en lettres en cas de paiement en espËces: ' (+2,5) !bold
     Alter-Printer Font=4 Point-Size=11
 
-    ! ùcriture des nombres en lettre
+    ! Ècriture des nombres en lettre
 BEGIN-SQL
 begin
  !X7.Nbr2Str(&mntttc_e,$Z821_de, $str1_de, $Z822_de);;
@@ -2487,6 +2546,7 @@ END-PROCEDURE  !SelDetFacEau
 BEGIN-PROCEDURE seldetfac
   alter-printer font=4 point-size=8
   let #current-position = #current-line
+
 begin-select
 rbq.lib &liib
 lgnfac.IdtRbq &IdtRbq
@@ -2597,8 +2657,11 @@ Begin-Footing 10
     !print 'Directeur agence' (1,40)
     
     print 'Payable au plus tard le ' (+2,5)
-    print &_datexg (,20)
-    
+    if not isnull(&_datexg)
+      print &_datexg (,20)
+    else
+      print &_datexg_e (,20)
+    end-if
     graphic (+4,5,68) horz-line 5
     
     alter-printer font=4 point-size=8
@@ -3059,7 +3122,7 @@ FacAlg.Z103 &Z103 ! calcul du timbre fiscal(payement en espùce)
 	let #_netplustimbre1 = $_netplustimbre!ltrim(edit(&Z101+&Z103,'999999999999.99'),' ')                                                       
 FacAlg.Z105 &Z105 ! montant ù payer pour le modele de facture F1                                                  
 	let $_Z105 = ltrim(edit(&Z105,'999999999999.99'),' ')  
-	
+	Do NBRTOSTRNETF3(#_netplustimbre1)
 	!modification e-paiment
 !FacAlg.datexg &datcal
 !to_char(FacAlg.datexg,'DD/MM/YYYY') &net 
@@ -3128,14 +3191,14 @@ FacAlg.NbrExp &NbrExp
 	    Do GrapheF3(&idtfac)                                                                                               
 	    Do INSINTOFILEF3(#nb1, &NbrExp)                                                                           
 	    ! nombre et montant des factures gùnùrùes en F1                                                           
-	    let #P2_MntF1 = #P2_MntF1 + &Z101                                                                         
+	    let #P2_MntF1 = #P2_MntF1 + &Z97 !&Z101   Correction FNE                                                                      
 	    let #P1_NbrFacF1 = #P1_NbrFacF1 + 1                                                                       
 	    break                                                                                                   
 	   when = 1 
 	     Do GrapheF3(&idtfac)                                                                                                 
 	  	 Do INSINTOFILEF3exF2(#nb1, &NbrExp)                                                                         
 	  	! nombre et montant des factures gùnùrùes en F2                                                           
-	  	 let #P4_MntF2 =  #P4_MntF2 + &Z101                                                                      
+	  	 let #P4_MntF2 =  #P4_MntF2 + &Z97 !&Z101   Correction FNE                                                                       
 	  	 let #P3_NbrFacF2 = #P3_NbrFacF2 + 1                                                                     
 	  	 break                                                                                                   
 	end-evaluate                                                                                                 
@@ -3145,8 +3208,8 @@ FacAlg.NbrExp &NbrExp
 	!do SendSMS(#idtfac)                                                                                         
 	!show &idtfac                                                                                                 
 	!show &Z36                                                                                                    
-                                                                                                             
-from alg_fac_F3 FacAlg, ALG_CPTBNC, STR, LOTRTG, SOUSLOTRTG, RTG                                                   
+!show '$_Whr SELFACF3' $_Whr                                                                                                              
+from x7.alg_fac_F3 FacAlg, x7.ALG_CPTBNC, x7.STR, x7.LOTRTG, x7.SOUSLOTRTG, x7.RTG
  where FacAlg.IdtLotFac = $vIdtLotFac                                                                           
 	and  FacAlg.IdtCntOpr = ALG_CPTBNC.IdtCntOpr                                                                  
 	and  ALG_CPTBNC.IdtCntOpr  = STR.IdtCntOpr                                                                    
@@ -3830,8 +3893,8 @@ let $nbrexp1 = ltrim(edit(#nbrexp1,'999'),' ')
  			write 1 from $v:01 $line2:04  $v:01 $p:01 $v:01 $_Z21  $v:01 $p:01 $v:01 $_Z14 $v:01 $p:01 $v:01 $_idtctr $v:01 $p:01 $v:01 $_ADRCNTOPR $v:01 $p:01 $v:01 $_Z1435 $v:01
  			write 1 from $v:01 $line3:04  $v:01 $p:01 $v:01 $_Z23  $v:01 $p:01 $v:01 $_Z16 $v:01 $p:01 $v:01 $_Z10 $v:01 $p:01 $v:01 $_DatLctPrc $v:01 $p:01 $v:01 $_DatLctDrn $v:01 
  			write 1 from $v:01 $line4:04  $v:01 $p:01 $v:01 $_Z25  $v:01 $p:01 $v:01 $_CFFMLP  $v:01 $p:01 $v:01 $_ZZcodmsg  $v:01 $p:01 $v:01 $_ZZdatemsg $v:01 
- 			write 1 from $v:01 $line5:04  $v:01 $p:01 $v:01 $_Z29  $v:01 $p:01 $v:01 $_Z27 $v:01 $p:01 $v:01 $_Z1053 $v:01 
- 			write 1 from $v:01 $line6:04  $v:01 $p:01 $v:01 $_Z59  $v:01 $p:01 $v:01 $_Z55 $v:01 $p:01 $v:01 $_Z51 $v:01 $p:01 $v:01 $_Z47   $v:01 $p:01 $v:01 $_Z43  $v:01
+ 			write 1 from $v:01 $line5:04  $v:01 $p:01 $v:01 $_Z29  $v:01 $p:01 $v:01 $_Z27 $v:01 $p:01 $v:01 $_Z1054 $v:01 
+ 			write 1 from $v:01 $line6:04  $v:01 $p:01 $v:01 $_Z59  $v:01 $p:01 $v:01 $_Z55 $v:01 $p:01 $v:01 $_Z51 $v:01 $p:01 $v:01 $_Z47   $v:01 $p:01 $v:01 $_Z43  $v:01 $p:01 $v:01 $_Z1053 $v:01
  			write 1 from $v:01 $line7:04  $v:01 $p:01 $v:01 $_Z60  $v:01 $p:01 $v:01 $_Z56 $v:01 $p:01 $v:01 $_Z52 $v:01 $p:01 $v:01 $_Z48   $v:01 $p:01 $v:01 $_Z44  $v:01
  			write 1 from $v:01 $line8:04  $v:01 $p:01 $v:01 $_Z83  $v:01 $p:01 $v:01 $_Z79 $v:01 $p:01 $v:01 $_Z61 $v:01 $p:01 $v:01 $_Z57   $v:01 $p:01 $v:01 $_Z53  $v:01 $p:01 $v:01 $_Z49 $v:01 $p:01 $v:01 $_Z45  $v:01
  			write 1 from $v:01 $line9:04  $v:01 $p:01 $v:01 $_Z84  $v:01 $p:01 $v:01 $_Z80 $v:01 $p:01 $v:01 $_Z62 $v:01 $p:01 $v:01 $_Z58   $v:01 $p:01 $v:01 $_Z54  $v:01 $p:01 $v:01 $_Z50 $v:01 $p:01 $v:01 $_Z46  $v:01
@@ -3904,8 +3967,8 @@ let $nbrexp1 = ltrim(edit(#nbrexp1,'999'),' ')
  			write 2 from $v:01 $line2:04  $v:01 $p:01 $v:01 $_Z21  $v:01 $p:01 $v:01 $_Z14 $v:01 $p:01 $v:01 $_idtctr $v:01 $p:01 $v:01 $_ADRCNTOPR $v:01 $p:01 $v:01 $_Z1435 $v:01
  			write 2 from $v:01 $line3:04  $v:01 $p:01 $v:01 $_Z23  $v:01 $p:01 $v:01 $_Z16 $v:01 $p:01 $v:01 $_Z10 $v:01 $p:01 $v:01 $_DatLctPrc $v:01 $p:01 $v:01 $_DatLctDrn $v:01 
  			write 2 from $v:01 $line4:04  $v:01 $p:01 $v:01 $_Z25  $v:01 $p:01 $v:01 $_CFFMLP  $v:01 $p:01 $v:01 $_ZZcodmsg  $v:01 $p:01 $v:01 $_ZZdatemsg $v:01 
- 			write 2 from $v:01 $line5:04  $v:01 $p:01 $v:01 $_Z29  $v:01 $p:01 $v:01 $_Z27 $v:01 $p:01 $v:01 $_Z1053 $v:01 
- 			write 2 from $v:01 $line6:04  $v:01 $p:01 $v:01 $_Z59  $v:01 $p:01 $v:01 $_Z55 $v:01 $p:01 $v:01 $_Z51 $v:01 $p:01 $v:01 $_Z47   $v:01 $p:01 $v:01 $_Z43  $v:01
+ 			write 2 from $v:01 $line5:04  $v:01 $p:01 $v:01 $_Z29  $v:01 $p:01 $v:01 $_Z27 $v:01 $p:01 $v:01 $_Z1054 $v:01 
+ 			write 2 from $v:01 $line6:04  $v:01 $p:01 $v:01 $_Z59  $v:01 $p:01 $v:01 $_Z55 $v:01 $p:01 $v:01 $_Z51 $v:01 $p:01 $v:01 $_Z47   $v:01 $p:01 $v:01 $_Z43  $v:01 $p:01 $v:01 $_Z1053 $v:01
  			write 2 from $v:01 $line7:04  $v:01 $p:01 $v:01 $_Z60  $v:01 $p:01 $v:01 $_Z56 $v:01 $p:01 $v:01 $_Z52 $v:01 $p:01 $v:01 $_Z48   $v:01 $p:01 $v:01 $_Z44  $v:01
  			write 2 from $v:01 $line8:04  $v:01 $p:01 $v:01 $_Z83  $v:01 $p:01 $v:01 $_Z79 $v:01 $p:01 $v:01 $_Z61 $v:01 $p:01 $v:01 $_Z57   $v:01 $p:01 $v:01 $_Z53  $v:01 $p:01 $v:01 $_Z49 $v:01 $p:01 $v:01 $_Z45  $v:01
  			write 2 from $v:01 $line9:04  $v:01 $p:01 $v:01 $_Z84  $v:01 $p:01 $v:01 $_Z80 $v:01 $p:01 $v:01 $_Z62 $v:01 $p:01 $v:01 $_Z58   $v:01 $p:01 $v:01 $_Z54  $v:01 $p:01 $v:01 $_Z50 $v:01 $p:01 $v:01 $_Z46  $v:01
@@ -3979,8 +4042,8 @@ let $nbrexp1 = ltrim(edit(#nbrexp1,'999'),' ')
  	   write 3 from $v:01 $line2:04  $v:01 $p:01 $v:01 $_Z21  $v:01 $p:01 $v:01 $_Z14  $v:01 $p:01 $v:01 $_idtctr $v:01 $p:01 $v:01 $_ADRCNTOPR $v:01 $p:01 $v:01 $_Z1435 $v:01
  	   write 3 from $v:01 $line3:04  $v:01 $p:01 $v:01 $_Z23  $v:01 $p:01 $v:01 $_Z16  $v:01 $p:01 $v:01 $_Z10 $v:01 $p:01 $v:01 $_DatLctPrc $v:01 $p:01 $v:01 $_DatLctDrn $v:01 
  	   write 3 from $v:01 $line4:04  $v:01 $p:01 $v:01 $_Z25  $v:01 $p:01 $v:01 $_CFFMLP  $v:01 $p:01 $v:01 $_ZZcodmsg  $v:01 $p:01 $v:01 $_ZZdatemsg $v:01                    
- 	   write 3 from $v:01 $line5:04  $v:01 $p:01 $v:01 $_Z29  $v:01 $p:01 $v:01 $_Z27  $v:01 $p:01 $v:01 $_Z1053 $v:01 
- 	   write 3 from $v:01 $line6:04  $v:01 $p:01 $v:01 $_Z59  $v:01 $p:01 $v:01 $_Z55  $v:01 $p:01 $v:01 $_Z51 $v:01 $p:01 $v:01 $_Z47   $v:01 $p:01 $v:01 $_Z43  $v:01
+ 	   write 3 from $v:01 $line5:04  $v:01 $p:01 $v:01 $_Z29  $v:01 $p:01 $v:01 $_Z27  $v:01 $p:01 $v:01 $_Z1054 $v:01 
+ 	   write 3 from $v:01 $line6:04  $v:01 $p:01 $v:01 $_Z59  $v:01 $p:01 $v:01 $_Z55  $v:01 $p:01 $v:01 $_Z51 $v:01 $p:01 $v:01 $_Z47   $v:01 $p:01 $v:01 $_Z43  $v:01 $p:01 $v:01 $_Z1053 $v:01
  	   write 3 from $v:01 $line7:04  $v:01 $p:01 $v:01 $_Z60  $v:01 $p:01 $v:01 $_Z56  $v:01 $p:01 $v:01 $_Z52 $v:01 $p:01 $v:01 $_Z48   $v:01 $p:01 $v:01 $_Z44  $v:01
  	   write 3 from $v:01 $line8:04  $v:01 $p:01 $v:01 $_Z83  $v:01 $p:01 $v:01 $_Z79  $v:01 $p:01 $v:01 $_Z61 $v:01 $p:01 $v:01 $_Z57   $v:01 $p:01 $v:01 $_Z53  $v:01 $p:01 $v:01 $_Z49 $v:01 $p:01 $v:01 $_Z45  $v:01
  	   write 3 from $v:01 $line9:04  $v:01 $p:01 $v:01 $_Z84  $v:01 $p:01 $v:01 $_Z80  $v:01 $p:01 $v:01 $_Z62 $v:01 $p:01 $v:01 $_Z58   $v:01 $p:01 $v:01 $_Z54  $v:01 $p:01 $v:01 $_Z50 $v:01 $p:01 $v:01 $_Z46  $v:01
@@ -4052,8 +4115,8 @@ let $nbrexp1 = ltrim(edit(#nbrexp1,'999'),' ')
  	   write 3 from $v:01 $line2:04  $v:01 $p:01 $v:01 $_Z21  $v:01 $p:01 $v:01 $_Z14  $v:01 $p:01 $v:01 $_idtctr $v:01 $p:01 $v:01 $_ADRCNTOPR $v:01 $p:01 $v:01 $_Z1435 $v:01
  	   write 3 from $v:01 $line3:04  $v:01 $p:01 $v:01 $_Z23  $v:01 $p:01 $v:01 $_Z16  $v:01 $p:01 $v:01 $_Z10 $v:01 $p:01 $v:01 $_DatLctPrc $v:01 $p:01 $v:01 $_DatLctDrn $v:01 
  	   write 3 from $v:01 $line4:04  $v:01 $p:01 $v:01 $_Z25  $v:01 $p:01 $v:01 $_CFFMLP  $v:01 $p:01 $v:01 $_ZZcodmsg  $v:01 $p:01 $v:01 $_ZZdatemsg $v:01                    
- 	   write 3 from $v:01 $line5:04  $v:01 $p:01 $v:01 $_Z29  $v:01 $p:01 $v:01 $_Z27  $v:01 $p:01 $v:01 $_Z1053 $v:01 
- 	   write 3 from $v:01 $line6:04  $v:01 $p:01 $v:01 $_Z59  $v:01 $p:01 $v:01 $_Z55  $v:01 $p:01 $v:01 $_Z51 $v:01 $p:01 $v:01 $_Z47   $v:01 $p:01 $v:01 $_Z43  $v:01
+ 	   write 3 from $v:01 $line5:04  $v:01 $p:01 $v:01 $_Z29  $v:01 $p:01 $v:01 $_Z27  $v:01 $p:01 $v:01 $_Z1054 $v:01 
+ 	   write 3 from $v:01 $line6:04  $v:01 $p:01 $v:01 $_Z59  $v:01 $p:01 $v:01 $_Z55  $v:01 $p:01 $v:01 $_Z51 $v:01 $p:01 $v:01 $_Z47   $v:01 $p:01 $v:01 $_Z43  $v:01 $p:01 $v:01 $_Z1053 $v:01
  	   write 3 from $v:01 $line7:04  $v:01 $p:01 $v:01 $_Z60  $v:01 $p:01 $v:01 $_Z56  $v:01 $p:01 $v:01 $_Z52 $v:01 $p:01 $v:01 $_Z48   $v:01 $p:01 $v:01 $_Z44  $v:01
  	   write 3 from $v:01 $line8:04  $v:01 $p:01 $v:01 $_Z83  $v:01 $p:01 $v:01 $_Z79  $v:01 $p:01 $v:01 $_Z61 $v:01 $p:01 $v:01 $_Z57   $v:01 $p:01 $v:01 $_Z53  $v:01 $p:01 $v:01 $_Z49 $v:01 $p:01 $v:01 $_Z45  $v:01
  	   write 3 from $v:01 $line9:04  $v:01 $p:01 $v:01 $_Z84  $v:01 $p:01 $v:01 $_Z80  $v:01 $p:01 $v:01 $_Z62 $v:01 $p:01 $v:01 $_Z58   $v:01 $p:01 $v:01 $_Z54  $v:01 $p:01 $v:01 $_Z50 $v:01 $p:01 $v:01 $_Z46  $v:01
@@ -4244,6 +4307,7 @@ FacAlg.Z103 &Z103 ! calcul du timbre fiscal(payement en espùce)
 	
 FacAlg.Z105 &Z105 ! montant ù payer pour le modele de facture F1                  
 	let $_Z105 = ltrim(edit(&Z105,'999999999999.99'),' ')
+  Do NBRTOSTRNETF3(#_netplustimbre1)
 FacAlg.IdtTrnTyp &IdtTrn ! identifiant de la tournùe
 	let $_Z121 = &IdtTrn
 FacAlg.Rng1 &rng1 ! identifiant du rang de la tournùe
@@ -4426,7 +4490,9 @@ END-PROCEDURE	 !RapGnrF3
 
 BEGIN-PROCEDURE GrapheF3(#idtfac)
 let $_graph = ''
+
 begin-select
+
 min(to_char(z.datclc,'DD/MM/YY')) &gdatclc
  let $_graph = ';"' ||&gdatclc ||'"'|| $_graph  
 sum(nvl(cns.cns, z.qtefct)) &gcns
@@ -4484,5 +4550,12 @@ where a.rn <= 10
 where z.idtfac = cns.idtfac (+)
 group by z.idtfac, z.datclc
 order by z.datclc desc, z.idtfac
+
+
 end-select
+
 end-procedure !GrapheF3
+
+
+
+
