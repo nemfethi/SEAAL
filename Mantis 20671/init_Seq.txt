@@ -1,0 +1,9 @@
+SELECT 1000000 - SEQ_PNTLVR.nextval FROM DUAL;
+
+===> donne un résultat
+
+ALTER SEQUENCE SEQ_PNTLVR increment by [le résultat de la première requête];
+
+SELECT SEQ_PNTLVR.nextval FROM DUAL;
+	
+ALTER SEQUENCE SEQ_PNTLVR increment by 1;
